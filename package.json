@@ -6,7 +6,7 @@
   "repository": "https://github.com/AktaryTech/xrpl-dex-sdk.git",
   "main": "src/index.ts",
   "scripts": {
-    "build": "tsc --build tsconfig.build.json",
+    "build": "tsc",
     "watch": "yarn build --watch",
     "clean": "rm -rf dist",
     "test": "nyc mocha --config=test/.mocharc.json --exit",

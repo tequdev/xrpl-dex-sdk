@@ -1,0 +1,20 @@
+name: Pull Request Check
+on:
+  pull_request:
+    types: [opened, edited, synchronize]
+    branches: [main]
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+jobs:
+  builds-and-passes-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "16"
+      - name: Install, build, and test
+        run: |
+          yarn
+          yarn build
+          yarn test
