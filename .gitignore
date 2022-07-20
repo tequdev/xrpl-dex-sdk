@@ -1,5 +1,19 @@
+# Ignore Macintosh Desktop Services Store files.
 .DS_Store
+
+# Ignore locally installed node_modules
+node_modules/
+!test/node_modules
+
+# Ignore dist folder, built from tsc
 dist
-node_modules
+
+# Ignore log files
 logs
 *.log
+
+# Ignore coverage files
+coverage
+
+# nyc (istanbul)
+.nyc_output
