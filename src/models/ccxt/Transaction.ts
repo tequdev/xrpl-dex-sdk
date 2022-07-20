@@ -1,0 +1,35 @@
+import { AccountAddress, Amount, CurrencyCode } from '../common';
+import Fee from './Fee';
+
+export enum TransactionType {
+  Deposit = 'deposit',
+  Withdrawal = 'withdrawal',
+}
+
+export enum TransactionStatus {
+  Pending = 'pending',
+  Ok = 'ok',
+  Failed = 'failed',
+  Canceled = 'canceled',
+}
+
+export default interface Transaction {
+  id: string;
+  txid: string;
+  timestamp: number;
+  datetime: string;
+  addressFrom: AccountAddress;
+  address: AccountAddress;
+  addressTo: AccountAddress;
+  tagFrom: string;
+  tag: string;
+  tagTo: string;
+  type: TransactionType;
+  amount: Amount;
+  currency: CurrencyCode;
+  status: TransactionStatus;
+  updated?: number;
+  comment?: string;
+  fee: Fee;
+  info: { [key: string]: any };
+}
