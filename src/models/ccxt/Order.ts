@@ -1,4 +1,4 @@
-import { Amount, MarketSymbol } from '../common';
+import { MarketSymbol } from '../common';
 import Fee from './Fee';
 
 export enum OrderStatus {
@@ -38,9 +38,9 @@ export default interface Order {
   side: OrderSide;
   price: number;
   average: number;
-  amount: Amount;
-  filled: Amount;
-  remaining: Amount;
+  amount: number;
+  filled: number;
+  remaining: number;
   cost: number;
   fee?: Fee;
   info: { [key: string]: any };

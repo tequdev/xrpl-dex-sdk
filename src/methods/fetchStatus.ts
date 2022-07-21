@@ -1,11 +1,11 @@
 import { Client } from 'xrpl';
 import { ExchangeStatusType, FetchStatusRequest, FetchStatusResponse } from '../models';
 
-async function fetchStatus(this: Client, request: FetchStatusRequest): Promise<FetchStatusResponse> {
+async function fetchStatus(this: Client, { params }: FetchStatusRequest): Promise<FetchStatusResponse> {
   const serverState = (
     await this.request({
       command: 'server_state',
-      ...request.params,
+      ...params,
     })
   ).result.state;
 
