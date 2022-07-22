@@ -40,6 +40,7 @@
   },
   "dependencies": {
     "bignumber.js": "^9.0.2",
+    "ccxt": "^1.91.6",
     "lodash": "^4.17.21",
     "ws": "^8.8.1",
     "xrpl": "^2.3.1"
