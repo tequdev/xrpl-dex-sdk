@@ -1,4 +1,4 @@
-import { AccountAddress, Amount, CurrencyCode } from '../common';
+import { AccountAddress, CurrencyCode } from '../common';
 import Fee from './Fee';
 
 export enum TransactionType {
@@ -25,7 +25,7 @@ export default interface Transaction {
   tag: string;
   tagTo: string;
   type: TransactionType;
-  amount: Amount;
+  amount: number;
   currency: CurrencyCode;
   status: TransactionStatus;
   updated?: number;

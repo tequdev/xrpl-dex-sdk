@@ -1,0 +1,14 @@
+{
+  "symbols": ["USD/BTC", "BTC/USD"],
+  "limit": 3,
+  "params": {
+    "USD/BTC": {
+      "takerGetsIssuer": "rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B",
+      "takerPaysIssuer": "rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B"
+    },
+    "BTC/USD": {
+      "takerGetsIssuer": "rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B",
+      "takerPaysIssuer": "rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B"
+    }
+  }
+}
