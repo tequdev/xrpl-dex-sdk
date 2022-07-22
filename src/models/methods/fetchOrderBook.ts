@@ -3,7 +3,6 @@ import { OrderBook } from '../ccxt';
 import { AccountAddress, MarketSymbol } from '../common';
 
 export interface FetchOrderBookParams {
-  limit?: number;
   takerGetsIssuer?: AccountAddress;
   takerPaysIssuer?: AccountAddress;
   ledgerIndex?: LedgerIndex;
@@ -30,4 +29,4 @@ export interface FetchOrderBookRequest {
  *
  * @category Responses
  */
-export interface FetchOrderBookResponse extends OrderBook {}
+export type FetchOrderBookResponse = OrderBook;

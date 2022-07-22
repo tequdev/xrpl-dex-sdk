@@ -1,5 +1,6 @@
 import _ from 'lodash';
-import { Client } from 'xrpl';
+import { Client, BookOffersRequest } from 'xrpl';
+import { OfferFlags } from 'xrpl/dist/npm/models/ledger';
 import { TakerAmount } from 'xrpl/dist/npm/models/methods/bookOffers';
 import { DEFAULT_LIMIT } from '../constants';
 import { OrderBookAsk, OrderBookBid, FetchOrderBookRequest, FetchOrderBookResponse } from '../models';
@@ -23,36 +24,42 @@ async function fetchOrderBook(
     issuer: params.takerGetsIssuer,
   };
 
-  const orderBook = await this.getOrderbook(takerPays, takerGets, {
+  const xrplRequest: BookOffersRequest = {
+    command: 'book_offers',
+    taker_pays: takerPays,
+    taker_gets: takerGets,
     limit: limit ?? DEFAULT_LIMIT,
     ledger_index: params.ledgerIndex,
     ledger_hash: params.ledgerHash,
     taker: params.taker,
-  });
+  };
 
-  // TODO: where are we getting this timestamp?
-  const timestamp = Date.now();
+  const offersResults = await this.requestAll(xrplRequest);
 
+  // Format XRPL response
+  const orders = _.flatMap(offersResults, (offersResult) => offersResult.result.offers);
+
+  // Create bids/asks arrays
   const bids: OrderBookBid[] = [];
-  _.forEach(orderBook.buy, (offer) => {
-    if (!offer.quality) return;
-    bids.push([offer.quality, parseCurrencyAmount(offer.TakerGets)]);
+  const asks: OrderBookAsk[] = [];
+  _.forEach(orders, (order) => {
+    if (!order.quality) return;
+    // L2 Order book
+    if ((order.Flags & OfferFlags.lsfSell) === 0) {
+      bids.push([order.quality, parseCurrencyAmount(order.TakerGets)]);
+    } else {
+      asks.push([order.quality, parseCurrencyAmount(order.TakerGets)]);
+    }
   });
 
-  const asks: OrderBookAsk[] = [];
-  _.forEach(orderBook.sell, (offer) => {
-    if (!offer.quality) return;
-    asks.push([offer.quality, parseCurrencyAmount(offer.TakerPays)]);
-  });
+  const lastOffers = offersResults[offersResults.length - 1].result.offers;
+
+  // TODO: confirm this is usable as a nonce
+  const nonce = lastOffers[lastOffers.length - 1].Sequence;
 
   const ccxtResponse: FetchOrderBookResponse = {
     symbol,
-    timestamp,
-    datetime: new Date(timestamp).toISOString(),
-
-    // TODO: where are we getting this nonce?
-    nonce: 0,
-
+    nonce,
     bids,
     asks,
   };

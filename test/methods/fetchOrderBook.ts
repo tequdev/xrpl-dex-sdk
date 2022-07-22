@@ -14,8 +14,7 @@ describe('fetchOrderBook', function () {
   afterEach(teardownClient);
 
   it('should return an OrderBook object', async function () {
-    this.mockRippled.addResponse('book_offers', rippled.book_offers.normalBids);
-    this.mockRippled.addResponse('book_offers', rippled.book_offers.normalAsks);
+    this.mockRippled.addResponse('book_offers', rippled.book_offers.usdBtc);
     const response: FetchOrderBookResponse = await fetchOrderBook.call(this.client, requests.fetchOrderBook);
     assertResultMatch(response, responses.fetchOrderBook);
   });

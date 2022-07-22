@@ -17,4 +17,4 @@ export interface FetchStatusRequest {
  *
  * @category Responses
  */
-export interface FetchStatusResponse extends ExchangeStatus {}
+export type FetchStatusResponse = ExchangeStatus;
