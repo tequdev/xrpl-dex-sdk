@@ -1,6 +1,3 @@
-import { MarketSymbol } from '../common';
-import Fee from './Fee';
-
 export enum OrderStatus {
   Open = 'open',
   Closed = 'closed',
@@ -11,6 +8,7 @@ export enum OrderStatus {
 
 export enum OrderType {
   Limit = 'limit',
+  Market = 'market',
 }
 
 export enum OrderTimeInForce {
@@ -21,27 +19,8 @@ export enum OrderTimeInForce {
 }
 
 export enum OrderSide {
+  /** Give quote currency and receive base currency; for example, buying BTC/USD means that you will receive bitcoins for your dollars. */
   Buy = 'buy',
+  /** Give base currency and receive quote currency; for example, buying BTC/USD means that you will receive dollars for your bitcoins. */
   Sell = 'sell',
-}
-
-export default interface Order {
-  id: string;
-  clientOrderId?: string;
-  datetime: string;
-  timestamp: number;
-  lastTradeTimestamp?: number;
-  status: OrderStatus;
-  symbol: MarketSymbol;
-  type: OrderType;
-  timeInForce?: OrderTimeInForce;
-  side: OrderSide;
-  price: number;
-  average: number;
-  amount: number;
-  filled: number;
-  remaining: number;
-  cost: number;
-  fee?: Fee;
-  info: { [key: string]: any };
 }
