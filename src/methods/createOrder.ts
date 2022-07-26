@@ -1,4 +1,4 @@
-import { Client, OfferCreate, OfferCreateFlags } from 'xrpl';
+import { Client, OfferCreate, OfferCreateFlags, rippleTimeToUnixTime } from 'xrpl';
 import { Amount } from 'xrpl/dist/npm/models/common';
 import { CreateOrderRequest, CreateOrderResponse, OrderSide } from '../models';
 
@@ -8,77 +8,85 @@ async function createOrder(
 ): Promise<CreateOrderResponse> {
   const [base, quote] = symbol.split('/');
 
-  let takerGets: Amount;
-  let takerPays: Amount;
+  let creatorGets: Amount;
+  let creatorPays: Amount;
 
-  const getsCurrency = side === OrderSide.Buy ? base : quote;
-  const getsAmount = side === OrderSide.Buy ? amount : price;
+  const creatorGetsCurrency = side === OrderSide.Buy ? base : quote;
+  const creatorGetsAmount = side === OrderSide.Buy ? amount : price;
 
-  const paysCurrency = side === OrderSide.Buy ? quote : base;
-  const paysAmount = side === OrderSide.Buy ? price : amount;
+  const creatorPaysCurrency = side === OrderSide.Buy ? quote : base;
+  const creatorPaysAmount = side === OrderSide.Buy ? price : amount;
 
-  takerGets =
-    getsCurrency === 'XRP'
-      ? getsAmount
+  creatorGets =
+    creatorGetsCurrency === 'XRP'
+      ? creatorGetsAmount
       : {
-          currency: getsCurrency,
-          value: getsAmount,
-          issuer: params.takerGetsIssuer || '',
-        };
-  takerPays =
-    paysCurrency === 'XRP'
-      ? paysAmount
-      : {
-          currency: paysCurrency,
-          value: paysAmount,
+          currency: creatorGetsCurrency,
+          value: creatorGetsAmount,
           issuer: params.takerPaysIssuer || '',
         };
+  creatorPays =
+    creatorPaysCurrency === 'XRP'
+      ? creatorPaysAmount
+      : {
+          currency: creatorPaysCurrency,
+          value: creatorPaysAmount,
+          issuer: params.takerGetsIssuer || '',
+        };
 
-  const flags = side === OrderSide.Sell ? OfferCreateFlags.tfSell : params.behavior || 0;
+  const flags = side === OrderSide.Sell ? OfferCreateFlags.tfSell : params.flags || 0;
 
-  const xrplTransaction: OfferCreate = {
+  const xrplTxPrepared: OfferCreate = await this.autofill({
     TransactionType: 'OfferCreate',
     Account: params.wallet.classicAddress,
-    TakerGets: takerGets,
-    TakerPays: takerPays,
+    TakerGets: creatorPays,
+    TakerPays: creatorGets,
     Flags: flags,
-    Fee: params.fee,
-  };
+  });
 
-  const xrplResult = await this.submit(xrplTransaction, { wallet: params.wallet });
+  const xrplTxSigned = params.wallet.sign(xrplTxPrepared);
 
-  // TODO: finish properly filling this out
+  const xrplTxResponse = await this.submitAndWait(xrplTxSigned.tx_blob);
+
+  const orderTimestamp = xrplTxResponse.result.date ? rippleTimeToUnixTime(xrplTxResponse.result.date) : Date.now();
 
   const response: CreateOrderResponse = {
-    id: typeof xrplResult.id === 'number' ? xrplResult.id.toString() : xrplResult.id,
-    clientOrderId: '',
-    datetime: '',
-    timestamp: 0,
+    // TODO: make sure this is correct
+    id: xrplTxResponse.result.Sequence?.toString() ?? xrplTxResponse.id.toString(),
+    // TODO: make sure this is correct
+    clientOrderId: xrplTxResponse.result.hash,
+    datetime: new Date(orderTimestamp).toISOString(),
+    timestamp: orderTimestamp,
+    // TODO: look up what the user's previous trade was and get the date
     lastTradeTimestamp: 0,
     status: 'open',
     symbol,
     type,
-    timeInForce: '',
+    timeInForce: params.expiration?.toString(),
     side,
-    price: parseFloat(paysAmount),
+    // TODO: verify creatorGetsAmount <-> price is the correct mapping
+    price: parseFloat(creatorGetsAmount),
+    // TODO: where do we get this?
     average: undefined,
-    amount: parseFloat(getsAmount),
+    // TODO: verify creatorPaysAmount <-> amount is the correct mapping
+    amount: parseFloat(creatorPaysAmount),
+    // TODO: see if the order was partially filled on creation
     filled: 0,
-    remaining: parseFloat(getsAmount),
-
+    remaining: parseFloat(creatorGetsAmount),
     // TODO: refresh on what this is
     cost: 0,
-
+    // TODO: look up what trades have been placed on this order
     trades: [],
     fee: {
       currency: 'XRP',
+      // TODO: Do we have this value available?
       type: side === OrderSide.Buy ? 'taker' : 'maker',
-      // TODO: verify this number is correct
-      cost: parseFloat(xrplResult.result.open_ledger_cost),
+      // TODO: what do we default to here?
+      cost: xrplTxResponse.result.Fee ? parseFloat(xrplTxResponse.result.Fee!) : 0,
       // TODO: get the proper number here
       rate: 0,
     },
-    info: xrplResult.result.tx_blob,
+    info: JSON.stringify(xrplTxResponse.result),
   };
 
   return response;

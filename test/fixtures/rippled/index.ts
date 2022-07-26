@@ -1,3 +1,5 @@
+import offerCreateBuy from './tx/offerCreateBuy.json';
+import offerCreateSell from './tx/offerCreateSell.json';
 import normalServerState from './serverState.json';
 import * as bookOffers from './bookOffers';
 import usdBtcOffers from './bookOffersUsdBtc.json';
@@ -18,12 +20,18 @@ const book_offers = {
   xrpUsd: xrpUsdOffers,
 };
 
+const offer_create = {
+  buy: offerCreateBuy,
+  sell: offerCreateSell,
+};
+
 const server_state = {
   normal: normalServerState,
 };
 
 const rippled = {
   book_offers,
+  offer_create,
   server_state,
 };
 

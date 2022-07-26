@@ -1,20 +1,22 @@
 import { Order } from 'ccxt';
 import { OfferCreateFlags, Wallet } from 'xrpl';
+import { Memo } from 'xrpl/dist/npm/models/common';
 import { OrderSide, OrderType } from '../ccxt';
 import { AccountAddress, MarketSymbol } from '../common';
 
 export interface CreateOrderParams {
   /** The Ripple wallet making the order */
   wallet: Wallet;
-  /** Issuer for the paying currency (if other than XRP) */
+  /** Issuer for the currency being received by the order creator (if other than XRP) */
   takerPaysIssuer?: AccountAddress;
-  /** Issuer for the receiving currency (if other than XRP) */
+  /** Issuer for the currency being paid by the order creator (if other than XRP) */
   takerGetsIssuer?: AccountAddress;
   /** Time after which the Offer is no longer active, in seconds since the Ripple Epoch. (1/1/2000) */
   expiration?: number;
-  /** Transaction fee to pay (in drops of XRP) */
-  fee?: string;
-  behavior?: OfferCreateFlags.tfFillOrKill | OfferCreateFlags.tfImmediateOrCancel | OfferCreateFlags.tfPassive;
+  /** Additional arbitrary information used to identify this transaction */
+  memos?: Memo[];
+  /** Various options that affect how a transaction should behave */
+  flags?: OfferCreateFlags.tfFillOrKill | OfferCreateFlags.tfImmediateOrCancel | OfferCreateFlags.tfPassive;
 }
 
 /**
