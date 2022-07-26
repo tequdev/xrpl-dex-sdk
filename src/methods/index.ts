@@ -1,5 +1,6 @@
+import fetchOrder from './fetchOrder';
 import fetchOrderBook from './fetchOrderBook';
 import fetchOrderBooks from './fetchOrderBooks';
 import fetchStatus from './fetchStatus';
 
-export { fetchOrderBook, fetchOrderBooks, fetchStatus };
+export { fetchOrder, fetchOrderBook, fetchOrderBooks, fetchStatus };
