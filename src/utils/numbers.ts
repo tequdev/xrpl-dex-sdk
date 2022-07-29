@@ -12,3 +12,8 @@ export const parseCurrencyAmount = (amount: Amount): string => {
     return dropsToXrp(bigAmount);
   }
 };
+
+export const stringToInt = (intString: string, radix?: number): number | undefined =>
+  parseInt(intString, radix) || undefined;
+
+export const stringToFloat = (floatString: string): number | undefined => parseFloat(floatString) || undefined;

@@ -4,13 +4,13 @@ import { OfferFlags } from 'xrpl/dist/npm/models/ledger';
 import { TakerAmount } from 'xrpl/dist/npm/models/methods/bookOffers';
 import { DEFAULT_LIMIT } from '../constants';
 import { OrderBookAsk, OrderBookBid, FetchOrderBookRequest, FetchOrderBookResponse } from '../models';
-import { parseCurrencyAmount } from '../utils';
+import { parseCurrencyAmount, parseMarketSymbol } from '../utils';
 
 async function fetchOrderBook(
   this: Client,
   { symbol, limit, params }: FetchOrderBookRequest
 ): Promise<FetchOrderBookResponse> {
-  const [base, quote] = symbol.split('/');
+  const [base, quote] = parseMarketSymbol(symbol);
 
   // TODO: fetch the issuer info from the cache produced by `loadMarkets` (if present)
 
