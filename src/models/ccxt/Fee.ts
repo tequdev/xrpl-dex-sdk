@@ -1,5 +1,5 @@
 export default interface Fee {
   currency: 'XRP';
-  cost: number;
-  rate?: number;
+  cost: string | number;
+  rate?: string | number;
 }
