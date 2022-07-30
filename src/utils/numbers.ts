@@ -4,12 +4,12 @@ import { Amount } from 'xrpl/dist/npm/models/common';
 
 export const BN = (amount: string) => new BigNumber(amount);
 
-export const parseCurrencyAmount = (amount: Amount): string => {
+export const parseCurrencyAmount = (amount: Amount): number => {
   if (typeof amount === 'object') {
-    return amount.value;
+    return parseFloat(amount.value);
   } else {
     const bigAmount = BN(amount);
-    return dropsToXrp(bigAmount);
+    return parseInt(dropsToXrp(bigAmount));
   }
 };
 

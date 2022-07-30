@@ -46,9 +46,9 @@ async function fetchOrderBook(
     if (!order.quality) return;
     // L2 Order book
     if ((order.Flags & OfferFlags.lsfSell) === 0) {
-      bids.push([order.quality, parseCurrencyAmount(order.TakerGets)]);
+      bids.push([order.quality, parseCurrencyAmount(order.TakerGets).toString()]);
     } else {
-      asks.push([order.quality, parseCurrencyAmount(order.TakerGets)]);
+      asks.push([order.quality, parseCurrencyAmount(order.TakerGets).toString()]);
     }
   });
 

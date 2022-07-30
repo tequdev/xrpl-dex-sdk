@@ -6,9 +6,9 @@ import { parseCurrencyAmount } from './numbers';
 
 export const xrplOfferToCcxtTrade = (offer: Offer): Trade => {
   // Price in quote currency (TakerGets) (float)
-  const price = parseFloat(parseCurrencyAmount(offer.TakerGets));
+  const price = parseCurrencyAmount(offer.TakerGets);
   // Ordered amount of base currency (TakerPays) (float)
-  const amount = parseFloat(parseCurrencyAmount(offer.TakerPays));
+  const amount = parseCurrencyAmount(offer.TakerPays);
 
   const trade: Trade = {
     id: offer.Sequence.toString(),
@@ -33,8 +33,8 @@ export const xrplOfferToCcxtTrade = (offer: Offer): Trade => {
 };
 
 export const xrplOfferToCcxtOrder = (offer: Offer): Order => {
-  const price = parseFloat(parseCurrencyAmount(offer.TakerGets));
-  const amount = parseFloat(parseCurrencyAmount(offer.TakerPays));
+  const price = parseCurrencyAmount(offer.TakerGets);
+  const amount = parseCurrencyAmount(offer.TakerPays);
 
   // TODO: get this data from Trades
   const filled = 0;
