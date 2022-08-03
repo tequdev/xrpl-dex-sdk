@@ -1,10 +1,14 @@
-import { OfferCreateFlags, Wallet } from 'xrpl';
+import { OfferCreateFlagsInterface } from 'xrpl';
 import { Memo } from 'xrpl/dist/npm/models/common';
 import { AccountAddress } from '../common';
 
 export interface CreateOrderParams {
-  /** The Ripple wallet making the order */
-  wallet: Wallet;
+  /** Secret from which to derive the Ripple wallet making the order */
+  wallet_secret?: string;
+  /** The public key of the Ripple wallet making the order. */
+  wallet_public_key?: string;
+  /** The private key of the Ripple wallet making the order. */
+  wallet_private_key?: string;
   /** Issuer for the currency being received by the order creator (if other than XRP) */
   taker_pays_issuer?: AccountAddress;
   /** Issuer for the currency being paid by the order creator (if other than XRP) */
@@ -13,6 +17,6 @@ export interface CreateOrderParams {
   expiration?: number;
   /** Additional arbitrary information used to identify this transaction */
   memos?: Memo[];
-  /** Various options that affect how a transaction should behave */
-  flags?: OfferCreateFlags.tfFillOrKill | OfferCreateFlags.tfImmediateOrCancel | OfferCreateFlags.tfPassive;
+  /** Order behavior (via XRPL OfferCreateFlags) */
+  flags?: OfferCreateFlagsInterface;
 }

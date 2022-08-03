@@ -1,0 +1,14 @@
+{
+  "symbol": "USD/XRP",
+  "side": "sell",
+  "type": "limit",
+  "amount": "100",
+  "price": "10",
+  "params": {
+    "wallet_secret": "ssSTL8XLsP3xmjtghETNnnriC5Xtd",
+    "taker_gets_issuer": "rMH4UxPrbuMa1spCBR98hLLyNJp4d8p4tM",
+    "flags": {
+      "tfPassive": true
+    }
+  }
+}

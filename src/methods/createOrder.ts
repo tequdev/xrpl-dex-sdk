@@ -1,18 +1,22 @@
-import { Trade } from 'ccxt';
+import { BadRequest, Trade } from 'ccxt';
 import _ from 'lodash';
 import {
   Client,
   OfferCreate,
-  OfferCreateFlags,
   rippleTimeToISOTime,
   rippleTimeToUnixTime,
-  unixTimeToRippleTime,
+  setTransactionFlagsToNumber,
+  Wallet,
 } from 'xrpl';
 import { Amount } from 'xrpl/dist/npm/models/common';
 import { hashOfferId } from 'xrpl/dist/npm/utils/hashes';
 import { REFERENCE_TX_COST } from '../constants';
-import { CreateOrderParams, MarketSymbol, OrderSide, OrderStatus, OrderTimeInForce, OrderType } from '../models';
-import { Order } from '../models/ccxt/Order';
+import { CreateOrderParams, MarketSymbol, Order, OrderSide, OrderStatus, OrderType } from '../models';
+// import { CreatedNode, DeletedNode, ModifiedNode } from '../models/xrpl';
+import {
+  offerCreateFlagsToTimeInForce,
+  // parseCurrencyAmount
+} from '../utils';
 
 async function createOrder(
   this: Client,
@@ -31,18 +35,13 @@ async function createOrder(
 ): Promise<Order> {
   const [base, quote] = symbol.split('/');
 
-  let creatorGets: Amount;
-  let creatorPays: Amount;
-
-  // TODO: verify this logic is correct
-
   const creatorGetsCurrency = side === OrderSide.Buy ? base : quote;
-  const creatorGetsAmount = side === OrderSide.Buy ? amount : price;
+  const creatorGetsAmount = amount;
 
   const creatorPaysCurrency = side === OrderSide.Buy ? quote : base;
-  const creatorPaysAmount = side === OrderSide.Buy ? price : amount;
+  const creatorPaysAmount = price;
 
-  creatorGets =
+  const creatorGets: Amount =
     creatorGetsCurrency === 'XRP'
       ? creatorGetsAmount
       : {
@@ -50,7 +49,7 @@ async function createOrder(
           value: creatorGetsAmount,
           issuer: params.taker_pays_issuer || '',
         };
-  creatorPays =
+  const creatorPays: Amount =
     creatorPaysCurrency === 'XRP'
       ? creatorPaysAmount
       : {
@@ -59,82 +58,114 @@ async function createOrder(
           issuer: params.taker_gets_issuer || '',
         };
 
-  // TODO: make the flags part of this more user-friendly (from a CCXT perspective)
-  const flags = side === OrderSide.Sell ? OfferCreateFlags.tfSell : params.flags || 0;
+  if (!params.wallet_secret && (!params.wallet_public_key || !params.wallet_private_key)) {
+    throw new BadRequest('Must provide either `wallet_secret` or `wallet_public_key` and `wallet_private_key`');
+  }
 
-  const xrplTxPrepared: OfferCreate = await this.autofill({
+  const wallet = params.wallet_secret
+    ? Wallet.fromSecret(params.wallet_secret)
+    : new Wallet(params.wallet_public_key as string, params.wallet_private_key as string);
+
+  const offerCreateTx: OfferCreate = {
     TransactionType: 'OfferCreate',
-    Account: params.wallet.classicAddress,
+    Account: wallet.classicAddress,
     TakerGets: creatorPays,
     TakerPays: creatorGets,
-    Flags: flags,
-  });
+    Flags: params.flags,
+  };
 
-  const xrplTxSigned = params.wallet.sign(xrplTxPrepared);
+  setTransactionFlagsToNumber(offerCreateTx);
 
-  // TODO: make sure this waits for the txn to be validated
-  const xrplTxResponse = await this.submitAndWait(xrplTxSigned.tx_blob);
+  const offerCreateTxPrepared = await this.autofill(offerCreateTx);
+  const offerCreateTxSigned = wallet.sign(offerCreateTxPrepared);
 
-  let filled = 0;
-  let remaining = parseFloat(creatorGetsAmount);
+  const offerCreateTxResponse = await this.submitAndWait(offerCreateTxSigned.tx_blob);
 
-  // TODO: fill this in once the logic is complete (also used in `fetchOrder`)
+  let amountFilled = 0;
+  let amountRemaining = parseFloat(creatorGetsAmount);
+
+  let status = OrderStatus.Open;
+
+  // TODO: fill this in once the Trades logic is complete
   const trades: Trade[] = [];
 
-  // if (typeof xrplTxResponse.result.meta === 'object') {
-  //   _.forEach(xrplTxResponse.result.meta.AffectedNodes, (affectedNode) => {
-  //     if (affectedNode.hasOwnProperty('ModifiedNode')) {
+  // TODO: use this info to populate Trades
+  // let affectedOffers: Record<'created' | 'modified' | 'deleted', string[]> = {
+  //   created: [],
+  //   modified: [],
+  //   deleted: [],
+  // };
+
+  // if (typeof offerCreateTxResponse.result.meta === 'object') {
+  //   _.forEach(offerCreateTxResponse.result.meta.AffectedNodes, (affectedNode) => {
+  //     if (affectedNode.hasOwnProperty('CreatedNode')) {
+  //       const { CreatedNode } = affectedNode as CreatedNode;
+
+  //       if (
+  //         CreatedNode.LedgerEntryType !== 'Offer' ||
+  //         CreatedNode.NewFields.Sequence !== offerCreateTxResponse.result.Sequence ||
+  //         !CreatedNode.NewFields.TakerPays
+  //       )
+  //         return;
+
+  //       affectedOffers.created.push(CreatedNode.LedgerIndex);
+
+  //       amountRemaining = parseFloat(parseCurrencyAmount(CreatedNode.NewFields.TakerPays as Amount));
+  //       amountFilled = parseFloat(creatorGetsAmount) - amountRemaining;
+  //     } else if (affectedNode.hasOwnProperty('ModifiedNode')) {
   //       const { ModifiedNode } = affectedNode as ModifiedNode;
-  //       if (ModifiedNode.LedgerEntryType === 'Offer') {
-  //         // Usually a ModifiedNode of type Offer indicates a previous Offer that
-  //         // was partially consumed by this one.
-  //       }
+
+  //       if (ModifiedNode.LedgerEntryType !== 'Offer') return;
+
+  //       affectedOffers.modified.push(ModifiedNode.LedgerIndex);
+  //     } else if (affectedNode.hasOwnProperty('DeletedNode')) {
+  //       const { DeletedNode } = affectedNode as DeletedNode;
+
+  //       if (DeletedNode.LedgerEntryType !== 'Offer') return;
+
+  //       affectedOffers.deleted.push(DeletedNode.LedgerIndex);
   //     }
   //   });
   // }
 
-  // TODO: fill this in once we have the Trades array
-  const lastTradeTimestamp = unixTimeToRippleTime(0);
+  // if (!affectedOffers.created.length) {
+  //   if (affectedOffers.modified.length || affectedOffers.deleted.length) {
+  //     status = OrderStatus.Closed;
+  //     amountRemaining = 0;
+  //     amountFilled = parseFloat(creatorGetsAmount);
+  //   } else if (!affectedOffers.modified.length && !affectedOffers.deleted.length) {
+  //     status = OrderStatus.Rejected;
+  //   }
+  // }
 
-  let timeInForce: OrderTimeInForce | undefined;
+  // TODO: calculate this once Trades logic is complete
+  // let lastTradeTimestamp: number | undefined;
 
-  switch (params.flags) {
-    case OfferCreateFlags.tfFillOrKill:
-      timeInForce = OrderTimeInForce.FillOrKill;
-    case OfferCreateFlags.tfImmediateOrCancel:
-      timeInForce = OrderTimeInForce.ImmediateOrCancel;
-    case OfferCreateFlags.tfPassive:
-      timeInForce = OrderTimeInForce.PostOnly;
-    default:
-      timeInForce = params.expiration ? undefined : OrderTimeInForce.GoodTillCanceled;
-  }
-
-  // TODO: calculate this based on trades
-  let average: number | undefined;
+  // TODO: calculate this once Trades logic is complete
+  let average: number | undefined = 0;
 
   const response: Order = {
-    // TODO: what situations would result in there not being a Sequence number yet? (param is optional on type)
-    id: hashOfferId(params.wallet.classicAddress, xrplTxResponse.result.Sequence || 0),
-    datetime: rippleTimeToISOTime(xrplTxResponse.result.date || 0),
-    timestamp: rippleTimeToUnixTime(xrplTxResponse.result.date || 0),
-    lastTradeTimestamp,
-    status: OrderStatus.Open,
+    id: hashOfferId(wallet.classicAddress, offerCreateTxResponse.result.Sequence || 0),
+    datetime: rippleTimeToISOTime(offerCreateTxResponse.result.date || 0),
+    timestamp: rippleTimeToUnixTime(offerCreateTxResponse.result.date || 0),
+    // lastTradeTimestamp,
+    status,
     symbol,
     type,
-    timeInForce,
+    timeInForce: offerCreateFlagsToTimeInForce(offerCreateTx),
     side,
     price: parseFloat(price),
     average,
     amount: parseFloat(amount),
-    filled,
-    remaining,
-    cost: filled * parseFloat(price),
+    filled: amountFilled,
+    remaining: amountRemaining,
+    cost: amountFilled * parseFloat(price),
     trades,
     fee: {
       currency: 'XRP',
-      cost: xrplTxResponse.result.Fee ? parseFloat(xrplTxResponse.result.Fee) : REFERENCE_TX_COST,
+      cost: offerCreateTxResponse.result.Fee ? parseFloat(offerCreateTxResponse.result.Fee) : REFERENCE_TX_COST,
     },
-    info: JSON.stringify(xrplTxResponse.result),
+    info: JSON.stringify({ OfferCreate: offerCreateTxResponse.result }),
   };
 
   return response;

@@ -1,11 +1,18 @@
+import accountInfo from './accountInfo.json';
 import offerCreateBuy from './tx/offerCreateBuy.json';
 import offerCreateSell from './tx/offerCreateSell.json';
-import normalServerState from './serverState.json';
 import * as bookOffers from './bookOffers';
 import usdBtcOffers from './bookOffersUsdBtc.json';
 import btcUsdOffers from './bookOffersBtcUsd.json';
 import usdXrpOffers from './bookOffersUsdXrp.json';
 import xrpUsdOffers from './bookOffersXrpUsd.json';
+import normalLedger from './ledger.json';
+import serverInfo from './serverInfo.json';
+import normalServerState from './serverState.json';
+
+const account_info = {
+  normal: accountInfo,
+};
 
 const book_offers = {
   normalBids: bookOffers.requestBookOffersBidsResponse,
@@ -20,9 +27,17 @@ const book_offers = {
   xrpUsd: xrpUsdOffers,
 };
 
+const ledger = {
+  normal: normalLedger,
+};
+
 const offer_create = {
   buy: offerCreateBuy,
   sell: offerCreateSell,
+};
+
+const server_info = {
+  normal: serverInfo,
 };
 
 const server_state = {
@@ -30,8 +45,11 @@ const server_state = {
 };
 
 const rippled = {
+  account_info,
   book_offers,
+  ledger,
   offer_create,
+  server_info,
   server_state,
 };
 

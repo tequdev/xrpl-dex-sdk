@@ -27,12 +27,12 @@ export enum OrderSide {
   Sell = 'sell',
 }
 
-export interface Order {
+export default interface Order {
   id: string;
   clientOrderId?: string;
   datetime: string;
   timestamp: number;
-  lastTradeTimestamp: number;
+  lastTradeTimestamp?: number;
   status: OrderStatus;
   symbol: MarketSymbol;
   type: string;
