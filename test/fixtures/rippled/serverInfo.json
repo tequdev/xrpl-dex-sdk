@@ -1,0 +1,59 @@
+{
+  "id": 1,
+  "result": {
+    "info": {
+      "build_version": "1.9.1",
+      "complete_ledgers": "27887240-30005418",
+      "hostid": "GAD",
+      "initial_sync_duration_us": "124119708",
+      "io_latency_ms": 1,
+      "jq_trans_overflow": "0",
+      "last_close": {
+        "converge_time_s": 2,
+        "proposers": 6
+      },
+      "load_factor": 1,
+      "peer_disconnects": "65766",
+      "peer_disconnects_resources": "2759",
+      "peers": 65,
+      "pubkey_node": "n9KgFbFqq5E6dbkfTrMhmAi1DYrWfteZsw379SuxdazL1MEi2aFV",
+      "server_state": "full",
+      "server_state_duration_us": "6066474890400",
+      "state_accounting": {
+        "connected": {
+          "duration_us": "120082189",
+          "transitions": "2"
+        },
+        "disconnected": {
+          "duration_us": "1029302",
+          "transitions": "2"
+        },
+        "full": {
+          "duration_us": "6066474890400",
+          "transitions": "1"
+        },
+        "syncing": {
+          "duration_us": "3008184",
+          "transitions": "1"
+        },
+        "tracking": {
+          "duration_us": "31",
+          "transitions": "1"
+        }
+      },
+      "time": "2022-Aug-03 00:43:40.232906 UTC",
+      "uptime": 6066599,
+      "validated_ledger": {
+        "age": 2,
+        "base_fee_xrp": 0.00001,
+        "hash": "B2FA3533F069539C9F7A9B3F29A2B0AEC4DDAB190744AD8D6E1277A7559D10EB",
+        "reserve_base_xrp": 10,
+        "reserve_inc_xrp": 2,
+        "seq": 30005418
+      },
+      "validation_quorum": 5
+    }
+  },
+  "status": "success",
+  "type": "response"
+}

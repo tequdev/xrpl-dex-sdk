@@ -1,4 +1,5 @@
 import { Order, Trade } from 'ccxt';
+import { OfferCreate, OfferCreateFlags, setTransactionFlagsToNumber } from 'xrpl';
 import { Amount } from 'xrpl/dist/npm/models/common';
 import { Offer, OfferFlags } from 'xrpl/dist/npm/models/ledger';
 import { CurrencyCode, MarketSymbol, OrderStatus, OrderTimeInForce, OrderType } from '../models';
@@ -84,4 +85,18 @@ export const getMarketSymbol = (base: Amount, quote: Amount): MarketSymbol => {
   symbol.push(typeof quote === 'object' ? quote.currency : 'XRP');
 
   return symbol.join('/');
+};
+
+export const offerCreateFlagsToTimeInForce = (tx: OfferCreate): OrderTimeInForce | undefined => {
+  setTransactionFlagsToNumber(tx);
+  const flags = tx.Flags as number;
+  if (flags === 0 && !tx.Expiration) {
+    return OrderTimeInForce.GoodTillCanceled;
+  } else if ((flags & OfferCreateFlags.tfFillOrKill) === OfferCreateFlags.tfFillOrKill) {
+    return OrderTimeInForce.FillOrKill;
+  } else if ((flags & OfferCreateFlags.tfImmediateOrCancel) === OfferCreateFlags.tfImmediateOrCancel) {
+    return OrderTimeInForce.ImmediateOrCancel;
+  } else if ((flags & OfferCreateFlags.tfPassive) === OfferCreateFlags.tfPassive) {
+    return OrderTimeInForce.PostOnly;
+  }
 };

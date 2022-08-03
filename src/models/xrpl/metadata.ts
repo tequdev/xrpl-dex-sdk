@@ -1,3 +1,8 @@
+/**
+ * These types are not exported by the XRPL.js library,
+ * causing typing issues when using its `Node` type
+ */
+
 export interface CreatedNode {
   CreatedNode: {
     LedgerEntryType: string;
