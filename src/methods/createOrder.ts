@@ -12,11 +12,7 @@ import { Amount } from 'xrpl/dist/npm/models/common';
 import { hashOfferId } from 'xrpl/dist/npm/utils/hashes';
 import { REFERENCE_TX_COST } from '../constants';
 import { CreateOrderParams, MarketSymbol, Order, OrderSide, OrderStatus, OrderType } from '../models';
-// import { CreatedNode, DeletedNode, ModifiedNode } from '../models/xrpl';
-import {
-  offerCreateFlagsToTimeInForce,
-  // parseCurrencyAmount
-} from '../utils';
+import { offerCreateFlagsToTimeInForce } from '../utils';
 
 async function createOrder(
   this: Client,
@@ -89,66 +85,15 @@ async function createOrder(
   // TODO: fill this in once the Trades logic is complete
   const trades: Trade[] = [];
 
-  // TODO: use this info to populate Trades
-  // let affectedOffers: Record<'created' | 'modified' | 'deleted', string[]> = {
-  //   created: [],
-  //   modified: [],
-  //   deleted: [],
-  // };
+  // TODO: calculate lastTradeTimestamp once Trades logic is complete
 
-  // if (typeof offerCreateTxResponse.result.meta === 'object') {
-  //   _.forEach(offerCreateTxResponse.result.meta.AffectedNodes, (affectedNode) => {
-  //     if (affectedNode.hasOwnProperty('CreatedNode')) {
-  //       const { CreatedNode } = affectedNode as CreatedNode;
-
-  //       if (
-  //         CreatedNode.LedgerEntryType !== 'Offer' ||
-  //         CreatedNode.NewFields.Sequence !== offerCreateTxResponse.result.Sequence ||
-  //         !CreatedNode.NewFields.TakerPays
-  //       )
-  //         return;
-
-  //       affectedOffers.created.push(CreatedNode.LedgerIndex);
-
-  //       amountRemaining = parseFloat(parseCurrencyAmount(CreatedNode.NewFields.TakerPays as Amount));
-  //       amountFilled = parseFloat(creatorGetsAmount) - amountRemaining;
-  //     } else if (affectedNode.hasOwnProperty('ModifiedNode')) {
-  //       const { ModifiedNode } = affectedNode as ModifiedNode;
-
-  //       if (ModifiedNode.LedgerEntryType !== 'Offer') return;
-
-  //       affectedOffers.modified.push(ModifiedNode.LedgerIndex);
-  //     } else if (affectedNode.hasOwnProperty('DeletedNode')) {
-  //       const { DeletedNode } = affectedNode as DeletedNode;
-
-  //       if (DeletedNode.LedgerEntryType !== 'Offer') return;
-
-  //       affectedOffers.deleted.push(DeletedNode.LedgerIndex);
-  //     }
-  //   });
-  // }
-
-  // if (!affectedOffers.created.length) {
-  //   if (affectedOffers.modified.length || affectedOffers.deleted.length) {
-  //     status = OrderStatus.Closed;
-  //     amountRemaining = 0;
-  //     amountFilled = parseFloat(creatorGetsAmount);
-  //   } else if (!affectedOffers.modified.length && !affectedOffers.deleted.length) {
-  //     status = OrderStatus.Rejected;
-  //   }
-  // }
-
-  // TODO: calculate this once Trades logic is complete
-  // let lastTradeTimestamp: number | undefined;
-
-  // TODO: calculate this once Trades logic is complete
+  // TODO: properly calculate this once Trades logic is complete
   let average: number | undefined = 0;
 
   const response: Order = {
     id: hashOfferId(wallet.classicAddress, offerCreateTxResponse.result.Sequence || 0),
     datetime: rippleTimeToISOTime(offerCreateTxResponse.result.date || 0),
     timestamp: rippleTimeToUnixTime(offerCreateTxResponse.result.date || 0),
-    // lastTradeTimestamp,
     status,
     symbol,
     type,
