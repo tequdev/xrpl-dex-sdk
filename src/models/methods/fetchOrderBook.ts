@@ -3,8 +3,10 @@ import { OrderBook } from '../ccxt';
 import { AccountAddress, MarketSymbol } from '../common';
 
 export interface FetchOrderBookParams {
-  takerGetsIssuer?: AccountAddress;
+  /** Issuer for the paying currency (if other than XRP) */
   takerPaysIssuer?: AccountAddress;
+  /** Issuer for the receiving currency (if other than XRP) */
+  takerGetsIssuer?: AccountAddress;
   ledgerIndex?: LedgerIndex;
   ledgerHash?: string;
   taker?: AccountAddress;

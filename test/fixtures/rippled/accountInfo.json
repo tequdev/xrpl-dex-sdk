@@ -1,0 +1,21 @@
+{
+  "id": 0,
+  "status": "success",
+  "type": "response",
+  "result": {
+    "account_data": {
+      "Account": "rhFDFxjpVHBZe69jw4TvFouPMdMRkXMkgd",
+      "Balance": "884999988",
+      "Flags": 0,
+      "LedgerEntryType": "AccountRoot",
+      "OwnerCount": 1,
+      "PreviousTxnID": "EF1389EFBA19D37A0C221E9DF995FA70DFF9BE2F6A20AB6854D078431E4BE2AD",
+      "PreviousTxnLgrSeq": 30003907,
+      "Sequence": 30003905,
+      "index": "09ACEF8E52B407A4C13861E1DF5719FEF45E8D388E84D5CEDEE7A6297B5A2E7D"
+    },
+    "ledger_hash": "7DC31433A47E72F9F48CD377ED530F4F24B3CFFF3866B50C028E5E25CB408D9A",
+    "ledger_index": 30005401,
+    "validated": true
+  }
+}

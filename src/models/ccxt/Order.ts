@@ -1,3 +1,4 @@
+import { Trade } from 'ccxt';
 import { MarketSymbol } from '../common';
 import Fee from './Fee';
 
@@ -11,6 +12,7 @@ export enum OrderStatus {
 
 export enum OrderType {
   Limit = 'limit',
+  Market = 'market',
 }
 
 export enum OrderTimeInForce {
@@ -33,15 +35,16 @@ export default interface Order {
   lastTradeTimestamp?: number;
   status: OrderStatus;
   symbol: MarketSymbol;
-  type: OrderType;
-  timeInForce?: OrderTimeInForce;
+  type: string;
+  timeInForce?: string;
   side: OrderSide;
-  price: number;
-  average: number;
-  amount: number;
-  filled: number;
-  remaining: number;
-  cost: number;
+  price?: string | number; // May be empty for Market orders
+  average?: string | number;
+  amount: string | number;
+  filled: string | number;
+  remaining: string | number;
+  cost: string | number;
+  trades: Trade[];
   fee?: Fee;
-  info: { [key: string]: any };
+  info: any;
 }
