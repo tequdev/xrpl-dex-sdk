@@ -1,33 +1,27 @@
 import { LedgerIndex } from 'xrpl/dist/npm/models/common';
 import { OrderBook } from '../ccxt';
-import { AccountAddress, MarketSymbol } from '../common';
-
-export interface FetchOrderBookParams {
-  /** Issuer for the paying currency (if other than XRP) */
-  takerPaysIssuer?: AccountAddress;
-  /** Issuer for the receiving currency (if other than XRP) */
-  takerGetsIssuer?: AccountAddress;
-  ledgerIndex?: LedgerIndex;
-  ledgerHash?: string;
-  taker?: AccountAddress;
-}
+import { AccountAddress } from '../common';
 
 /**
- * Fetches L2/L3 {@link OrderBook} for a particular market trading symbol.
+ * Request parameters for a fetchOrderBook call
  *
- * @category Requests
+ * @category Parameters
  */
-export interface FetchOrderBookRequest {
-  /** Token pair (called Unified Market Symbol in CCXT) */
-  symbol: MarketSymbol;
-  /** Number of results to return */
-  limit?: number;
-  /** Parameters specific to the exchange API endpoint */
-  params: FetchOrderBookParams;
+export interface FetchOrderBookParams {
+  /** Issuer for the currency being received by the order creator (if other than XRP) */
+  taker_pays_issuer?: AccountAddress;
+  /** Issuer for the currency being paid by the order creator (if other than XRP) */
+  taker_gets_issuer?: AccountAddress;
+  /** Filter order book by taker address */
+  taker?: AccountAddress;
+  /** Get order book from the given ledger */
+  ledger_index?: LedgerIndex;
+  /** Get order book from the provided hash */
+  ledger_hash?: string;
 }
 
 /**
- * Expected response from a {@link FetchOrderBookRequest}.
+ * Expected response from a fetchOrderBook call
  *
  * @category Responses
  */

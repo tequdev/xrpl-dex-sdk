@@ -14,6 +14,12 @@ import { REFERENCE_TX_COST } from '../constants';
 import { CreateOrderParams, MarketSymbol, Order, OrderSide, OrderStatus, OrderType } from '../models';
 import { offerCreateFlagsToTimeInForce } from '../utils';
 
+/**
+ * Creates a new Order on the Ripple dEX. Returns an {@link CreateOrderResponse}
+ * with the newly created Order object.
+ *
+ * @category Methods
+ */
 async function createOrder(
   this: Client,
   /** Token pair (called Unified Market Symbol in CCXT) */
@@ -31,6 +37,17 @@ async function createOrder(
 ): Promise<Order> {
   const [base, quote] = symbol.split('/');
 
+  const {
+    wallet_private_key,
+    wallet_public_key,
+    wallet_secret,
+    taker_gets_issuer,
+    taker_pays_issuer,
+    expiration,
+    memos,
+    flags,
+  } = params;
+
   const creatorGetsCurrency = side === OrderSide.Buy ? base : quote;
   const creatorGetsAmount = amount;
 
@@ -43,7 +60,7 @@ async function createOrder(
       : {
           currency: creatorGetsCurrency,
           value: creatorGetsAmount,
-          issuer: params.taker_pays_issuer || '',
+          issuer: taker_pays_issuer || '',
         };
   const creatorPays: Amount =
     creatorPaysCurrency === 'XRP'
@@ -51,24 +68,27 @@ async function createOrder(
       : {
           currency: creatorPaysCurrency,
           value: creatorPaysAmount,
-          issuer: params.taker_gets_issuer || '',
+          issuer: taker_gets_issuer || '',
         };
 
-  if (!params.wallet_secret && (!params.wallet_public_key || !params.wallet_private_key)) {
+  if (!wallet_secret && (!wallet_public_key || !wallet_private_key)) {
     throw new BadRequest('Must provide either `wallet_secret` or `wallet_public_key` and `wallet_private_key`');
   }
 
-  const wallet = params.wallet_secret
-    ? Wallet.fromSecret(params.wallet_secret)
-    : new Wallet(params.wallet_public_key as string, params.wallet_private_key as string);
+  const wallet = wallet_secret
+    ? Wallet.fromSecret(wallet_secret)
+    : new Wallet(wallet_public_key as string, wallet_private_key as string);
 
   const offerCreateTx: OfferCreate = {
     TransactionType: 'OfferCreate',
     Account: wallet.classicAddress,
     TakerGets: creatorPays,
     TakerPays: creatorGets,
-    Flags: params.flags,
+    Flags: flags,
   };
+
+  if (expiration) offerCreateTx.Expiration = expiration;
+  if (memos) offerCreateTx.Memos = memos;
 
   setTransactionFlagsToNumber(offerCreateTx);
 
