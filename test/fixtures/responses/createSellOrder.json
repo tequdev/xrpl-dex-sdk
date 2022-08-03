@@ -2,6 +2,7 @@
   "id": "5DF18A38D3114A0D947335479CD6B6582501DC7DCD6ECCCD086023B3024ABE95",
   "datetime": "2015-11-18T20:56:30.000Z",
   "timestamp": 1447880190000,
+  "lastTradeTimestamp": 0,
   "status": "open",
   "symbol": "USD/XRP",
   "type": "limit",

@@ -86,14 +86,16 @@ async function createOrder(
   const trades: Trade[] = [];
 
   // TODO: calculate lastTradeTimestamp once Trades logic is complete
+  let lastTradeTimestamp: number = 0;
 
   // TODO: properly calculate this once Trades logic is complete
-  let average: number | undefined = 0;
+  let average: number = 0;
 
   const response: Order = {
     id: hashOfferId(wallet.classicAddress, offerCreateTxResponse.result.Sequence || 0),
     datetime: rippleTimeToISOTime(offerCreateTxResponse.result.date || 0),
     timestamp: rippleTimeToUnixTime(offerCreateTxResponse.result.date || 0),
+    lastTradeTimestamp,
     status,
     symbol,
     type,
