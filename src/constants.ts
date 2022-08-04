@@ -1,6 +1,6 @@
 import { RippleUrl } from './models';
 
-export const DEFAULT_LIMIT = 20;
+export const DEFAULT_LIMIT = process.env.RIPPLE_DEFAULT_LIMIT ? parseInt(process.env.RIPPLE_DEFAULT_LIMIT) : 20;
 
 export const REFERENCE_TX_COST = '10';
 export const ACCOUNT_DELETE_TX_COST = '2000000';
