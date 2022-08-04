@@ -1,13 +1,13 @@
 import { LedgerIndex } from 'xrpl/dist/npm/models/common';
 import { OrderBook } from '../ccxt';
-import { AccountAddress } from '../common';
+import { AccountAddress, BaseParams } from '../common';
 
 /**
  * Request parameters for a fetchOrderBook call
  *
  * @category Parameters
  */
-export interface FetchOrderBookParams {
+export interface FetchOrderBookParams extends BaseParams {
   /** Issuer for the currency being received by the order creator (if other than XRP) */
   taker_pays_issuer?: AccountAddress;
   /** Issuer for the currency being paid by the order creator (if other than XRP) */

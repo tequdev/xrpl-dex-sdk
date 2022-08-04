@@ -8,7 +8,7 @@ import { FetchOrderBookParams } from './fetchOrderBook';
  * @category Parameters
  */
 export interface FetchOrderBooksParams {
-  [marketSymbol: MarketSymbol]: FetchOrderBookParams;
+  [symbol: MarketSymbol]: FetchOrderBookParams;
 }
 
 /**
