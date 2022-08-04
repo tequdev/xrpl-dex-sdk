@@ -22,10 +22,8 @@ async function fetchCurrencies(
   let marker: unknown;
   let hasNextPage = true;
 
-  let iteration = 0;
-
   // 1. Download the full ledger object
-  while (hasNextPage && iteration <= 5) {
+  while (hasNextPage) {
     const { result: ledgerDataResult } = await this.request({
       command: 'ledger_data',
       ledger_index: 'validated',
@@ -34,12 +32,11 @@ async function fetchCurrencies(
       marker,
     } as LedgerDataRequest);
 
-    if (ledgerDataResult.state.length < limit) {
+    marker = ledgerDataResult.marker;
+
+    if (!marker) {
       hasNextPage = false;
-    } else {
-      marker = ledgerDataResult.marker;
     }
-    iteration += 1;
 
     _.forEach(ledgerDataResult.state, (state) => {
       const ledgerEntry = state as LabeledLedgerEntry;
@@ -53,10 +50,13 @@ async function fetchCurrencies(
         // 3. Look at the currency and issuer pair on objects that have a non-zero “Balance” value
         if (balance !== 0) {
           // balance will never be 0, so the falsy value of >= 0 will always be negative
+          // (see https://xrpl.org/ripplestate.html#ripplestate-fields for more info)
           const issuer = balance >= 0 ? rippleState.LowLimit.issuer : rippleState.HighLimit.issuer;
 
           if (currencies[rippleState.Balance.currency]) {
-            currencies[rippleState.Balance.currency].issuers.push(issuer);
+            if (currencies[rippleState.Balance.currency].issuers.indexOf(issuer) === -1) {
+              currencies[rippleState.Balance.currency].issuers.push(issuer);
+            }
           } else {
             currencies[rippleState.Balance.currency] = {
               code: rippleState.Balance.currency,

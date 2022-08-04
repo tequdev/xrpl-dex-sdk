@@ -7,6 +7,7 @@ import btcUsdOffers from './bookOffersBtcUsd.json';
 import usdXrpOffers from './bookOffersUsdXrp.json';
 import xrpUsdOffers from './bookOffersXrpUsd.json';
 import normalLedger from './ledger.json';
+import normalLedgerData from './ledgerData.json';
 import serverInfo from './serverInfo.json';
 import normalServerState from './serverState.json';
 
@@ -31,6 +32,10 @@ const ledger = {
   normal: normalLedger,
 };
 
+const ledger_data = {
+  normal: normalLedgerData,
+};
+
 const offer_create = {
   buy: offerCreateBuy,
   sell: offerCreateSell,
@@ -48,6 +53,7 @@ const rippled = {
   account_info,
   book_offers,
   ledger,
+  ledger_data,
   offer_create,
   server_info,
   server_state,

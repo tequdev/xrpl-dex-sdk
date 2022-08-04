@@ -1,0 +1,13 @@
+{
+  "SEC": { "code": "SEC", "issuers": ["rf7T7P1XNAKAfp83LZ6XRLHfLkwpGpGeGo"] },
+  "534F4C4F00000000000000000000000000000000": {
+    "code": "534F4C4F00000000000000000000000000000000",
+    "issuers": ["raB1YXH7AiUvrFdaKXwAtzHa8rPdaGBnhR"]
+  },
+  "4C49464500000000000000000000000000000000": {
+    "code": "4C49464500000000000000000000000000000000",
+    "issuers": ["r3jr6myVcxnL4pekbK5PNx7RBTRUqRDbwq"]
+  },
+  "LUC": { "code": "LUC", "issuers": ["r3E76nAHJmRE4bRAi6UqjhJzswsdgnSP6G"] },
+  "CCB": { "code": "CCB", "issuers": ["rEw5H4MfM1DQsbmR13AndZ8GpwtC2vDXTy"] }
+}
