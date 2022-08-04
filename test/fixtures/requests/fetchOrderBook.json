@@ -2,7 +2,7 @@
   "symbol": "USD/BTC",
   "limit": 3,
   "params": {
-    "takerGetsIssuer": "rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B",
-    "takerPaysIssuer": "rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B"
+    "taker_gets_issuer": "rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B",
+    "taker_pays_issuer": "rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B"
   }
 }

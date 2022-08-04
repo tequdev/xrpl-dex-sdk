@@ -1,6 +1,5 @@
 import 'mocha';
 
-import requests from '../fixtures/requests';
 import responses from '../fixtures/responses';
 import rippled from '../fixtures/rippled';
 
@@ -15,7 +14,9 @@ describe('fetchStatus', function () {
 
   it("should return 'ok' if the exchange server is running", async function () {
     this.mockRippled.addResponse('server_state', () => rippled.server_state.normal);
-    const response: FetchStatusResponse = await fetchStatus.call(this.client, requests.fetchStatus);
+
+    const response: FetchStatusResponse = await fetchStatus.call(this.client);
+
     assertResultMatch(response, responses.fetchStatus);
   });
 });

@@ -2,29 +2,20 @@ import { OrderBook } from '../ccxt';
 import { MarketSymbol } from '../common';
 import { FetchOrderBookParams } from './fetchOrderBook';
 
-export interface FetchOrderBooksParams {
-  [marketSymbol: MarketSymbol]: FetchOrderBookParams;
-}
-
 /**
- * Fetches L2/L3 {@link OrderBook} for a particular market trading symbol.
+ * Request parameters for a fetchOrderBooks call
  *
- * @category Requests
+ * @category Parameters
  */
-export interface FetchOrderBooksRequest {
-  /** Token pair (aka Unified Market Symbol in CCXT) */
-  symbols: MarketSymbol[];
-  /** Number of results to return */
-  limit?: number;
-  /** Parameters specific to the exchange API endpoint */
-  params: FetchOrderBooksParams;
+export interface FetchOrderBooksParams {
+  [symbol: MarketSymbol]: FetchOrderBookParams;
 }
 
 /**
- * Expected response from a {@link FetchOrderBooksRequest}.
+ * Expected response from a fetchOrderBooks call
  *
  * @category Responses
  */
 export interface FetchOrderBooksResponse {
-  [marketSymbol: MarketSymbol]: OrderBook;
+  [symbol: MarketSymbol]: OrderBook;
 }
