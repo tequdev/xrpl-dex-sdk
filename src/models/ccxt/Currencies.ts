@@ -2,10 +2,13 @@ import { AccountAddress, CurrencyCode } from '../common';
 
 export interface Currency {
   code: CurrencyCode;
-  issuers: AccountAddress[];
+  issuer: AccountAddress;
   name?: string;
+  issuerName?: string;
+  logo?: string;
   precision?: number;
-  numericId?: number;
 }
 
-export type Currencies = Record<CurrencyCode, Currency>;
+type Currencies = Record<CurrencyCode, Currency[]>;
+
+export default Currencies;
