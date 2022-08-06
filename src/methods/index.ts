@@ -5,5 +5,15 @@ import fetchMarkets from './fetchMarkets';
 import fetchOrderBook from './fetchOrderBook';
 import fetchOrderBooks from './fetchOrderBooks';
 import fetchStatus from './fetchStatus';
+import fetchTransactionFee from './fetchTransactionFee';
 
-export { createOrder, fetchCurrencies, fetchIssuers, fetchMarkets, fetchOrderBook, fetchOrderBooks, fetchStatus };
+export {
+  createOrder,
+  fetchCurrencies,
+  fetchIssuers,
+  fetchMarkets,
+  fetchOrderBook,
+  fetchOrderBooks,
+  fetchStatus,
+  fetchTransactionFee,
+};

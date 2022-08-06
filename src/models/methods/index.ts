@@ -5,3 +5,4 @@ export * from './fetchMarkets';
 export * from './fetchOrderBook';
 export * from './fetchOrderBooks';
 export * from './fetchStatus';
+export * from './fetchTransactionFee';

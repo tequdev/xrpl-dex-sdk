@@ -1,8 +1,9 @@
-import { AccountAddress, CurrencyCode } from '../common';
+import { AccountAddress, CurrencyCode, PercentDecimal } from '../common';
 
 export interface Currency {
   code: CurrencyCode;
   issuer: AccountAddress;
+  fee?: PercentDecimal;
   name?: string;
   issuerName?: string;
   logo?: string;

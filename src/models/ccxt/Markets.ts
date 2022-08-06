@@ -1,4 +1,4 @@
-import { AccountAddress, CurrencyCode, MarketSymbol } from '../common';
+import { AccountAddress, CurrencyCode, MarketSymbol, PercentDecimal } from '../common';
 
 export interface Market {
   /** String literal for referencing within an exchange */
@@ -13,10 +13,12 @@ export interface Market {
   quote: CurrencyCode;
   /** Issuers are optional when currency is XRP (which has no issuer) */
   quoteIssuer?: AccountAddress;
-  /** Transfer fee */
-  taker?: number;
-  /** Whether transfer fee is a percentage */
-  percentage?: boolean;
+  /** Base token transfer fee */
+  baseFee?: PercentDecimal;
+  /** Quote token transfer fee */
+  quoteFee?: PercentDecimal;
+  /** Whether transfer fees are percentages */
+  percentage?: true;
 }
 
 type Markets = Record<MarketSymbol, Market>;

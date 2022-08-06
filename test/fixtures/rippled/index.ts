@@ -1,4 +1,6 @@
 import accountInfo from './accountInfo.json';
+import accountInfoIssuer from './accountInfoIssuer.json';
+import normalFee from './fee.json';
 import offerCreateBuy from './tx/offerCreateBuy.json';
 import offerCreateSell from './tx/offerCreateSell.json';
 import * as bookOffers from './bookOffers';
@@ -13,6 +15,11 @@ import normalServerState from './serverState.json';
 
 const account_info = {
   normal: accountInfo,
+  issuer: accountInfoIssuer,
+};
+
+const fee = {
+  normal: normalFee,
 };
 
 const book_offers = {
@@ -52,6 +59,7 @@ const server_state = {
 const rippled = {
   account_info,
   book_offers,
+  fee,
   ledger,
   ledger_data,
   offer_create,

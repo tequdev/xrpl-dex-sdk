@@ -1,0 +1,28 @@
+{
+  "id": 2,
+  "result": {
+    "account_data": {
+      "Account": "rcA8X3TVMST1n3CJeAdGk1RdRCHii7N2h",
+      "Balance": "118080000",
+      "Flags": 9043968,
+      "LedgerEntryType": "AccountRoot",
+      "OwnerCount": 12,
+      "PreviousTxnID": "3624A917962ED062CCB22EF8877284EA5A3B1E777215CB718943CA72859BB130",
+      "PreviousTxnLgrSeq": 73498250,
+      "RegularKey": "rrG3M2nV7ubzBnR8FHg8zWyisE5JiMQrL",
+      "Sequence": 878,
+      "TransferRate": 1003000000,
+      "index": "16F5E74AE0F9C0908649BEEA9F6D9B02DB2084CFDA200F81DC8E7FAAE1883D59"
+    },
+    "ledger_current_index": 73501339,
+    "validated": false
+  },
+  "status": "success",
+  "type": "response",
+  "warnings": [
+    {
+      "id": 2001,
+      "message": "This is a clio server. clio only serves validated data. If you want to talk to rippled, include 'ledger_index':'current' in your request"
+    }
+  ]
+}
