@@ -6,6 +6,7 @@ import fetchOrderBook from './fetchOrderBook.json';
 import fetchOrderBooks from './fetchOrderBooks.json';
 import fetchStatus from './fetchStatus.json';
 import fetchTransactionFee from './fetchTransactionFee.json';
+import fetchTransactionFees from './fetchTransactionFees.json';
 
 const createOrder = {
   sell: createSellOrder,
@@ -20,6 +21,7 @@ const responses = {
   fetchOrderBooks,
   fetchStatus,
   fetchTransactionFee,
+  fetchTransactionFees,
 };
 
 export default responses;

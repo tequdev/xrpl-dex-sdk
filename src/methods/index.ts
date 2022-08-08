@@ -6,6 +6,7 @@ import fetchOrderBook from './fetchOrderBook';
 import fetchOrderBooks from './fetchOrderBooks';
 import fetchStatus from './fetchStatus';
 import fetchTransactionFee from './fetchTransactionFee';
+import fetchTransactionFees from './fetchTransactionFees';
 
 export {
   createOrder,
@@ -16,4 +17,5 @@ export {
   fetchOrderBooks,
   fetchStatus,
   fetchTransactionFee,
+  fetchTransactionFees,
 };

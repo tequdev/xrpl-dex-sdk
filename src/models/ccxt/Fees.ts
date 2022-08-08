@@ -1,5 +1,10 @@
 import { AccountAddress, CurrencyCode, Drops, MarketSymbol, PercentDecimal } from '../common';
 
+/**
+ * The "fee" property on Order objects
+ *
+ * This is not related to the Fees endpoints.
+ */
 export interface Fee {
   /** Transaction currency (always in XRP) */
   currency: 'XRP';
@@ -11,6 +16,9 @@ export interface Fee {
   percentage?: boolean;
 }
 
+/**
+ * This is returned by `fetchTransactionFee(s)`
+ */
 export interface TransactionFee {
   /** The currency being transacted */
   code: CurrencyCode;
@@ -20,10 +28,16 @@ export interface TransactionFee {
   transfer: { [issuer: AccountAddress]: PercentDecimal };
 }
 
+/**
+ * This is returned by `fetchTradingFee(s)`
+ */
 export interface TradingFee {
   [symbol: MarketSymbol]: {
+    /** Unified Market Symbol */
     symbol: MarketSymbol;
+    /** Fee rate for base token */
     base: PercentDecimal;
+    /** Fee rate for quote token */
     quote: PercentDecimal;
   };
 }
