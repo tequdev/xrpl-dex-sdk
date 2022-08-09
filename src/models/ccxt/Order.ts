@@ -1,6 +1,6 @@
 import { Trade } from 'ccxt';
 import { MarketSymbol } from '../common';
-import Fee from './Fee';
+import { Fee } from '.';
 
 export enum OrderStatus {
   Open = 'open',

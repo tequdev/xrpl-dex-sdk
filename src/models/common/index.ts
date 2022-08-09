@@ -15,6 +15,11 @@ export type MarketSymbol = string;
  */
 export type BigNumberish = BigNumber | number | string;
 
+export type PercentDecimal = number;
+
+// Drops are 0.000001 XRP
+export type Drops = BigNumberish;
+
 /**
  * Enumerations
  */
@@ -33,4 +38,11 @@ export enum RippleNetwork {
  */
 export interface BaseParams {
   network?: RippleNetwork;
+}
+
+/**
+ * Responses
+ */
+export interface BaseResponse {
+  info: unknown;
 }
