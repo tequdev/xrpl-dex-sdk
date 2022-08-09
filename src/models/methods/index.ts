@@ -6,5 +6,6 @@ export * from './fetchOrderBook';
 export * from './fetchOrderBooks';
 export * from './fetchStatus';
 export * from './fetchTradingFee';
+export * from './fetchTradingFees';
 export * from './fetchTransactionFee';
 export * from './fetchTransactionFees';

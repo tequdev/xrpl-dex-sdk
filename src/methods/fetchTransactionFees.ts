@@ -3,9 +3,8 @@ import { CurrencyCode, FetchTransactionFeesParams, FetchTransactionFeesResponse,
 import fetchCurrencies from './fetchCurrencies';
 
 /**
- * Returns information regarding {@link ExchangeTransactionFees} from either the info
- * hardcoded in the exchange instance or the API, if available. Returns an
- * {@link FetchTransactionFeesResponse}.
+ * Returns information about fees incurred for performing transactions with a
+ * list of currencies. Returns a {@link FetchTransactionFeesResponse}.
  *
  * @category Methods
  */

@@ -3,9 +3,8 @@ import { FetchTradingFeeResponse, MarketSymbol } from '../models';
 import fetchMarkets from './fetchMarkets';
 
 /**
- * Returns information regarding {@link ExchangeTradingFee} from either the info
- * hardcoded in the exchange instance or the API, if available. Returns an
- * {@link FetchTradingFeeResponse}.
+ * Returns information about the fees incurred while trading on given market.
+ * Returns a {@link FetchTradingFeeResponse}.
  *
  * @category Methods
  */
