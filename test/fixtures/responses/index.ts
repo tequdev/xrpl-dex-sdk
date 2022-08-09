@@ -5,6 +5,7 @@ import fetchMarkets from './fetchMarkets.json';
 import fetchOrderBook from './fetchOrderBook.json';
 import fetchOrderBooks from './fetchOrderBooks.json';
 import fetchStatus from './fetchStatus.json';
+import fetchTradingFee from './fetchTradingFee.json';
 import fetchTransactionFee from './fetchTransactionFee.json';
 import fetchTransactionFees from './fetchTransactionFees.json';
 
@@ -20,6 +21,7 @@ const responses = {
   fetchOrderBook,
   fetchOrderBooks,
   fetchStatus,
+  fetchTradingFee,
   fetchTransactionFee,
   fetchTransactionFees,
 };

@@ -32,12 +32,16 @@ export interface TransactionFee {
  * This is returned by `fetchTradingFee(s)`
  */
 export interface TradingFee {
-  [symbol: MarketSymbol]: {
-    /** Unified Market Symbol */
-    symbol: MarketSymbol;
-    /** Fee rate for base token */
-    base: PercentDecimal;
-    /** Fee rate for quote token */
-    quote: PercentDecimal;
-  };
+  /** Unified Market Symbol */
+  symbol: MarketSymbol;
+  /** Fee rate for base token */
+  base: PercentDecimal;
+  /** Fee rate for quote token */
+  quote: PercentDecimal;
+  /** Whether the fees are a percentage or flat rate */
+  percentage: true;
+  /** Issuer for the base token */
+  baseIssuer?: AccountAddress;
+  /** Issuer for the quote token */
+  quoteIssuer?: AccountAddress;
 }
