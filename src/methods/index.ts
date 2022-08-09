@@ -1,5 +1,6 @@
 import createOrder from './createOrder';
 import fetchCurrencies from './fetchCurrencies';
+import fetchFees from './fetchFees';
 import fetchIssuers from './fetchIssuers';
 import fetchMarkets from './fetchMarkets';
 import fetchOrderBook from './fetchOrderBook';
@@ -13,6 +14,7 @@ import fetchTransactionFees from './fetchTransactionFees';
 export {
   createOrder,
   fetchCurrencies,
+  fetchFees,
   fetchIssuers,
   fetchMarkets,
   fetchOrderBook,

@@ -45,3 +45,11 @@ export interface TradingFee {
   /** Issuer for the quote token */
   quoteIssuer?: AccountAddress;
 }
+
+/**
+ * This is returned by `fetchFees`
+ */
+export interface FeeSchedule {
+  transactions: TransactionFee[];
+  trading: TradingFee[];
+}

@@ -1,5 +1,6 @@
 import createSellOrder from './createSellOrder.json';
 import fetchCurrencies from './fetchCurrencies.json';
+import fetchFees from './fetchFees.json';
 import fetchIssuers from './fetchIssuers.json';
 import fetchMarkets from './fetchMarkets.json';
 import fetchOrderBook from './fetchOrderBook.json';
@@ -17,6 +18,7 @@ const createOrder = {
 const responses = {
   createOrder,
   fetchCurrencies,
+  fetchFees,
   fetchIssuers,
   fetchMarkets,
   fetchOrderBook,

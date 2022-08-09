@@ -1,5 +1,6 @@
 export * from './createOrder';
 export * from './fetchCurrencies';
+export * from './fetchFees';
 export * from './fetchIssuers';
 export * from './fetchMarkets';
 export * from './fetchOrderBook';
