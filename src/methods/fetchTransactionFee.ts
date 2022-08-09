@@ -22,13 +22,18 @@ async function fetchTransactionFee(
 
   const transferRates: TransactionFee['transfer'] = {};
 
-  Object.keys(currencies).forEach((currencyKey) => {
-    if (currencyKey === code) {
-      currencies[currencyKey].forEach((currency) => {
-        if (params.issuer && params.issuer !== currency.issuer) return;
+  const currency = currencies[code];
 
-        transferRates[currency.issuer] = currency.fee || 0;
-      });
+  // TODO: proper error response
+  if (!currency) return;
+
+  currency.forEach(({ fee, issuer }) => {
+    if (params.issuer) {
+      if (params.issuer === issuer) {
+        transferRates[issuer] = fee || 0;
+      }
+    } else {
+      transferRates[issuer] = fee || 0;
     }
   });
 
@@ -36,7 +41,7 @@ async function fetchTransactionFee(
     code,
     current: parseInt(feesResult.drops.open_ledger_fee),
     transfer: transferRates,
-    info: JSON.stringify({ feesResult }),
+    info: JSON.stringify({ feesResult, currency }),
   };
 
   return response;

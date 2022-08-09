@@ -8,11 +8,11 @@ import { fetchTransactionFees } from '../../src/methods';
 import { setupClient, teardownClient } from '../setupClient';
 import { assertResultMatch } from '../testUtils';
 
-describe('fetchTransactionFee', function () {
+describe('fetchTransactionFees', function () {
   beforeEach(setupClient);
   afterEach(teardownClient);
 
-  it('should return the transaction fee for a list of currencies', async function () {
+  it('should return the transaction fees for a list of currencies', async function () {
     this.mockRippled.addResponse('fee', rippled.fee.normal);
 
     // TODO: figure out a cleaner way to do this
