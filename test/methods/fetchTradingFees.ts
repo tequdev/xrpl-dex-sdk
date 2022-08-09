@@ -12,7 +12,7 @@ describe('fetchTradingFees', function () {
   beforeEach(setupClient);
   afterEach(teardownClient);
 
-  it('should return the trading fees for a given currency', async function () {
+  it('should return the trading fees for all markets', async function () {
     this.mockRippled.addResponse('fee', rippled.fee.normal);
 
     // TODO: figure out a cleaner way to do this
