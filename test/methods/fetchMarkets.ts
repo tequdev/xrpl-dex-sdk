@@ -6,7 +6,7 @@ import rippled from '../fixtures/rippled';
 
 import { fetchMarkets } from '../../src/methods';
 import { Markets } from '../../src/models';
-import { setupClient, teardownClient } from '../setupClient';
+import { setupClient, teardownClient } from '../setupUnitTest';
 import { assertResultMatch } from '../testUtils';
 import serverUrl from '../serverUrl';
 

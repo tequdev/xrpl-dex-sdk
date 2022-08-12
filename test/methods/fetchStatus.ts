@@ -5,7 +5,7 @@ import rippled from '../fixtures/rippled';
 
 import { fetchStatus } from '../../src/methods';
 import { FetchStatusResponse } from '../../src/models';
-import { setupClient, teardownClient } from '../setupClient';
+import { setupClient, teardownClient } from '../setupUnitTest';
 import { assertResultMatch } from '../testUtils';
 
 describe('fetchStatus', function () {

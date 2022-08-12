@@ -7,12 +7,11 @@ import rippled from '../fixtures/rippled';
 
 import { createOrder } from '../../src/methods';
 import { Order, OrderSide, OrderType } from '../../src/models';
-import { setupClient, teardownClient } from '../setupClient';
+import { setupClient, teardownClient } from '../setupUnitTest';
 import { assertResultMatch } from '../testUtils';
-import serverUrl from '../serverUrl';
 
 describe('createOrder', function () {
-  beforeEach(_.partial(setupClient, serverUrl));
+  beforeEach(setupClient);
   afterEach(teardownClient);
 
   it('should create a Sell Order', async function () {

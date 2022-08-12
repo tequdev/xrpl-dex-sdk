@@ -1,3 +1,4 @@
+import cancelOrder from './cancelOrder.json';
 import createSellOrder from './createSellOrder.json';
 import fetchCurrencies from './fetchCurrencies.json';
 import fetchFees from './fetchFees.json';
@@ -16,6 +17,7 @@ const createOrder = {
 };
 
 const responses = {
+  cancelOrder,
   createOrder,
   fetchCurrencies,
   fetchFees,
