@@ -6,7 +6,7 @@ import rippled from '../fixtures/rippled';
 
 import { fetchCurrencies } from '../../src/methods';
 import { Currencies } from '../../src/models';
-import { setupClient, teardownClient } from '../setupUnitTest';
+import { setupClient, teardownClient } from '../setupClient';
 import { assertResultMatch } from '../testUtils';
 
 describe('fetchCurrencies', function () {

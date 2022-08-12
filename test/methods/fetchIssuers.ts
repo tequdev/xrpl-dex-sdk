@@ -5,7 +5,7 @@ import responses from '../fixtures/responses';
 
 import { fetchIssuers } from '../../src/methods';
 import { Issuers } from '../../src/models';
-import { setupClient, teardownClient } from '../setupUnitTest';
+import { setupClient, teardownClient } from '../setupClient';
 import { assertResultMatch } from '../testUtils';
 import serverUrl from '../serverUrl';
 

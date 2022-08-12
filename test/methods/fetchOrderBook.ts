@@ -6,7 +6,7 @@ import rippled from '../fixtures/rippled';
 
 import { fetchOrderBook } from '../../src/methods';
 import { FetchOrderBookResponse } from '../../src/models';
-import { setupClient, teardownClient } from '../setupUnitTest';
+import { setupClient, teardownClient } from '../setupClient';
 import { assertResultMatch } from '../testUtils';
 
 describe('fetchOrderBook', function () {

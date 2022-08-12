@@ -5,7 +5,7 @@ import responses from '../fixtures/responses';
 import rippled from '../fixtures/rippled';
 
 import { fetchTradingFee } from '../../src/methods';
-import { setupClient, teardownClient } from '../setupUnitTest';
+import { setupClient, teardownClient } from '../setupClient';
 import { assertResultMatch } from '../testUtils';
 
 describe('fetchTradingFee', function () {

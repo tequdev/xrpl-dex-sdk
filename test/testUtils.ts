@@ -100,8 +100,8 @@ export function ignoreWebSocketDisconnect(error: Error): void {
   throw error;
 }
 
-const masterAccount = 'rhFDFxjpVHBZe69jw4TvFouPMdMRkXMkgd';
-const masterSecret = 'ssSTL8XLsP3xmjtghETNnnriC5Xtd';
+const masterAccount = 'rG2upzWTq1kFDVWSHjsoZ3FSiJNWP3ANpR';
+const masterSecret = 'spuZqrBF6SV9TyKJriggFV63Q46cd';
 
 export async function ledgerAccept(client: Client): Promise<void> {
   const request = { command: 'ledger_accept' };

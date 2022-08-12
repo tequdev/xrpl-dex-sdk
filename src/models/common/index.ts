@@ -4,6 +4,7 @@ import BigNumber from 'bignumber.js';
  * Aliases
  */
 export type AccountAddress = string;
+export type Sequence = string;
 
 export type RippleUrl = string;
 

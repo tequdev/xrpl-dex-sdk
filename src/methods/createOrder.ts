@@ -9,7 +9,6 @@ import {
   Wallet,
 } from 'xrpl';
 import { Amount } from 'xrpl/dist/npm/models/common';
-import { hashOfferId } from 'xrpl/dist/npm/utils/hashes';
 import { REFERENCE_TX_COST } from '../constants';
 import { CreateOrderParams, MarketSymbol, Order, OrderSide, OrderStatus, OrderType } from '../models';
 import { offerCreateFlagsToTimeInForce } from '../utils';
@@ -112,7 +111,7 @@ async function createOrder(
   let average: number = 0;
 
   const response: Order = {
-    id: hashOfferId(wallet.classicAddress, offerCreateTxResponse.result.Sequence || 0),
+    id: (offerCreateTxResponse.result.Sequence || 0).toString(),
     datetime: rippleTimeToISOTime(offerCreateTxResponse.result.date || 0),
     timestamp: rippleTimeToUnixTime(offerCreateTxResponse.result.date || 0),
     lastTradeTimestamp,
