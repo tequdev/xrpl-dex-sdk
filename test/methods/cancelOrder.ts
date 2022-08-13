@@ -4,17 +4,15 @@ import 'mocha';
 import { Client } from 'xrpl';
 
 import requests from '../fixtures/requests';
-import responses from '../fixtures/responses';
 
-import { createOrder } from '../../src/methods';
+import { cancelOrder, createOrder } from '../../src/methods';
 import { Order, OrderSide, OrderType } from '../../src/models';
 import { teardownRemoteClient } from '../setupClient';
 import networks from '../../src/networks';
-import { assertResultMatch } from '../testUtils';
 
-const TIMEOUT = 10000;
+const TIMEOUT = 20000;
 
-describe('createOrder', function () {
+describe('cancelOrder', function () {
   this.timeout(TIMEOUT);
 
   beforeEach(async function (this) {
@@ -23,7 +21,7 @@ describe('createOrder', function () {
   });
   afterEach(teardownRemoteClient);
 
-  it('should create a Buy Order', async function () {
+  it('should create and then cancel an Order', async function () {
     const { symbol, side, type, amount, price, params } = requests.createOrder.buy;
     const newOrder: Order = await createOrder.call(
       this.client,
@@ -37,8 +35,9 @@ describe('createOrder', function () {
 
     assert(typeof newOrder !== 'undefined');
 
-    const { id, datetime, timestamp, fee, info, ...expectedResponse } = responses.createOrder.buy;
+    const canceledOrder = await cancelOrder.call(this.client, newOrder.id, { wallet_secret: params.wallet_secret });
 
-    assertResultMatch(newOrder, { ...newOrder, ...expectedResponse });
+    assert(typeof canceledOrder !== 'undefined');
+    assert(canceledOrder.id === newOrder.id);
   });
 });

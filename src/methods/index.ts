@@ -1,3 +1,4 @@
+import cancelOrder from './cancelOrder';
 import createOrder from './createOrder';
 import fetchCurrencies from './fetchCurrencies';
 import fetchFees from './fetchFees';
@@ -12,6 +13,7 @@ import fetchTransactionFee from './fetchTransactionFee';
 import fetchTransactionFees from './fetchTransactionFees';
 
 export {
+  cancelOrder,
   createOrder,
   fetchCurrencies,
   fetchFees,

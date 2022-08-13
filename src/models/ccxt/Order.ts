@@ -28,6 +28,7 @@ export enum OrderSide {
 }
 
 export default interface Order {
+  /** The Offer's Sequence number (as a string) */
   id: string;
   clientOrderId?: string;
   datetime: string;
@@ -46,5 +47,6 @@ export default interface Order {
   cost: string | number;
   trades: Trade[];
   fee?: Fee;
+  /** Raw XRPL responses as JSON strings */
   info: any;
 }

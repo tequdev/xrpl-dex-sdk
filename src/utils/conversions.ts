@@ -100,3 +100,19 @@ export const offerCreateFlagsToTimeInForce = (tx: OfferCreate): OrderTimeInForce
     return OrderTimeInForce.PostOnly;
   }
 };
+
+export const stringToInt = (input: string): number | undefined => {
+  try {
+    return parseInt(input);
+  } catch (err) {
+    return;
+  }
+};
+
+export const stringToFloat = (input: string): number | undefined => {
+  try {
+    return parseFloat(input);
+  } catch (err) {
+    return;
+  }
+};

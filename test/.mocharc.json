@@ -10,6 +10,6 @@
   "recursive": true,
   "file": [],
   "ui": "bdd",
-  "watch-files": ["src/**/*.ts", "test/**/*.ts"],
-  "watch-ignore": ["test/node_modules/**/*", "test/vendor/**/*"]
+  "watch-files": ["./src/**/*.ts", "./test/**/*.ts"],
+  "watch-ignore": ["./test/node_modules/**/*", "./test/vendor/**/*"]
 }
