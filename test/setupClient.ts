@@ -3,7 +3,12 @@
 import { Client, BroadcastClient } from 'xrpl';
 
 import createMockRippled from './createMockRippled';
+import serverUrl from './serverUrl';
 import { getFreePort } from './testUtils';
+
+/**
+ * Local Tests
+ */
 
 async function setupMockRippledConnection(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Typing is too complicated
@@ -62,3 +67,17 @@ function teardownClient(this: any, done: () => void): void {
 }
 
 export { setupClient, teardownClient, setupBroadcast, createMockRippled };
+
+/**
+ * Remote Client
+ */
+
+export async function teardownRemoteClient(this: Mocha.Context): Promise<void> {
+  this.client.removeAllListeners();
+  this.client.disconnect();
+}
+
+export async function setupRemoteClient(this: Mocha.Context, server = serverUrl): Promise<void> {
+  this.client = new Client(server);
+  await this.client.connect();
+}

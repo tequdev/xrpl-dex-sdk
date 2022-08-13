@@ -6,7 +6,7 @@
   "require": "ts-node/register",
   "reporter": "spec",
   "slow": 500,
-  "timeout": 10000,
+  "timeout": 5000,
   "recursive": true,
   "file": [],
   "ui": "bdd",

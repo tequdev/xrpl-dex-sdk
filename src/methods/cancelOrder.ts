@@ -1,10 +1,6 @@
 import { BadRequest } from 'ccxt';
 import _ from 'lodash';
-import {
-  Client,
-  // OfferCancel,
-  Wallet,
-} from 'xrpl';
+import { Client, OfferCancel, Wallet } from 'xrpl';
 import { CancelOrderParams, CancelOrderResponse } from '../models';
 import { stringToInt } from '../utils';
 
@@ -21,12 +17,7 @@ async function cancelOrder(
   /** Exchange-specific parameters */
   params: CancelOrderParams
 ): Promise<CancelOrderResponse | undefined> {
-  const {
-    //   last_ledger_sequence,
-    wallet_private_key,
-    wallet_public_key,
-    wallet_secret,
-  } = params;
+  const { wallet_private_key, wallet_public_key, wallet_secret } = params;
 
   const sequence = stringToInt(id);
 
@@ -42,33 +33,17 @@ async function cancelOrder(
     ? Wallet.fromSecret(wallet_secret)
     : new Wallet(wallet_public_key as string, wallet_private_key as string);
 
-  const offerCancelTxn: any = {
+  const offerCancel: OfferCancel = {
     TransactionType: 'OfferCancel',
     Account: wallet.classicAddress,
-    OfferSequence: 30228805,
-    LastLedgerSequence: 30228884,
+    OfferSequence: sequence,
   };
 
-  //   const offerCancelTxn: OfferCancel = {
-  //     TransactionType: 'OfferCancel',
-  //     Account: wallet.classicAddress,
-  //     OfferSequence: sequence,
-  //     LastLedgerSequence: last_ledger_sequence,
-  //   };
-
-  const offerCancelTxnFilled = await this.autofill(offerCancelTxn);
-
-  const offerCancelTxnSigned = wallet.sign(offerCancelTxnFilled);
-
-  console.log(offerCancelTxnSigned.tx_blob);
-
-  const offerCancelResult = await this.submitAndWait(offerCancelTxnSigned.tx_blob);
-
-  console.log(offerCancelResult);
+  const offerCancelResult = await this.submitAndWait(offerCancel, { autofill: true, wallet });
 
   const response: CancelOrderResponse = {
     id,
-    info: JSON.stringify({ OfferCancel: offerCancelResult }),
+    info: { OfferCancel: offerCancelResult },
   };
 
   return response;

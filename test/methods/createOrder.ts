@@ -1,42 +1,44 @@
 import _ from 'lodash';
-import 'mocha';
-
-// import requests from '../../fixtures/requests';
-// import responses from '../../fixtures/responses';
-// import rippled from '../../fixtures/rippled';
-
-// import { createOrder } from '../../../src/methods';
-// import { Order, OrderSide, OrderType } from '../../../src/models';
-import { setupClient, teardownClient } from '../setupClient';
-// import { assertResultMatch } from '../../testUtils';
-// import serverUrl from '../../serverUrl';
-import networks from '../../src/networks';
 import { assert } from 'chai';
+import 'mocha';
+import { Client } from 'xrpl';
+
+import requests from '../fixtures/requests';
+import responses from '../fixtures/responses';
+
+import { createOrder } from '../../src/methods';
+import { Order, OrderSide, OrderType } from '../../src/models';
+import { teardownRemoteClient } from '../setupClient';
+import networks from '../../src/networks';
+import { assertResultMatch } from '../testUtils';
+
+const TIMEOUT = 10000;
 
 describe('createOrder', function () {
-  beforeEach(_.partial(setupClient, networks.testnet.websockets));
-  afterEach(teardownClient);
+  this.timeout(TIMEOUT);
 
-  it('should connect to the testnet', function () {
-    assert(this.client.isConnected());
+  beforeEach(async function (this) {
+    this.client = new Client(networks.testnet.websockets);
+    await this.client.connect();
   });
+  afterEach(teardownRemoteClient);
 
-  it('should create a Sell Order', async function () {
-    // this.mockRippled.addResponse('account_info', rippled.account_info.normal);
-    // this.mockRippled.addResponse('server_info', rippled.server_info.normal);
-    // this.mockRippled.addResponse('ledger', rippled.ledger.normal);
-    // this.mockRippled.addResponse('submit', rippled.offer_create.sell);
-    // this.mockRippled.addResponse('tx', rippled.offer_create.sell);
-    // const { symbol, side, type, amount, price, params } = requests.createOrder.sell;
-    // const response: Order = await createOrder.call(
-    //   this.client,
-    //   symbol,
-    //   side as OrderSide,
-    //   type as OrderType,
-    //   amount,
-    //   price,
-    //   params
-    // );
-    // assertResultMatch(response, responses.createOrder.sell);
+  it('should create a Buy Order', async function () {
+    const { symbol, side, type, amount, price, params } = requests.createOrder.buy;
+    const newOrder: Order = await createOrder.call(
+      this.client,
+      symbol,
+      side as OrderSide,
+      type as OrderType,
+      amount,
+      price,
+      params
+    );
+
+    assert(typeof newOrder !== 'undefined');
+
+    const { id, datetime, timestamp, fee, info, ...expectedResponse } = responses.createOrder.buy;
+
+    assertResultMatch(newOrder, { ...newOrder, ...expectedResponse });
   });
 });
