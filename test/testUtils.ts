@@ -100,8 +100,8 @@ export function ignoreWebSocketDisconnect(error: Error): void {
   throw error;
 }
 
-const masterAccount = 'rhFDFxjpVHBZe69jw4TvFouPMdMRkXMkgd'
-const masterSecret = 'ssSTL8XLsP3xmjtghETNnnriC5Xtd'
+const masterAccount = 'rG2upzWTq1kFDVWSHjsoZ3FSiJNWP3ANpR';
+const masterSecret = 'spuZqrBF6SV9TyKJriggFV63Q46cd';
 
 export async function ledgerAccept(client: Client): Promise<void> {
   const request = { command: 'ledger_accept' };
@@ -132,6 +132,30 @@ export async function fundAccount(client: Client, wallet: Wallet): Promise<void>
   await ledgerAccept(client);
   const signedTx = _.omit(response.result.tx_json, 'hash');
   await verifySubmittedTransaction(client, signedTx as Transaction);
+}
+
+export async function fundTestnetAccount(client: Client, wallet: Wallet): Promise<void> {
+  const payment: Payment = {
+    TransactionType: 'Payment',
+    Account: masterAccount,
+    Destination: wallet.classicAddress,
+    // 2 times the amount needed for a new account (20 XRP)
+    Amount: '200000000',
+  };
+
+  const response = await client.submit(payment, {
+    wallet: Wallet.fromSeed(masterSecret),
+  });
+
+  if (response.status !== 'tesSUCCESS') {
+    // eslint-disable-next-line no-console -- happens only when something goes wrong
+    console.log(response);
+    assert.fail(`Response not successful, ${response.status}`);
+  }
+  console.log(response);
+  // await ledgerAccept(client);
+  // const signedTx = _.omit(response.result.tx_json, 'hash');
+  // await verifySubmittedTransaction(client, signedTx as Transaction);
 }
 
 export async function generateFundedWallet(client: Client): Promise<Wallet> {

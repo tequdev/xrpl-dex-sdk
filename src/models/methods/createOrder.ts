@@ -1,8 +1,14 @@
 import { OfferCreateFlagsInterface } from 'xrpl';
 import { Memo } from 'xrpl/dist/npm/models/common';
-import { AccountAddress } from '../common';
+import { Order } from '../ccxt';
+import { AccountAddress, BaseParams } from '../common';
 
-export interface CreateOrderParams {
+/**
+ * Request parameters for a createOrder call
+ *
+ * @category Parameters
+ */
+export interface CreateOrderParams extends BaseParams {
   /** Secret from which to derive the Ripple wallet making the order */
   wallet_secret?: string;
   /** The public key of the Ripple wallet making the order. */
@@ -20,3 +26,10 @@ export interface CreateOrderParams {
   /** Order behavior (via XRPL OfferCreateFlags) */
   flags?: OfferCreateFlagsInterface;
 }
+
+/**
+ * Expected response from a createOrder call
+ *
+ * @category Responses
+ */
+export type CreateOrderResponse = Order;

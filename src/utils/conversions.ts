@@ -1,35 +1,59 @@
-import { Order, Trade } from 'ccxt';
-import { OfferCreate, OfferCreateFlags, setTransactionFlagsToNumber } from 'xrpl';
+import { Order } from 'ccxt';
+import {
+  OfferCreate,
+  OfferCreateFlags,
+  rippleTimeToISOTime,
+  rippleTimeToUnixTime,
+  setTransactionFlagsToNumber,
+  TxResponse,
+} from 'xrpl';
 import { Amount } from 'xrpl/dist/npm/models/common';
 import { Offer, OfferFlags } from 'xrpl/dist/npm/models/ledger';
-import { CurrencyCode, MarketSymbol, OrderStatus, OrderTimeInForce, OrderType } from '../models';
+import { CurrencyCode, MarketSymbol, OrderSide, OrderStatus, OrderTimeInForce, OrderType, Trade } from '../models';
 import { parseCurrencyAmount } from './numbers';
 
-export const xrplOfferToCcxtTrade = (offer: Offer): Trade => {
-  // Price in quote currency (TakerGets) (float)
-  const price = parseCurrencyAmount(offer.TakerGets);
-  // Ordered amount of base currency (TakerPays) (float)
-  const amount = parseCurrencyAmount(offer.TakerPays);
+export const xrplOfferToCcxtTrade = (offer: Offer, transaction: TxResponse, offerPrevious?: Offer): Trade => {
+  const tradeSide = offer.Flags === OfferFlags.lsfSell ? OrderSide.Sell : OrderSide.Buy;
+  const tradeBase = tradeSide === OrderSide.Buy ? offer.TakerPays : offer.TakerGets;
+  const tradeBasePrevious = offerPrevious
+    ? tradeSide === OrderSide.Buy
+      ? offerPrevious.TakerPays
+      : offerPrevious.TakerGets
+    : '0';
+
+  const tradeQuote = tradeSide === OrderSide.Buy ? offer.TakerGets : offer.TakerPays;
+  const tradeQuotePrevious = offerPrevious
+    ? tradeSide === OrderSide.Buy
+      ? offerPrevious.TakerGets
+      : offerPrevious.TakerPays
+    : '0';
+
+  const tradeSymbol = getMarketSymbol(tradeBase, tradeQuote);
+
+  const tradeAmount = parseCurrencyAmount(tradeBase, tradeBasePrevious);
+  const tradePrice = parseCurrencyAmount(tradeQuote, tradeQuotePrevious);
+
+  const feeCost = stringToInt(transaction.result.Fee || '0') || 0;
 
   const trade: Trade = {
     id: offer.Sequence.toString(),
-    datetime: '',
-    timestamp: 0,
-    symbol: getMarketSymbol(offer.TakerPays, offer.TakerGets),
-    type: OrderType.Limit, // TODO: get this data
-    side: offer.Flags === OfferFlags.lsfSell ? 'sell' : 'buy',
-    price,
-    amount,
-    cost: price * amount,
+    order: offer.Sequence.toString(),
+    datetime: rippleTimeToISOTime(transaction.result.date || 0),
+    timestamp: rippleTimeToUnixTime(transaction.result.date || 0),
+    symbol: tradeSymbol,
+    type: OrderType.Limit,
+    side: tradeSide,
+    amount: tradeAmount.toString(),
+    price: tradePrice.toString(),
+    takerOrMaker: 'maker',
+    cost: (tradeAmount * tradePrice + feeCost).toString(),
     fee: {
       currency: 'XRP',
-      cost: 0,
-      rate: 0,
-      type: 'maker', // TODO: get this data
+      cost: feeCost,
     },
-    takerOrMaker: 'maker', // TODO: get this data
-    info: JSON.stringify(offer),
+    info: { offer, transaction },
   };
+
   return trade;
 };
 
@@ -98,5 +122,21 @@ export const offerCreateFlagsToTimeInForce = (tx: OfferCreate): OrderTimeInForce
     return OrderTimeInForce.ImmediateOrCancel;
   } else if ((flags & OfferCreateFlags.tfPassive) === OfferCreateFlags.tfPassive) {
     return OrderTimeInForce.PostOnly;
+  }
+};
+
+export const stringToInt = (input: string): number | undefined => {
+  try {
+    return parseInt(input);
+  } catch (err) {
+    return;
+  }
+};
+
+export const stringToFloat = (input: string): number | undefined => {
+  try {
+    return parseFloat(input);
+  } catch (err) {
+    return;
   }
 };

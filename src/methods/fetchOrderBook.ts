@@ -3,41 +3,61 @@ import { Client, BookOffersRequest } from 'xrpl';
 import { OfferFlags } from 'xrpl/dist/npm/models/ledger';
 import { TakerAmount } from 'xrpl/dist/npm/models/methods/bookOffers';
 import { DEFAULT_LIMIT } from '../constants';
-import { OrderBookAsk, OrderBookBid, FetchOrderBookRequest, FetchOrderBookResponse } from '../models';
+import {
+  OrderBookAsk,
+  OrderBookBid,
+  MarketSymbol,
+  FetchOrderBookParams,
+  OrderBook,
+  FetchOrderBookResponse,
+} from '../models';
 import { parseCurrencyAmount, parseMarketSymbol } from '../utils';
 
+/**
+ * Retrieves order book data for a single market pair. Returns an
+ * {@link FetchOrderBookResponse}.
+ *
+ * @category Methods
+ */
 async function fetchOrderBook(
   this: Client,
-  { symbol, limit, params }: FetchOrderBookRequest
+  /** Token pair (called Unified Market Symbol in CCXT) */
+  symbol: MarketSymbol,
+  /** Number of results to return */
+  limit: number = DEFAULT_LIMIT,
+  /** Parameters specific to the exchange API endpoint */
+  params: FetchOrderBookParams = {}
 ): Promise<FetchOrderBookResponse> {
   const [base, quote] = parseMarketSymbol(symbol);
+
+  const { taker, taker_gets_issuer, taker_pays_issuer, ledger_hash, ledger_index } = params;
 
   // TODO: fetch the issuer info from the cache produced by `loadMarkets` (if present)
 
   const takerPays: TakerAmount = {
     currency: quote,
-    issuer: params.takerPaysIssuer,
+    issuer: taker_pays_issuer,
   };
 
   const takerGets: TakerAmount = {
     currency: base,
-    issuer: params.takerGetsIssuer,
+    issuer: taker_gets_issuer,
   };
 
-  const xrplRequest: BookOffersRequest = {
+  const bookOffersRequest: BookOffersRequest = {
     command: 'book_offers',
     taker_pays: takerPays,
     taker_gets: takerGets,
-    limit: limit ?? DEFAULT_LIMIT,
-    ledger_index: params.ledgerIndex,
-    ledger_hash: params.ledgerHash,
-    taker: params.taker,
+    limit,
+    ledger_index,
+    ledger_hash,
+    taker,
   };
 
-  const offersResults = await this.requestAll(xrplRequest);
+  const bookOffersResponse = await this.requestAll(bookOffersRequest);
 
   // Format XRPL response
-  const orders = _.flatMap(offersResults, (offersResult) => offersResult.result.offers);
+  const orders = _.flatMap(bookOffersResponse, (offersResult) => offersResult.result.offers);
 
   // Create bids/asks arrays
   const bids: OrderBookBid[] = [];
@@ -52,19 +72,19 @@ async function fetchOrderBook(
     }
   });
 
-  const lastOffers = offersResults[offersResults.length - 1].result.offers;
+  const lastOffers = bookOffersResponse[bookOffersResponse.length - 1].result.offers;
 
   // TODO: confirm this is usable as a nonce
   const nonce = lastOffers[lastOffers.length - 1].Sequence;
 
-  const ccxtResponse: FetchOrderBookResponse = {
+  const response: OrderBook = {
     symbol,
     nonce,
     bids,
     asks,
   };
 
-  return ccxtResponse;
+  return response;
 }
 
 export default fetchOrderBook;

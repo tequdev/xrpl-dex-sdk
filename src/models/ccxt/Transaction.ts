@@ -1,9 +1,11 @@
 import { AccountAddress, CurrencyCode } from '../common';
-import Fee from './Fee';
+import { Fee } from './Fees';
 
 export enum TransactionType {
   Deposit = 'deposit',
   Withdrawal = 'withdrawal',
+  Transfer = 'transfer',
+  Trade = 'trade',
 }
 
 export enum TransactionStatus {

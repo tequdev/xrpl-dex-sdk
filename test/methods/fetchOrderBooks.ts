@@ -16,7 +16,11 @@ describe('fetchOrderBooks', function () {
   it('should return an array of OrderBook objects', async function () {
     this.mockRippled.addResponse('book_offers', rippled.book_offers.usdBtc);
     this.mockRippled.addResponse('book_offers', rippled.book_offers.btcUsd);
-    const response: FetchOrderBooksResponse = await fetchOrderBooks.call(this.client, requests.fetchOrderBooks);
+
+    const { symbols, limit, params } = requests.fetchOrderBooks;
+
+    const response: FetchOrderBooksResponse = await fetchOrderBooks.call(this.client, symbols, limit, params);
+
     assertResultMatch(response, responses.fetchOrderBooks);
   });
 });

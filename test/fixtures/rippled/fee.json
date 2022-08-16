@@ -1,0 +1,30 @@
+{
+  "id": "fee_websocket_example",
+  "result": {
+    "current_ledger_size": "93",
+    "current_queue_size": "0",
+    "drops": {
+      "base_fee": "10",
+      "median_fee": "5000",
+      "minimum_fee": "10",
+      "open_ledger_fee": "10"
+    },
+    "expected_ledger_size": "288",
+    "ledger_current_index": 73501472,
+    "levels": {
+      "median_level": "128000",
+      "minimum_level": "256",
+      "open_ledger_level": "256",
+      "reference_level": "256"
+    },
+    "max_queue_size": "5760"
+  },
+  "status": "success",
+  "type": "response",
+  "warnings": [
+    {
+      "id": 2001,
+      "message": "This is a clio server. clio only serves validated data. If you want to talk to rippled, include 'ledger_index':'current' in your request"
+    }
+  ]
+}

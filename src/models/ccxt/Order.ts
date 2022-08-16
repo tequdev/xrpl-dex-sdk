@@ -1,6 +1,5 @@
-import { Trade } from 'ccxt';
 import { MarketSymbol } from '../common';
-import Fee from './Fee';
+import { Fee, Trade } from '.';
 
 export enum OrderStatus {
   Open = 'open',
@@ -27,7 +26,8 @@ export enum OrderSide {
   Sell = 'sell',
 }
 
-export interface Order {
+export default interface Order {
+  /** The Offer's Sequence number (as a string) */
   id: string;
   clientOrderId?: string;
   datetime: string;
@@ -38,13 +38,14 @@ export interface Order {
   type: string;
   timeInForce?: string;
   side: OrderSide;
+  amount: string | number;
   price?: string | number; // May be empty for Market orders
   average?: string | number;
-  amount: string | number;
   filled: string | number;
   remaining: string | number;
   cost: string | number;
   trades: Trade[];
   fee?: Fee;
+  /** Raw XRPL responses as JSON strings */
   info: any;
 }

@@ -1,4 +1,4 @@
-import { BadRequest, Trade } from 'ccxt';
+import { BadRequest } from 'ccxt';
 import _ from 'lodash';
 import {
   Client,
@@ -9,11 +9,16 @@ import {
   Wallet,
 } from 'xrpl';
 import { Amount } from 'xrpl/dist/npm/models/common';
-import { hashOfferId } from 'xrpl/dist/npm/utils/hashes';
 import { REFERENCE_TX_COST } from '../constants';
-import { CreateOrderParams, MarketSymbol, Order, OrderSide, OrderStatus, OrderType } from '../models';
+import { CreateOrderParams, MarketSymbol, Order, OrderSide, OrderStatus, OrderType, Trade } from '../models';
 import { offerCreateFlagsToTimeInForce } from '../utils';
 
+/**
+ * Creates a new Order on the Ripple dEX. Returns an {@link CreateOrderResponse}
+ * with the newly created Order object.
+ *
+ * @category Methods
+ */
 async function createOrder(
   this: Client,
   /** Token pair (called Unified Market Symbol in CCXT) */
@@ -31,6 +36,17 @@ async function createOrder(
 ): Promise<Order> {
   const [base, quote] = symbol.split('/');
 
+  const {
+    wallet_private_key,
+    wallet_public_key,
+    wallet_secret,
+    taker_gets_issuer,
+    taker_pays_issuer,
+    expiration,
+    memos,
+    flags,
+  } = params;
+
   const creatorGetsCurrency = side === OrderSide.Buy ? base : quote;
   const creatorGetsAmount = amount;
 
@@ -43,7 +59,7 @@ async function createOrder(
       : {
           currency: creatorGetsCurrency,
           value: creatorGetsAmount,
-          issuer: params.taker_pays_issuer || '',
+          issuer: taker_pays_issuer || '',
         };
   const creatorPays: Amount =
     creatorPaysCurrency === 'XRP'
@@ -51,31 +67,34 @@ async function createOrder(
       : {
           currency: creatorPaysCurrency,
           value: creatorPaysAmount,
-          issuer: params.taker_gets_issuer || '',
+          issuer: taker_gets_issuer || '',
         };
 
-  if (!params.wallet_secret && (!params.wallet_public_key || !params.wallet_private_key)) {
+  if (!wallet_secret && (!wallet_public_key || !wallet_private_key)) {
     throw new BadRequest('Must provide either `wallet_secret` or `wallet_public_key` and `wallet_private_key`');
   }
 
-  const wallet = params.wallet_secret
-    ? Wallet.fromSecret(params.wallet_secret)
-    : new Wallet(params.wallet_public_key as string, params.wallet_private_key as string);
+  const wallet = wallet_secret
+    ? Wallet.fromSecret(wallet_secret)
+    : new Wallet(wallet_public_key as string, wallet_private_key as string);
 
-  const offerCreateTx: OfferCreate = {
+  const offerCreate: OfferCreate = {
     TransactionType: 'OfferCreate',
     Account: wallet.classicAddress,
     TakerGets: creatorPays,
     TakerPays: creatorGets,
-    Flags: params.flags,
+    Flags: flags,
   };
 
-  setTransactionFlagsToNumber(offerCreateTx);
+  if (expiration) offerCreate.Expiration = expiration;
+  if (memos) offerCreate.Memos = memos;
 
-  const offerCreateTxPrepared = await this.autofill(offerCreateTx);
-  const offerCreateTxSigned = wallet.sign(offerCreateTxPrepared);
+  setTransactionFlagsToNumber(offerCreate);
 
-  const offerCreateTxResponse = await this.submitAndWait(offerCreateTxSigned.tx_blob);
+  const offerCreateResponse = await this.submitAndWait(offerCreate, {
+    autofill: true,
+    wallet,
+  });
 
   let amountFilled = 0;
   let amountRemaining = parseFloat(creatorGetsAmount);
@@ -91,15 +110,15 @@ async function createOrder(
   // TODO: properly calculate this once Trades logic is complete
   let average: number = 0;
 
-  const response: Order = {
-    id: hashOfferId(wallet.classicAddress, offerCreateTxResponse.result.Sequence || 0),
-    datetime: rippleTimeToISOTime(offerCreateTxResponse.result.date || 0),
-    timestamp: rippleTimeToUnixTime(offerCreateTxResponse.result.date || 0),
+  const newOrder: Order = {
+    id: (offerCreateResponse.result.Sequence || 0).toString(),
+    datetime: rippleTimeToISOTime(offerCreateResponse.result.date || 0),
+    timestamp: rippleTimeToUnixTime(offerCreateResponse.result.date || 0),
     lastTradeTimestamp,
     status,
     symbol,
     type,
-    timeInForce: offerCreateFlagsToTimeInForce(offerCreateTx),
+    timeInForce: offerCreateFlagsToTimeInForce(offerCreate),
     side,
     price: parseFloat(price),
     average,
@@ -110,12 +129,12 @@ async function createOrder(
     trades,
     fee: {
       currency: 'XRP',
-      cost: offerCreateTxResponse.result.Fee ? parseFloat(offerCreateTxResponse.result.Fee) : REFERENCE_TX_COST,
+      cost: offerCreateResponse.result.Fee ? parseFloat(offerCreateResponse.result.Fee) : REFERENCE_TX_COST,
     },
-    info: JSON.stringify({ OfferCreate: offerCreateTxResponse.result }),
+    info: { OfferCreate: offerCreateResponse.result },
   };
 
-  return response;
+  return newOrder;
 }
 
 export default createOrder;
