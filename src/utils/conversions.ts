@@ -125,17 +125,17 @@ export const offerCreateFlagsToTimeInForce = (tx: OfferCreate): OrderTimeInForce
   }
 };
 
-export const stringToInt = (input: string): number | undefined => {
+export const stringToInt = (input?: string): number | undefined => {
   try {
-    return parseInt(input);
+    return input ? parseInt(input) : 0;
   } catch (err) {
     return;
   }
 };
 
-export const stringToFloat = (input: string): number | undefined => {
+export const stringToFloat = (input?: string): number | undefined => {
   try {
-    return parseFloat(input);
+    return input ? parseFloat(input) : 0;
   } catch (err) {
     return;
   }

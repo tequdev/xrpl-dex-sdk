@@ -47,29 +47,6 @@ async function createOrder(
     flags,
   } = params;
 
-  const creatorGetsCurrency = side === OrderSide.Buy ? base : quote;
-  const creatorGetsAmount = amount;
-
-  const creatorPaysCurrency = side === OrderSide.Buy ? quote : base;
-  const creatorPaysAmount = price;
-
-  const creatorGets: Amount =
-    creatorGetsCurrency === 'XRP'
-      ? creatorGetsAmount
-      : {
-          currency: creatorGetsCurrency,
-          value: creatorGetsAmount,
-          issuer: taker_pays_issuer || '',
-        };
-  const creatorPays: Amount =
-    creatorPaysCurrency === 'XRP'
-      ? creatorPaysAmount
-      : {
-          currency: creatorPaysCurrency,
-          value: creatorPaysAmount,
-          issuer: taker_gets_issuer || '',
-        };
-
   if (!wallet_secret && (!wallet_public_key || !wallet_private_key)) {
     throw new BadRequest('Must provide either `wallet_secret` or `wallet_public_key` and `wallet_private_key`');
   }
@@ -78,11 +55,41 @@ async function createOrder(
     ? Wallet.fromSecret(wallet_secret)
     : new Wallet(wallet_public_key as string, wallet_private_key as string);
 
+  const takerGetsCurrency = side === OrderSide.Buy ? quote : base;
+  const takerGetsValue = side === OrderSide.Buy ? price : amount;
+  const takerGetsIssuer = taker_gets_issuer || '';
+
+  const takerPaysCurrency = side === OrderSide.Buy ? base : quote;
+  const takerPaysValue = side === OrderSide.Buy ? amount : price;
+  const takerPaysIssuer = taker_pays_issuer || '';
+
+  if ((takerGetsCurrency !== 'XRP' && !takerGetsIssuer) || (takerPaysCurrency !== 'XRP' && !takerPaysIssuer)) {
+    throw new BadRequest('Non-XRP currencies must specify an issuer');
+  }
+
+  const takerGets: Amount =
+    takerGetsCurrency === 'XRP'
+      ? takerGetsValue
+      : {
+          currency: takerGetsCurrency,
+          issuer: takerGetsIssuer,
+          value: takerGetsValue,
+        };
+
+  const takerPays: Amount =
+    takerPaysCurrency === 'XRP'
+      ? takerPaysValue
+      : {
+          currency: takerPaysCurrency,
+          issuer: takerPaysIssuer,
+          value: takerPaysValue,
+        };
+
   const offerCreate: OfferCreate = {
     TransactionType: 'OfferCreate',
     Account: wallet.classicAddress,
-    TakerGets: creatorPays,
-    TakerPays: creatorGets,
+    TakerGets: takerGets,
+    TakerPays: takerPays,
     Flags: flags,
   };
 
@@ -97,7 +104,7 @@ async function createOrder(
   });
 
   let amountFilled = 0;
-  let amountRemaining = parseFloat(creatorGetsAmount);
+  let amountRemaining = parseFloat(takerPaysValue);
 
   let status = OrderStatus.Open;
 
