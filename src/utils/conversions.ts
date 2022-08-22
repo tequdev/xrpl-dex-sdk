@@ -1,4 +1,4 @@
-import { Order } from 'ccxt';
+import { BaseError, Order } from 'ccxt';
 import {
   OfferCreate,
   OfferCreateFlags,
@@ -9,8 +9,73 @@ import {
 } from 'xrpl';
 import { Amount } from 'xrpl/dist/npm/models/common';
 import { Offer, OfferFlags } from 'xrpl/dist/npm/models/ledger';
-import { CurrencyCode, MarketSymbol, OrderSide, OrderStatus, OrderTimeInForce, OrderType, Trade } from '../models';
+import {
+  CurrencyCode,
+  MarketSymbol,
+  ModifiedNode,
+  OrderSide,
+  OrderStatus,
+  OrderTimeInForce,
+  OrderType,
+  Trade,
+} from '../models';
 import { parseCurrencyAmount } from './numbers';
+
+export const getOrderSideFromTx = (tx: TxResponse['result']) =>
+  tx.Flags === OfferFlags.lsfSell ? OrderSide.Sell : OrderSide.Buy;
+export const getOrderSideFromOffer = (offer: Offer) =>
+  offer.Flags === OfferFlags.lsfSell ? OrderSide.Sell : OrderSide.Buy;
+export const getBaseAmountKey = (side: OrderSide) => (side === OrderSide.Buy ? 'TakerPays' : 'TakerGets');
+export const getQuoteAmountKey = (side: OrderSide) => (side === OrderSide.Buy ? 'TakerGets' : 'TakerPays');
+
+export const getOfferTradeFromModifiedOffer = (
+  id: string,
+  modifiedOffer: ModifiedNode['ModifiedNode'],
+  transaction: TxResponse['result']
+) => {
+  if (!transaction.Sequence) throw new BaseError(`No Sequence number found for transaction ${transaction.hash}`);
+
+  const tradePreviousFields = modifiedOffer.PreviousFields as unknown as Offer;
+  const tradeFinalFields = modifiedOffer.FinalFields as unknown as Offer;
+
+  const tradeSide = transaction.Flags === OfferFlags.lsfSell ? OrderSide.Sell : OrderSide.Buy;
+
+  const tradeBaseAmountKey = tradeSide === OrderSide.Buy ? 'TakerPays' : 'TakerGets';
+  const tradeQuoteAmountKey = tradeSide === OrderSide.Buy ? 'TakerGets' : 'TakerPays';
+
+  // 4. Subtract the FinalFields TakerGets/TakerPays values from the PreviousFields values
+  const tradePreviousBaseAmount = tradePreviousFields[tradeBaseAmountKey];
+  const tradeFinalBaseAmount = tradeFinalFields[tradeBaseAmountKey];
+
+  const tradePreviousQuoteAmount = tradePreviousFields[tradeQuoteAmountKey];
+  const tradeFinalQuoteAmount = tradeFinalFields[tradeQuoteAmountKey];
+
+  const tradeBaseAmount = parseCurrencyAmount(tradeFinalBaseAmount, tradePreviousBaseAmount);
+  const tradeQuoteAmount = parseCurrencyAmount(tradeFinalQuoteAmount, tradePreviousQuoteAmount);
+  const tradePrice = tradeBaseAmount / tradeQuoteAmount;
+
+  // 5. Assemble Trade data from the ModifiedNode's FinalFields object
+  const trade: Trade = {
+    id: transaction.Sequence.toString(),
+    order: id,
+    datetime: rippleTimeToISOTime(transaction.date || 0),
+    timestamp: rippleTimeToUnixTime(transaction.date || 0),
+    symbol: getMarketSymbol(tradeFinalFields[tradeBaseAmountKey], tradeFinalFields[tradeQuoteAmountKey]),
+    type: OrderType.Limit,
+    side: tradeSide,
+    amount: tradeBaseAmount.toString(),
+    price: tradePrice.toString(),
+    takerOrMaker: tradeSide === OrderSide.Buy ? 'taker' : 'maker', // verify this is correct
+    cost: (tradeBaseAmount * tradePrice).toString(),
+    fee: {
+      currency: 'XRP',
+      cost: transaction.Fee || '0',
+    },
+    info: { transaction: transaction },
+  };
+
+  return trade;
+};
 
 export const xrplOfferToCcxtTrade = (offer: Offer, transaction: TxResponse, offerPrevious?: Offer): Trade => {
   const tradeSide = offer.Flags === OfferFlags.lsfSell ? OrderSide.Sell : OrderSide.Buy;
