@@ -1,4 +1,5 @@
 export * from './cancelOrder';
+export * from './createLimitBuyOrder';
 export * from './createOrder';
 export * from './fetchCurrencies';
 export * from './fetchFees';
