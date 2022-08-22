@@ -1,4 +1,5 @@
 import cancelOrder from './cancelOrder';
+import createLimitBuyOrder from './createLimitBuyOrder';
 import createLimitSellOrder from './createLimitSellOrder';
 import createOrder from './createOrder';
 import fetchCurrencies from './fetchCurrencies';
@@ -15,6 +16,7 @@ import fetchTransactionFees from './fetchTransactionFees';
 
 export {
   cancelOrder,
+  createLimitBuyOrder,
   createLimitSellOrder,
   createOrder,
   fetchCurrencies,
