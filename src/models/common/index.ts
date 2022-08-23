@@ -45,5 +45,5 @@ export interface BaseParams {
  * Responses
  */
 export interface BaseResponse {
-  info: unknown;
+  info: any;
 }

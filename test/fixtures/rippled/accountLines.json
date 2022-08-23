@@ -1,0 +1,23 @@
+{
+  "id": 2,
+  "result": {
+    "account": "rpkeJcxB2y5BeAFyycuWwdTTcR3og2a3SR",
+    "ledger_current_index": 30554719,
+    "lines": [
+      {
+        "account": "rMZoAqwRn3BLbmFYL3exNVNVKrceYcNy6B",
+        "balance": "89.825",
+        "currency": "AKT",
+        "limit": "1000000000",
+        "limit_peer": "0",
+        "no_ripple": false,
+        "no_ripple_peer": false,
+        "quality_in": 0,
+        "quality_out": 0
+      }
+    ],
+    "validated": false
+  },
+  "status": "success",
+  "type": "response"
+}
