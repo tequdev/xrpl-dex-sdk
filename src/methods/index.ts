@@ -1,33 +1,16 @@
-import cancelOrder from './cancelOrder';
-import createLimitBuyOrder from './createLimitBuyOrder';
-import createLimitSellOrder from './createLimitSellOrder';
-import createOrder from './createOrder';
-import fetchCurrencies from './fetchCurrencies';
-import fetchFees from './fetchFees';
-import fetchIssuers from './fetchIssuers';
-import fetchMarkets from './fetchMarkets';
-import fetchOrderBook from './fetchOrderBook';
-import fetchOrderBooks from './fetchOrderBooks';
-import fetchStatus from './fetchStatus';
-import fetchTradingFee from './fetchTradingFee';
-import fetchTradingFees from './fetchTradingFees';
-import fetchTransactionFee from './fetchTransactionFee';
-import fetchTransactionFees from './fetchTransactionFees';
-
-export {
-  cancelOrder,
-  createLimitBuyOrder,
-  createLimitSellOrder,
-  createOrder,
-  fetchCurrencies,
-  fetchFees,
-  fetchIssuers,
-  fetchMarkets,
-  fetchOrderBook,
-  fetchOrderBooks,
-  fetchStatus,
-  fetchTradingFee,
-  fetchTradingFees,
-  fetchTransactionFee,
-  fetchTransactionFees,
-};
+export { default as cancelOrder } from './cancelOrder';
+export { default as createLimitBuyOrder } from './createLimitBuyOrder';
+export { default as createLimitSellOrder } from './createLimitSellOrder';
+export { default as createOrder } from './createOrder';
+export { default as fetchBalance } from './fetchBalance';
+export { default as fetchCurrencies } from './fetchCurrencies';
+export { default as fetchFees } from './fetchFees';
+export { default as fetchIssuers } from './fetchIssuers';
+export { default as fetchMarkets } from './fetchMarkets';
+export { default as fetchOrderBook } from './fetchOrderBook';
+export { default as fetchOrderBooks } from './fetchOrderBooks';
+export { default as fetchStatus } from './fetchStatus';
+export { default as fetchTradingFee } from './fetchTradingFee';
+export { default as fetchTradingFees } from './fetchTradingFees';
+export { default as fetchTransactionFee } from './fetchTransactionFee';
+export { default as fetchTransactionFees } from './fetchTransactionFees';

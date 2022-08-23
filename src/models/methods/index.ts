@@ -2,6 +2,7 @@ export * from './cancelOrder';
 export * from './createLimitBuyOrder';
 export * from './createLimitSellOrder';
 export * from './createOrder';
+export * from './fetchBalance';
 export * from './fetchCurrencies';
 export * from './fetchFees';
 export * from './fetchIssuers';

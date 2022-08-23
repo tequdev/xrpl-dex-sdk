@@ -5,6 +5,7 @@ import Order, { OrderStatus, OrderType, OrderTimeInForce, OrderSide } from './Or
 import OrderBook, { OrderBookBid, OrderBookAsk, OrderBookLevel } from './OrderBook';
 import Transaction, { TransactionType, TransactionStatus } from './Transaction';
 
+export * from './Balances';
 export * from './Fees';
 
 export {

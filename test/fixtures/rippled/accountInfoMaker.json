@@ -1,0 +1,24 @@
+{
+  "id": 2,
+  "result": {
+    "account_data": {
+      "Account": "rpkeJcxB2y5BeAFyycuWwdTTcR3og2a3SR",
+      "Balance": "999999992",
+      "Domain": "6578616D706C652E636F6D",
+      "Flags": 786432,
+      "LedgerEntryType": "AccountRoot",
+      "OwnerCount": 2,
+      "PreviousTxnID": "2A666127126AFF17D41BA491E5FC3E6CC970642E3F3ABB7858746CD6089BE75D",
+      "PreviousTxnLgrSeq": 30420014,
+      "Sequence": 30419058,
+      "index": "81B14268BCE9EBDFCE9E7A1CB9074EC6208CB32C8EC3A5E9752EAFFEA1CBB7A8"
+    },
+    "ledger_current_index": 30554725,
+    "queue_data": {
+      "txn_count": 0
+    },
+    "validated": false
+  },
+  "status": "success",
+  "type": "response"
+}
