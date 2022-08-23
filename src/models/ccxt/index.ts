@@ -6,6 +6,7 @@ import OrderBook, { OrderBookBid, OrderBookAsk, OrderBookLevel } from './OrderBo
 import Trade from './Trade';
 import Transaction, { TransactionType, TransactionStatus } from './Transaction';
 
+export * from './Balances';
 export * from './Fees';
 
 export {
