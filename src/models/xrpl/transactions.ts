@@ -1,4 +1,4 @@
-import { Transaction, TransactionMetadata } from 'xrpl';
+import { Transaction, TransactionMetadata, TxResponse } from 'xrpl';
 import { ResponseOnlyTxInfo } from 'xrpl/dist/npm/models/common';
 
 export interface AccountTransaction {
@@ -8,3 +8,5 @@ export interface AccountTransaction {
   tx_blob?: string;
   validated: boolean;
 }
+
+export type TxResult<T> = TxResponse['result'] & T;
