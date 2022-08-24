@@ -141,11 +141,14 @@ async function fetchOrder(
       let didCreateOffer = false;
       for (let n = 0, nl = previousTx.meta.AffectedNodes.length; n < nl; n += 1) {
         const node = previousTx.meta.AffectedNodes[n];
+
+        let trade: Trade | undefined;
+
         if (node.hasOwnProperty('ModifiedNode')) {
           const { LedgerEntryType, FinalFields, PreviousFields } = (node as ModifiedNode).ModifiedNode;
           if (LedgerEntryType !== 'Offer' || !FinalFields || !PreviousFields) continue;
 
-          const trade = getTradeFromOffer(
+          trade = getTradeFromOffer(
             id,
             {
               ...(FinalFields as unknown as Offer),
@@ -154,27 +157,22 @@ async function fetchOrder(
             },
             previousTxResponse
           );
-          orderTrades.push(trade);
-
-          totalTradesPrice += parseFloat(trade.price);
-          orderFilled += parseFloat(trade.amount);
         } else if (node.hasOwnProperty('DeletedNode')) {
           const { LedgerEntryType, FinalFields } = (node as DeletedNode).DeletedNode;
           if (LedgerEntryType !== 'Offer') continue;
 
-          const trade = getTradeFromOffer(id, FinalFields as unknown as Offer, previousTxResponse);
+          trade = getTradeFromOffer(id, FinalFields as unknown as Offer, previousTxResponse);
+        } else if (node.hasOwnProperty('CreatedNode')) {
+          const { LedgerEntryType, NewFields } = (node as CreatedNode).CreatedNode;
+          if (LedgerEntryType === 'Offer' || NewFields.Account === account || NewFields.Sequence === parseInt(id))
+            didCreateOffer = true;
+        }
+
+        if (trade) {
           orderTrades.push(trade);
 
           totalTradesPrice += parseFloat(trade.price);
           orderFilled += parseFloat(trade.amount);
-        } else if (node.hasOwnProperty('CreatedNode')) {
-          const { LedgerEntryType, NewFields } = (node as CreatedNode).CreatedNode;
-          if (
-            LedgerEntryType === 'Offer' ||
-            (NewFields as unknown as Offer).Account === account ||
-            (NewFields as unknown as Offer).Sequence === parseInt(id)
-          )
-            didCreateOffer = true;
         }
       }
       previousTxnId = undefined;
