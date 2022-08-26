@@ -15,10 +15,10 @@ export enum OrderType {
 }
 
 export enum OrderTimeInForce {
-  GoodTillCanceled = 'gtc',
-  ImmediateOrCancel = 'ioc',
-  FillOrKill = 'fok',
-  PostOnly = 'po',
+  GoodTillCanceled = 'GTC',
+  ImmediateOrCancel = 'IOC',
+  FillOrKill = 'FOK',
+  PostOnly = 'PO',
 }
 
 export enum OrderSide {

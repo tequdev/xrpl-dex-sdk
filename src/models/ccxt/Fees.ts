@@ -6,10 +6,10 @@ import { AccountAddress, CurrencyCode, Drops, MarketSymbol, PercentDecimal } fro
  * This is not related to the Fees endpoints.
  */
 export interface Fee {
-  /** Transaction currency (always in XRP) */
-  currency: 'XRP';
+  /** Fee currency */
+  currency: CurrencyCode;
   /** The fee cost (base_fee * rate) */
-  cost: Drops;
+  cost: string | Drops;
   /** The fee rate, 0.05% = 0.0005, 1% = 0.01, ... */
   rate?: PercentDecimal | Drops;
   /** Whether the fee rate is a percentage or flat rate */

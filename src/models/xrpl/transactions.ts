@@ -10,3 +10,4 @@ export interface AccountTransaction {
 }
 
 export type TxResult<T> = TxResponse['result'] & T;
+export type TxBaseResponse<T> = T;

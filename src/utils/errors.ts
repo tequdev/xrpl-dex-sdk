@@ -1,5 +1,5 @@
 import { OrderNotFound } from 'ccxt';
-import { ErrorResponse, LedgerEntryResponse, TxResponse } from 'xrpl';
+import { ErrorResponse, LedgerEntryResponse, Response } from 'xrpl';
 import { XrplErrorTypes } from '../models';
 
 export const handleLedgerEntryErrors = (offerResult: LedgerEntryResponse) => {
@@ -13,13 +13,13 @@ export const handleLedgerEntryErrors = (offerResult: LedgerEntryResponse) => {
   }
 };
 
-export const handleTxErrors = (txResult: TxResponse) => {
-  if (txResult.status === 'error') {
-    const { error, error_message, error_code } = txResult as unknown as ErrorResponse;
+export const handleTxErrors = (txResponse: Response) => {
+  if (txResponse.status === 'error') {
+    const { error, error_message, error_code } = txResponse as unknown as ErrorResponse;
     if (error_message || error === XrplErrorTypes.EntryNotFound) {
       throw new OrderNotFound(`${error_code ? error_code + ':' : ''} ${error_message || error}`);
     }
-  } else if (!txResult.result) {
+  } else if (!txResponse.result) {
     throw new OrderNotFound('No `result` field found');
   }
 };

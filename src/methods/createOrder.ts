@@ -130,13 +130,13 @@ async function createOrder(
   let totalTradesPrice = 0;
 
   let didCreateOffer = false;
-  for (let n = 0, nl = offerCreateTx.meta.AffectedNodes.length; n < nl; n += 1) {
-    const node = offerCreateTx.meta.AffectedNodes[n];
+  for (const node of offerCreateTx.meta.AffectedNodes) {
     if (node.hasOwnProperty('ModifiedNode')) {
       const { LedgerEntryType, FinalFields, PreviousFields } = (node as ModifiedNode).ModifiedNode;
       if (LedgerEntryType !== 'Offer' || !FinalFields || !PreviousFields) continue;
 
-      const trade = getTradeFromOffer(
+      const trade = await getTradeFromOffer(
+        this,
         orderId,
         {
           ...(FinalFields as unknown as Offer),
@@ -155,7 +155,7 @@ async function createOrder(
       const { LedgerEntryType, FinalFields } = (node as DeletedNode).DeletedNode;
       if (LedgerEntryType !== 'Offer') continue;
 
-      const trade = getTradeFromOffer(orderId, FinalFields as unknown as Offer, offerCreateTxResponse);
+      const trade = await getTradeFromOffer(this, orderId, FinalFields as unknown as Offer, offerCreateTxResponse);
       orderTrades.push(trade);
 
       if (!lastTradeTimestamp) lastTradeTimestamp = trade.timestamp;

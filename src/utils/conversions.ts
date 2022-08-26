@@ -1,16 +1,30 @@
 import { BadRequest } from 'ccxt';
 import {
+  Client,
   OfferCreate,
   OfferCreateFlags,
   rippleTimeToISOTime,
   rippleTimeToUnixTime,
   setTransactionFlagsToNumber,
+  // transferRateToDecimal,
   TxResponse,
 } from 'xrpl';
 import { Amount } from 'xrpl/dist/npm/models/common';
 import { Offer, OfferFlags } from 'xrpl/dist/npm/models/ledger';
 import { parseAmountValue } from 'xrpl/dist/npm/models/transactions/common';
-import { CurrencyCode, MarketSymbol, OrderSide, OrderTimeInForce, OrderType, Trade, TxResult } from '../models';
+// import { fetchMarket } from '../methods';
+import {
+  AccountAddress,
+  CurrencyCode,
+  Fee,
+  MarketSymbol,
+  OrderSide,
+  OrderTimeInForce,
+  OrderType,
+  Trade,
+  TxResult,
+} from '../models';
+import { fetchTransferRate } from './markets';
 import { divideAmountValues } from './numbers';
 
 /**
@@ -21,8 +35,12 @@ export const getOrderSideFromTx = (tx: TxResponse['result']) =>
 export const getOrderSideFromOffer = (offer: Offer) =>
   offer.Flags === OfferFlags.lsfSell ? OrderSide.Sell : OrderSide.Buy;
 
-const getBaseAmountKey = (side: OrderSide) => (side === OrderSide.Buy ? 'TakerPays' : 'TakerGets');
-const getQuoteAmountKey = (side: OrderSide) => (side === OrderSide.Buy ? 'TakerGets' : 'TakerPays');
+export const getBaseAmountKey = (side: OrderSide) => (side === OrderSide.Buy ? 'TakerPays' : 'TakerGets');
+export const getQuoteAmountKey = (side: OrderSide) => (side === OrderSide.Buy ? 'TakerGets' : 'TakerPays');
+export const getAmountKeys = (side: OrderSide): [base: string, quote: string] => [
+  getBaseAmountKey(side),
+  getQuoteAmountKey(side),
+];
 
 export const getOrderBaseAmount = (offer: Offer) => offer[getBaseAmountKey(getOrderSideFromOffer(offer))];
 export const getOrderQuoteAmount = (offer: Offer) => offer[getQuoteAmountKey(getOrderSideFromOffer(offer))];
@@ -33,7 +51,7 @@ export const getOrderCost = (baseAmount: Amount, price: number) => parseAmountVa
 // TODO: verify this result is correct
 export const getTakerOrMaker = (side: OrderSide) => (side === OrderSide.Buy ? 'taker' : 'maker');
 
-export const getTradeFromOfferTx = (orderId: string, txResponse: TxResponse) => {
+export const getTradeFromOfferTx = async (client: Client, orderId: string, txResponse: TxResponse) => {
   if (txResponse.result.TransactionType !== 'OfferCreate') {
     throw new BadRequest(`Cannot get Trade data from TransactionType ${txResponse.result.TransactionType}`);
   }
@@ -41,27 +59,44 @@ export const getTradeFromOfferTx = (orderId: string, txResponse: TxResponse) => 
   const tx = txResponse.result as TxResult<OfferCreate>;
   if (!tx.Sequence) throw new BadRequest(`No Sequence number found for Transaction ${tx.hash}`);
 
-  const side = getOrderSideFromTx(tx);
-  const baseAmount = tx[getBaseAmountKey(side)];
-  const quoteAmount = tx[getQuoteAmountKey(side)];
-  const price = getOrderPrice(baseAmount, quoteAmount);
-  const cost = getOrderCost(baseAmount, price);
+  const tradeSide = getOrderSideFromTx(tx);
+
+  const tradeBaseAmount = tx[getBaseAmountKey(tradeSide)];
+  const tradeQuoteAmount = tx[getQuoteAmountKey(tradeSide)];
+
+  const tradeBaseRate = parseFloat(await fetchTransferRate(client, tradeBaseAmount));
+  const tradeQuoteRate = parseFloat(await fetchTransferRate(client, tradeQuoteAmount));
+
+  const tradeBaseValue = parseAmountValue(tradeBaseAmount);
+  const tradeQuoteValue = parseAmountValue(tradeQuoteAmount);
+
+  /** Price in quote currency */
+  const tradePrice = tradeQuoteValue / tradeBaseValue;
+
+  /** The ``cost`` of an order means the total *quote* volume of the order */
+  const tradeCost = tradeBaseValue * tradePrice;
+
+  const tradeFeeCurrency = getAmountCurrencyCode(tradeSide === OrderSide.Buy ? tradeQuoteAmount : tradeBaseAmount);
+  const tradeFeeRate = tradeSide === OrderSide.Buy ? tradeQuoteRate : tradeBaseRate;
+  const tradeFees = tradeBaseValue * tradeFeeRate;
 
   const trade: Trade = {
     id: tx.Sequence.toString(),
     order: orderId,
     datetime: rippleTimeToISOTime(tx.date || 0),
     timestamp: rippleTimeToUnixTime(tx.date || 0),
-    symbol: getMarketSymbol(baseAmount, quoteAmount),
+    symbol: getMarketSymbol(tradeBaseAmount, tradeQuoteAmount),
     type: OrderType.Limit,
-    side,
-    amount: parseAmountValue(baseAmount).toString(),
-    price: price.toString(),
-    takerOrMaker: getTakerOrMaker(side),
-    cost: cost.toString(),
+    side: tradeSide,
+    amount: tradeBaseValue.toString(),
+    price: tradePrice.toString(),
+    takerOrMaker: getTakerOrMaker(tradeSide),
+    cost: tradeCost.toString(),
     fee: {
-      currency: 'XRP',
-      cost: tx.Fee || '0',
+      currency: tradeFeeCurrency,
+      cost: tradeFees.toString(),
+      rate: tradeFeeRate.toString(),
+      percentage: true,
     },
     info: { Transaction: tx },
   };
@@ -69,7 +104,7 @@ export const getTradeFromOfferTx = (orderId: string, txResponse: TxResponse) => 
   return trade;
 };
 
-export const getTradeFromOffer = (orderId: string, offer: Offer, txResponse: TxResponse) => {
+export const getTradeFromOffer = async (client: Client, orderId: string, offer: Offer, txResponse: TxResponse) => {
   if (txResponse.result.TransactionType !== 'OfferCreate') {
     throw new BadRequest(`Cannot get Trade data from TransactionType ${txResponse.result.TransactionType}`);
   }
@@ -77,9 +112,35 @@ export const getTradeFromOffer = (orderId: string, offer: Offer, txResponse: TxR
   const tx = txResponse.result as TxResult<OfferCreate>;
 
   const tradeSide = getOrderSideFromOffer(offer);
-  const tradeBaseAmount = getOrderBaseAmount(offer);
-  const tradeQuoteAmount = getOrderQuoteAmount(offer);
-  const tradePrice = getOrderPrice(tradeBaseAmount, tradeQuoteAmount);
+
+  const tradeBaseAmount = offer[getBaseAmountKey(tradeSide)];
+  const tradeQuoteAmount = offer[getQuoteAmountKey(tradeSide)];
+
+  const tradeBaseRate = parseFloat(await fetchTransferRate(client, tradeBaseAmount));
+  const tradeQuoteRate = parseFloat(await fetchTransferRate(client, tradeQuoteAmount));
+
+  const tradeBaseValue = parseAmountValue(tradeBaseAmount);
+  const tradeQuoteValue = parseAmountValue(tradeQuoteAmount);
+
+  /** Price in quote currency */
+  const tradePrice = tradeQuoteValue / tradeBaseValue;
+
+  /** The ``cost`` of an order means the total *quote* volume of the order */
+  const tradeCost = tradeBaseValue * tradePrice;
+
+  const tradeFeeCurrency = getAmountCurrencyCode(tradeSide === OrderSide.Buy ? tradeQuoteAmount : tradeBaseAmount);
+  const tradeFeeRate = tradeSide === OrderSide.Buy ? tradeQuoteRate : tradeBaseRate;
+  const tradeFees = tradeBaseValue * tradeFeeRate;
+
+  const tradeFee: Fee = {
+    currency: tradeFeeCurrency,
+    cost: tradeFees.toString(),
+  };
+
+  if (tradeFee.cost) {
+    tradeFee.rate = tradeFeeRate.toString();
+    tradeFee.percentage = true;
+  }
 
   const trade: Trade = {
     id: offer.Sequence.toString(),
@@ -89,20 +150,20 @@ export const getTradeFromOffer = (orderId: string, offer: Offer, txResponse: TxR
     symbol: getMarketSymbol(tradeBaseAmount, tradeQuoteAmount),
     type: OrderType.Limit,
     side: tradeSide,
-    amount: parseAmountValue(tradeBaseAmount).toString(),
+    amount: tradeBaseValue.toString(),
     price: tradePrice.toString(),
     takerOrMaker: getTakerOrMaker(tradeSide),
-    cost: getOrderCost(tradeBaseAmount, tradePrice).toString(),
-    fee: {
-      currency: 'XRP',
-      cost: tx.Fee || '0',
-    },
-    info: { Transaction: tx, Offer: offer },
+    cost: tradeCost.toString(),
+    fee: tradeFee,
+    info: { Transaction: tx },
   };
 
   return trade;
 };
 
+/**
+ * Market Symbols
+ */
 export const parseMarketSymbol = (symbol: MarketSymbol): [base: CurrencyCode, quote: CurrencyCode] => {
   const [base, quote] = symbol.split('/');
   return [base, quote];
@@ -117,6 +178,18 @@ export const getMarketSymbol = (base: Amount, quote: Amount): MarketSymbol => {
   return symbol.join('/');
 };
 
+/**
+ * Currencies
+ */
+export const getAmountIssuer = (amount: Amount): AccountAddress | undefined =>
+  typeof amount === 'object' ? amount.issuer : undefined;
+
+export const getAmountCurrencyCode = (amount: Amount): CurrencyCode =>
+  typeof amount === 'object' ? amount.currency : 'XRP';
+
+/**
+ * Offers
+ */
 export const offerCreateFlagsToTimeInForce = (tx: OfferCreate): OrderTimeInForce | undefined => {
   setTransactionFlagsToNumber(tx);
   const flags = tx.Flags as number;

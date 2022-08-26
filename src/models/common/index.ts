@@ -1,4 +1,18 @@
 import BigNumber from 'bignumber.js';
+import { Client } from 'xrpl';
+import { Currencies, Markets } from '../ccxt';
+import { Issuers } from '../xrpl';
+
+/**
+ * SDK
+ */
+export interface SDK {
+  client: Client;
+  markets: Markets;
+  currencies: Currencies;
+  issuers: Issuers;
+  [key: string]: unknown;
+}
 
 /**
  * Aliases
@@ -19,7 +33,8 @@ export type BigNumberish = BigNumber | number | string;
 
 export type PercentDecimal = number;
 
-// Drops are 0.000001 XRP
+// 1 Drop = 0.000001 XRP
+// 1000000 Drops = 1
 export type Drops = BigNumberish;
 
 /**

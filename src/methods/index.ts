@@ -6,6 +6,7 @@ export { default as fetchBalance } from './fetchBalance';
 export { default as fetchCurrencies } from './fetchCurrencies';
 export { default as fetchFees } from './fetchFees';
 export { default as fetchIssuers } from './fetchIssuers';
+export { default as fetchMarket } from './fetchMarket';
 export { default as fetchMarkets } from './fetchMarkets';
 export { default as fetchOrder } from './fetchOrder';
 export { default as fetchOrderBook } from './fetchOrderBook';
