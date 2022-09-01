@@ -6,7 +6,7 @@ import fetchCurrencies from './fetchCurrencies.json';
 import fetchFees from './fetchFees.json';
 import fetchIssuers from './fetchIssuers.json';
 import fetchMarkets from './fetchMarkets.json';
-import * as fetchOrderResponses from './fetchOrder';
+import fetchOrder from './fetchOrder';
 import fetchOrderBook from './fetchOrderBook.json';
 import fetchOrderBooks from './fetchOrderBooks.json';
 import fetchStatus from './fetchStatus.json';
@@ -18,11 +18,6 @@ import fetchTransactionFees from './fetchTransactionFees.json';
 const createOrder = {
   buy: createBuyOrder,
   sell: createSellOrder,
-};
-
-const fetchOrder = {
-  buy: fetchOrderResponses.buyOrder,
-  sell: fetchOrderResponses.sellOrder,
 };
 
 const responses = {

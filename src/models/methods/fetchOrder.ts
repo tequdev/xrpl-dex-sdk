@@ -1,14 +1,11 @@
 import { LedgerIndex } from 'xrpl/dist/npm/models/common';
 import { Order } from '../ccxt';
-import { AccountAddress, PaginationParams } from '../common';
 
-export interface FetchOrderParams extends PaginationParams {
-  /** The account that placed the Order */
-  account: AccountAddress;
-  /** Ledger hash containing the Order (optional) */
-  ledger_hash?: string;
+export interface FetchOrderParams {
   /** Ledger index containing the Order (optional) */
   ledger_index?: LedgerIndex;
+  /** Max items to search through looking for an Order before giving up */
+  max_search?: number;
 }
 
 /**

@@ -19,10 +19,19 @@ import {
   Order,
   OrderSide,
   OrderStatus,
+  OrderTimeInForce,
   OrderType,
   Trade,
+  TxResult,
 } from '../models';
-import { getTradeFromOffer, handleTxErrors, offerCreateFlagsToTimeInForce, subtractAmounts } from '../utils';
+import {
+  getOrderOrTradeId,
+  getTrade,
+  handleTxErrors,
+  offerCreateFlagsToTimeInForce,
+  parseMarketSymbol,
+  subtractAmounts,
+} from '../utils';
 
 /**
  * Creates a new Order on the Ripple dEX. Returns an {@link CreateOrderResponse}
@@ -45,7 +54,7 @@ async function createOrder(
   /** Parameters specific to the exchange API endpoint */
   params: CreateOrderParams
 ): Promise<Order> {
-  const [base, quote] = symbol.split('/');
+  const [base, quote] = parseMarketSymbol(symbol);
 
   const {
     wallet_private_key,
@@ -121,7 +130,7 @@ async function createOrder(
   }
 
   const orderTrades: Trade[] = [];
-  const orderId = offerCreateTx.Sequence.toString();
+  const orderId = getOrderOrTradeId(offerCreateTx.Account, offerCreateTx.Sequence);
 
   let orderStatus = OrderStatus.Open;
   let orderFilled = 0;
@@ -131,51 +140,60 @@ async function createOrder(
 
   let didCreateOffer = false;
   for (const node of offerCreateTx.meta.AffectedNodes) {
+    let affectedOffer: Offer | undefined;
+
     if (node.hasOwnProperty('ModifiedNode')) {
       const { LedgerEntryType, FinalFields, PreviousFields } = (node as ModifiedNode).ModifiedNode;
       if (LedgerEntryType !== 'Offer' || !FinalFields || !PreviousFields) continue;
 
-      const trade = await getTradeFromOffer(
-        this,
-        orderId,
-        {
-          ...(FinalFields as unknown as Offer),
-          TakerGets: subtractAmounts(PreviousFields.TakerGets as Amount, FinalFields.TakerGets as Amount),
-          TakerPays: subtractAmounts(PreviousFields.TakerPays as Amount, FinalFields.TakerPays as Amount),
-        },
-        offerCreateTxResponse
+      const updatedOrderTakerGets = subtractAmounts(
+        PreviousFields.TakerGets as Amount,
+        FinalFields.TakerGets as Amount
       );
-      orderTrades.push(trade);
+      const updatedOrderTakerPays = subtractAmounts(
+        PreviousFields.TakerPays as Amount,
+        FinalFields.TakerPays as Amount
+      );
 
-      if (!lastTradeTimestamp) lastTradeTimestamp = trade.timestamp;
-
-      totalTradesPrice += parseFloat(trade.price);
-      orderFilled += parseFloat(trade.amount);
+      affectedOffer = {
+        ...(FinalFields as unknown as Offer),
+        TakerGets: updatedOrderTakerGets,
+        TakerPays: updatedOrderTakerPays,
+      };
     } else if (node.hasOwnProperty('DeletedNode')) {
       const { LedgerEntryType, FinalFields } = (node as DeletedNode).DeletedNode;
       if (LedgerEntryType !== 'Offer') continue;
 
-      const trade = await getTradeFromOffer(this, orderId, FinalFields as unknown as Offer, offerCreateTxResponse);
+      affectedOffer = FinalFields as unknown as Offer;
+    } else if (node.hasOwnProperty('CreatedNode')) {
+      if ((node as CreatedNode).CreatedNode.LedgerEntryType === 'Offer') didCreateOffer = true;
+    }
+
+    if (affectedOffer) {
+      const trade = await getTrade(this, getOrderOrTradeId(affectedOffer.Account, affectedOffer.Sequence), {
+        ...offerCreateTxResponse,
+        result: {
+          ...offerCreateTxResponse.result,
+          TakerGets: affectedOffer.TakerPays,
+          TakerPays: affectedOffer.TakerGets,
+        } as TxResult<OfferCreate>,
+      });
       orderTrades.push(trade);
-
-      if (!lastTradeTimestamp) lastTradeTimestamp = trade.timestamp;
-
       totalTradesPrice += parseFloat(trade.price);
       orderFilled += parseFloat(trade.amount);
-    } else if (node.hasOwnProperty('CreatedNode')) {
-      const { LedgerEntryType, NewFields } = (node as CreatedNode).CreatedNode;
-      if (
-        LedgerEntryType === 'Offer' ||
-        (NewFields as unknown as Offer).Account === wallet.classicAddress ||
-        (NewFields as unknown as Offer).Sequence === parseInt(orderId)
-      )
-        didCreateOffer = true;
     }
   }
+
+  const orderTimeInForce = offerCreateFlagsToTimeInForce(offerCreate);
+
   if (offerCreateTx.meta.TransactionResult !== 'tesSUCCESS') {
     orderStatus = OrderStatus.Rejected;
   } else if (!didCreateOffer) {
-    orderStatus = OrderStatus.Closed;
+    if (orderTimeInForce === OrderTimeInForce.FillOrKill && orderFilled !== parseFloat(amount))
+      orderStatus = OrderStatus.Canceled;
+    else if (orderTimeInForce === OrderTimeInForce.ImmediateOrCancel && orderFilled == 0)
+      orderStatus = OrderStatus.Canceled;
+    else orderStatus = OrderStatus.Closed;
   }
 
   const newOrder: Order = {

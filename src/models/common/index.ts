@@ -8,9 +8,9 @@ import { Issuers } from '../xrpl';
  */
 export interface SDK {
   client: Client;
-  markets: Markets;
-  currencies: Currencies;
-  issuers: Issuers;
+  markets?: Markets;
+  currencies?: Currencies;
+  issuers?: Issuers;
   [key: string]: unknown;
 }
 
