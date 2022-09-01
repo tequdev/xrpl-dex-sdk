@@ -3,6 +3,7 @@ import ExchangeStatus, { ExchangeStatusType } from './ExchangeStatus';
 import Markets, { Market } from './Markets';
 import Order, { OrderStatus, OrderType, OrderTimeInForce, OrderSide } from './Order';
 import OrderBook, { OrderBookBid, OrderBookAsk, OrderBookLevel } from './OrderBook';
+import Trade from './Trade';
 import Transaction, { TransactionType, TransactionStatus } from './Transaction';
 
 export * from './Balances';
@@ -24,6 +25,7 @@ export {
   OrderBookBid,
   OrderBookAsk,
   OrderBookLevel,
+  Trade,
   Transaction,
   TransactionStatus,
   TransactionType,

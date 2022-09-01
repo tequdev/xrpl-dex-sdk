@@ -1,4 +1,18 @@
 import BigNumber from 'bignumber.js';
+import { Client } from 'xrpl';
+import { Currencies, Markets } from '../ccxt';
+import { Issuers } from '../xrpl';
+
+/**
+ * SDK
+ */
+export interface SDK {
+  client: Client;
+  markets?: Markets;
+  currencies?: Currencies;
+  issuers?: Issuers;
+  [key: string]: unknown;
+}
 
 /**
  * Aliases
@@ -8,6 +22,7 @@ export type Sequence = string;
 
 export type RippleUrl = string;
 
+// Tokens
 export type CurrencyCode = string;
 export type MarketSymbol = string;
 
@@ -18,7 +33,8 @@ export type BigNumberish = BigNumber | number | string;
 
 export type PercentDecimal = number;
 
-// Drops are 0.000001 XRP
+// 1 Drop = 0.000001 XRP
+// 1000000 Drops = 1
 export type Drops = BigNumberish;
 
 /**
@@ -32,6 +48,16 @@ export enum RippleNetwork {
   Devnet = 'devnet',
   NFTDevnet = 'nft_devnet',
   Local = 'local',
+}
+
+/**
+ * Parameters
+ */
+export interface PaginationParams {
+  /** Limit the number of transactions to retrieve. */
+  limit?: number;
+  /** Value from a previous paginated response. Resume retrieving data where that response left off. */
+  marker?: unknown;
 }
 
 /**

@@ -1,4 +1,4 @@
-import { BadRequest, Trade } from 'ccxt';
+import { BadRequest, BadResponse } from 'ccxt';
 import _ from 'lodash';
 import {
   Client,
@@ -9,9 +9,29 @@ import {
   Wallet,
 } from 'xrpl';
 import { Amount } from 'xrpl/dist/npm/models/common';
-import { REFERENCE_TX_COST } from '../constants';
-import { CreateOrderParams, MarketSymbol, Order, OrderSide, OrderStatus, OrderType } from '../models';
-import { offerCreateFlagsToTimeInForce } from '../utils';
+import { Offer } from 'xrpl/dist/npm/models/ledger';
+import {
+  CreatedNode,
+  CreateOrderParams,
+  DeletedNode,
+  MarketSymbol,
+  ModifiedNode,
+  Order,
+  OrderSide,
+  OrderStatus,
+  OrderTimeInForce,
+  OrderType,
+  Trade,
+  TxResult,
+} from '../models';
+import {
+  getOrderOrTradeId,
+  getTrade,
+  handleTxErrors,
+  offerCreateFlagsToTimeInForce,
+  parseMarketSymbol,
+  subtractAmounts,
+} from '../utils';
 
 /**
  * Creates a new Order on the Ripple dEX. Returns an {@link CreateOrderResponse}
@@ -34,7 +54,7 @@ async function createOrder(
   /** Parameters specific to the exchange API endpoint */
   params: CreateOrderParams
 ): Promise<Order> {
-  const [base, quote] = symbol.split('/');
+  const [base, quote] = parseMarketSymbol(symbol);
 
   const {
     wallet_private_key,
@@ -47,29 +67,6 @@ async function createOrder(
     flags,
   } = params;
 
-  const creatorGetsCurrency = side === OrderSide.Buy ? base : quote;
-  const creatorGetsAmount = amount;
-
-  const creatorPaysCurrency = side === OrderSide.Buy ? quote : base;
-  const creatorPaysAmount = price;
-
-  const creatorGets: Amount =
-    creatorGetsCurrency === 'XRP'
-      ? creatorGetsAmount
-      : {
-          currency: creatorGetsCurrency,
-          value: creatorGetsAmount,
-          issuer: taker_pays_issuer || '',
-        };
-  const creatorPays: Amount =
-    creatorPaysCurrency === 'XRP'
-      ? creatorPaysAmount
-      : {
-          currency: creatorPaysCurrency,
-          value: creatorPaysAmount,
-          issuer: taker_gets_issuer || '',
-        };
-
   if (!wallet_secret && (!wallet_public_key || !wallet_private_key)) {
     throw new BadRequest('Must provide either `wallet_secret` or `wallet_public_key` and `wallet_private_key`');
   }
@@ -78,11 +75,39 @@ async function createOrder(
     ? Wallet.fromSecret(wallet_secret)
     : new Wallet(wallet_public_key as string, wallet_private_key as string);
 
+  const takerGetsCurrency = side === OrderSide.Buy ? quote : base;
+  const takerGetsIssuer = taker_gets_issuer || '';
+
+  const takerPaysCurrency = side === OrderSide.Buy ? base : quote;
+  const takerPaysIssuer = taker_pays_issuer || '';
+
+  if ((takerGetsCurrency !== 'XRP' && !takerGetsIssuer) || (takerPaysCurrency !== 'XRP' && !takerPaysIssuer)) {
+    throw new BadRequest('Non-XRP currencies must specify an issuer');
+  }
+
+  const takerGets: Amount =
+    takerGetsCurrency === 'XRP'
+      ? amount
+      : {
+          currency: takerGetsCurrency,
+          issuer: takerGetsIssuer,
+          value: amount,
+        };
+
+  const takerPays: Amount =
+    takerPaysCurrency === 'XRP'
+      ? amount
+      : {
+          currency: takerPaysCurrency,
+          issuer: takerPaysIssuer,
+          value: amount,
+        };
+
   const offerCreate: OfferCreate = {
     TransactionType: 'OfferCreate',
     Account: wallet.classicAddress,
-    TakerGets: creatorPays,
-    TakerPays: creatorGets,
+    TakerGets: takerGets,
+    TakerPays: takerPays,
     Flags: flags,
   };
 
@@ -91,47 +116,108 @@ async function createOrder(
 
   setTransactionFlagsToNumber(offerCreate);
 
-  const offerCreateResponse = await this.submitAndWait(offerCreate, {
+  const offerCreateTxResponse = await this.submitAndWait(offerCreate, {
     autofill: true,
     wallet,
   });
 
-  let amountFilled = 0;
-  let amountRemaining = parseFloat(creatorGetsAmount);
+  handleTxErrors(offerCreateTxResponse);
 
-  let status = OrderStatus.Open;
+  const offerCreateTx = offerCreateTxResponse.result;
 
-  // TODO: fill this in once the Trades logic is complete
-  const trades: Trade[] = [];
+  if (!offerCreateTx.meta || typeof offerCreateTx.meta !== 'object' || !offerCreateTx.Sequence) {
+    throw new BadResponse(`Bad data for OrderCreate Transaction with hash ${offerCreateTx.hash}`);
+  }
 
-  // TODO: calculate lastTradeTimestamp once Trades logic is complete
+  const orderTrades: Trade[] = [];
+  const orderId = getOrderOrTradeId(offerCreateTx.Account, offerCreateTx.Sequence);
+
+  let orderStatus = OrderStatus.Open;
+  let orderFilled = 0;
+
   let lastTradeTimestamp: number = 0;
+  let totalTradesPrice = 0;
 
-  // TODO: properly calculate this once Trades logic is complete
-  let average: number = 0;
+  let didCreateOffer = false;
+  for (const node of offerCreateTx.meta.AffectedNodes) {
+    let affectedOffer: Offer | undefined;
+
+    if (node.hasOwnProperty('ModifiedNode')) {
+      const { LedgerEntryType, FinalFields, PreviousFields } = (node as ModifiedNode).ModifiedNode;
+      if (LedgerEntryType !== 'Offer' || !FinalFields || !PreviousFields) continue;
+
+      const updatedOrderTakerGets = subtractAmounts(
+        PreviousFields.TakerGets as Amount,
+        FinalFields.TakerGets as Amount
+      );
+      const updatedOrderTakerPays = subtractAmounts(
+        PreviousFields.TakerPays as Amount,
+        FinalFields.TakerPays as Amount
+      );
+
+      affectedOffer = {
+        ...(FinalFields as unknown as Offer),
+        TakerGets: updatedOrderTakerGets,
+        TakerPays: updatedOrderTakerPays,
+      };
+    } else if (node.hasOwnProperty('DeletedNode')) {
+      const { LedgerEntryType, FinalFields } = (node as DeletedNode).DeletedNode;
+      if (LedgerEntryType !== 'Offer') continue;
+
+      affectedOffer = FinalFields as unknown as Offer;
+    } else if (node.hasOwnProperty('CreatedNode')) {
+      if ((node as CreatedNode).CreatedNode.LedgerEntryType === 'Offer') didCreateOffer = true;
+    }
+
+    if (affectedOffer) {
+      const trade = await getTrade(this, getOrderOrTradeId(affectedOffer.Account, affectedOffer.Sequence), {
+        ...offerCreateTxResponse,
+        result: {
+          ...offerCreateTxResponse.result,
+          TakerGets: affectedOffer.TakerPays,
+          TakerPays: affectedOffer.TakerGets,
+        } as TxResult<OfferCreate>,
+      });
+      orderTrades.push(trade);
+      totalTradesPrice += parseFloat(trade.price);
+      orderFilled += parseFloat(trade.amount);
+    }
+  }
+
+  const orderTimeInForce = offerCreateFlagsToTimeInForce(offerCreate);
+
+  if (offerCreateTx.meta.TransactionResult !== 'tesSUCCESS') {
+    orderStatus = OrderStatus.Rejected;
+  } else if (!didCreateOffer) {
+    if (orderTimeInForce === OrderTimeInForce.FillOrKill && orderFilled !== parseFloat(amount))
+      orderStatus = OrderStatus.Canceled;
+    else if (orderTimeInForce === OrderTimeInForce.ImmediateOrCancel && orderFilled == 0)
+      orderStatus = OrderStatus.Canceled;
+    else orderStatus = OrderStatus.Closed;
+  }
 
   const newOrder: Order = {
-    id: (offerCreateResponse.result.Sequence || 0).toString(),
-    datetime: rippleTimeToISOTime(offerCreateResponse.result.date || 0),
-    timestamp: rippleTimeToUnixTime(offerCreateResponse.result.date || 0),
+    id: orderId,
+    datetime: rippleTimeToISOTime(offerCreateTx.date || 0),
+    timestamp: rippleTimeToUnixTime(offerCreateTx.date || 0),
     lastTradeTimestamp,
-    status,
+    status: orderStatus,
     symbol,
     type,
     timeInForce: offerCreateFlagsToTimeInForce(offerCreate),
     side,
     price: parseFloat(price),
-    average,
+    average: orderTrades.length ? totalTradesPrice / orderTrades.length : 0,
     amount: parseFloat(amount),
-    filled: amountFilled,
-    remaining: amountRemaining,
-    cost: amountFilled * parseFloat(price),
-    trades,
+    filled: orderFilled,
+    remaining: parseFloat(amount) - orderFilled,
+    cost: orderFilled * parseFloat(price),
+    trades: orderTrades,
     fee: {
       currency: 'XRP',
-      cost: offerCreateResponse.result.Fee ? parseFloat(offerCreateResponse.result.Fee) : REFERENCE_TX_COST,
+      cost: offerCreateTx.Fee ? parseFloat(offerCreateTx.Fee) : 0,
     },
-    info: { OfferCreate: offerCreateResponse.result },
+    info: { OfferCreate: offerCreateTx },
   };
 
   return newOrder;

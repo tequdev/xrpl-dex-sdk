@@ -11,7 +11,7 @@ import {
   OrderBook,
   FetchOrderBookResponse,
 } from '../models';
-import { parseCurrencyAmount } from '../utils';
+import { parseCurrencyAmount, parseMarketSymbol } from '../utils';
 
 /**
  * Retrieves order book data for a single market pair. Returns an
@@ -28,7 +28,7 @@ async function fetchOrderBook(
   /** Parameters specific to the exchange API endpoint */
   params: FetchOrderBookParams = {}
 ): Promise<FetchOrderBookResponse> {
-  const [base, quote] = symbol.split('/');
+  const [base, quote] = parseMarketSymbol(symbol);
 
   const { taker, taker_gets_issuer, taker_pays_issuer, ledger_hash, ledger_index } = params;
 
@@ -66,9 +66,9 @@ async function fetchOrderBook(
     if (!order.quality) return;
     // L2 Order book
     if ((order.Flags & OfferFlags.lsfSell) === 0) {
-      bids.push([order.quality, parseCurrencyAmount(order.TakerGets)]);
+      bids.push([order.quality, parseCurrencyAmount(order.TakerGets).toString()]);
     } else {
-      asks.push([order.quality, parseCurrencyAmount(order.TakerGets)]);
+      asks.push([order.quality, parseCurrencyAmount(order.TakerGets).toString()]);
     }
   });
 

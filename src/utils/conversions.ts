@@ -1,78 +1,10 @@
-import { Order, Trade } from 'ccxt';
 import { OfferCreate, OfferCreateFlags, setTransactionFlagsToNumber } from 'xrpl';
 import { Amount } from 'xrpl/dist/npm/models/common';
-import { Offer, OfferFlags } from 'xrpl/dist/npm/models/ledger';
-import { CurrencyCode, MarketSymbol, OrderStatus, OrderTimeInForce, OrderType } from '../models';
-import { parseCurrencyAmount } from './numbers';
+import { AccountAddress, CurrencyCode, MarketSymbol, OrderTimeInForce } from '../models';
 
-export const xrplOfferToCcxtTrade = (offer: Offer): Trade => {
-  // Price in quote currency (TakerGets) (float)
-  const price = parseFloat(parseCurrencyAmount(offer.TakerGets));
-  // Ordered amount of base currency (TakerPays) (float)
-  const amount = parseFloat(parseCurrencyAmount(offer.TakerPays));
-
-  const trade: Trade = {
-    id: offer.Sequence.toString(),
-    datetime: '',
-    timestamp: 0,
-    symbol: getMarketSymbol(offer.TakerPays, offer.TakerGets),
-    type: OrderType.Limit, // TODO: get this data
-    side: offer.Flags === OfferFlags.lsfSell ? 'sell' : 'buy',
-    price,
-    amount,
-    cost: price * amount,
-    fee: {
-      currency: 'XRP',
-      cost: 0,
-      rate: 0,
-      type: 'maker', // TODO: get this data
-    },
-    takerOrMaker: 'maker', // TODO: get this data
-    info: JSON.stringify(offer),
-  };
-  return trade;
-};
-
-export const xrplOfferToCcxtOrder = (offer: Offer): Order => {
-  const price = parseFloat(parseCurrencyAmount(offer.TakerGets));
-  const amount = parseFloat(parseCurrencyAmount(offer.TakerPays));
-
-  // TODO: get this data from Trades
-  const filled = 0;
-  const remaining = amount;
-
-  // Average filling price (float)
-  const average = 0;
-
-  const order: Order = {
-    id: offer.Sequence.toString(),
-    clientOrderId: '',
-    datetime: '',
-    timestamp: 0,
-    lastTradeTimestamp: 0, // TODO: get this data
-    status: OrderStatus.Open, // TODO: get this data
-    symbol: getMarketSymbol(offer.TakerPays, offer.TakerGets),
-    type: OrderType.Limit, // TODO: get this data
-    timeInForce: offer.Flags === OfferFlags.lsfPassive ? OrderTimeInForce.PostOnly : undefined,
-    side: offer.Flags === OfferFlags.lsfSell ? 'sell' : 'buy',
-    price,
-    average,
-    amount,
-    filled,
-    remaining,
-    cost: filled * price,
-    trades: [],
-    fee: {
-      currency: 'XRP',
-      cost: 0,
-      rate: 0,
-      type: 'maker', // TODO: get this data
-    },
-    info: JSON.stringify(offer),
-  };
-  return order;
-};
-
+/**
+ * Market Symbols
+ */
 export const parseMarketSymbol = (symbol: MarketSymbol): [base: CurrencyCode, quote: CurrencyCode] => {
   const [base, quote] = symbol.split('/');
   return [base, quote];
@@ -87,6 +19,18 @@ export const getMarketSymbol = (base: Amount, quote: Amount): MarketSymbol => {
   return symbol.join('/');
 };
 
+/**
+ * Currencies
+ */
+export const getAmountIssuer = (amount: Amount): AccountAddress | undefined =>
+  typeof amount === 'object' ? amount.issuer : undefined;
+
+export const getAmountCurrencyCode = (amount: Amount): CurrencyCode =>
+  typeof amount === 'object' ? amount.currency : 'XRP';
+
+/**
+ * Offers
+ */
 export const offerCreateFlagsToTimeInForce = (tx: OfferCreate): OrderTimeInForce | undefined => {
   setTransactionFlagsToNumber(tx);
   const flags = tx.Flags as number;
@@ -101,17 +45,17 @@ export const offerCreateFlagsToTimeInForce = (tx: OfferCreate): OrderTimeInForce
   }
 };
 
-export const stringToInt = (input: string): number | undefined => {
+export const stringToInt = (input?: string): number | undefined => {
   try {
-    return parseInt(input);
+    return input ? parseInt(input) : 0;
   } catch (err) {
     return;
   }
 };
 
-export const stringToFloat = (input: string): number | undefined => {
+export const stringToFloat = (input?: string): number | undefined => {
   try {
-    return parseFloat(input);
+    return input ? parseFloat(input) : 0;
   } catch (err) {
     return;
   }

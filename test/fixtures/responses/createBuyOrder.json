@@ -6,7 +6,7 @@
   "status": "open",
   "symbol": "TST/XRP",
   "type": "limit",
-  "timeInForce": "gtc",
+  "timeInForce": "GTC",
   "side": "buy",
   "price": 10,
   "average": 0,

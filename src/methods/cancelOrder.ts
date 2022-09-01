@@ -2,7 +2,7 @@ import { BadRequest } from 'ccxt';
 import _ from 'lodash';
 import { Client, OfferCancel, Wallet } from 'xrpl';
 import { CancelOrderParams, CancelOrderResponse } from '../models';
-import { stringToInt } from '../utils';
+import { parseOrderId } from '../utils';
 
 /**
  * Cancels an Order on the Ripple dEX. Returns an {@link CancelOrderResponse}
@@ -19,11 +19,7 @@ async function cancelOrder(
 ): Promise<CancelOrderResponse | undefined> {
   const { wallet_private_key, wallet_public_key, wallet_secret } = params;
 
-  const sequence = stringToInt(id);
-
-  if (!sequence) {
-    throw new BadRequest('ID must be an integer string');
-  }
+  const { sequenceNumber } = parseOrderId(id);
 
   if (!wallet_secret && (!wallet_public_key || !wallet_private_key)) {
     throw new BadRequest('Must provide either `wallet_secret` or `wallet_public_key` and `wallet_private_key`');
@@ -36,7 +32,7 @@ async function cancelOrder(
   const offerCancel: OfferCancel = {
     TransactionType: 'OfferCancel',
     Account: wallet.classicAddress,
-    OfferSequence: sequence,
+    OfferSequence: sequenceNumber,
   };
 
   const offerCancelResult = await this.submitAndWait(offerCancel, { autofill: true, wallet });

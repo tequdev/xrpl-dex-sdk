@@ -6,6 +6,7 @@ import fetchCurrencies from './fetchCurrencies.json';
 import fetchFees from './fetchFees.json';
 import fetchIssuers from './fetchIssuers.json';
 import fetchMarkets from './fetchMarkets.json';
+import fetchOrder from './fetchOrder';
 import fetchOrderBook from './fetchOrderBook.json';
 import fetchOrderBooks from './fetchOrderBooks.json';
 import fetchStatus from './fetchStatus.json';
@@ -27,6 +28,7 @@ const responses = {
   fetchFees,
   fetchIssuers,
   fetchMarkets,
+  fetchOrder,
   fetchOrderBook,
   fetchOrderBooks,
   fetchStatus,

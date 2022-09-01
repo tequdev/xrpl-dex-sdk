@@ -1,6 +1,5 @@
-import { Trade } from 'ccxt';
 import { MarketSymbol } from '../common';
-import { Fee } from '.';
+import { Fee, Trade } from '.';
 
 export enum OrderStatus {
   Open = 'open',
@@ -16,10 +15,10 @@ export enum OrderType {
 }
 
 export enum OrderTimeInForce {
-  GoodTillCanceled = 'gtc',
-  ImmediateOrCancel = 'ioc',
-  FillOrKill = 'fok',
-  PostOnly = 'po',
+  GoodTillCanceled = 'GTC',
+  ImmediateOrCancel = 'IOC',
+  FillOrKill = 'FOK',
+  PostOnly = 'PO',
 }
 
 export enum OrderSide {
@@ -33,15 +32,15 @@ export default interface Order {
   clientOrderId?: string;
   datetime: string;
   timestamp: number;
-  lastTradeTimestamp?: number;
+  lastTradeTimestamp: number;
   status: OrderStatus;
   symbol: MarketSymbol;
   type: string;
   timeInForce?: string;
   side: OrderSide;
+  amount: string | number;
   price?: string | number; // May be empty for Market orders
   average?: string | number;
-  amount: string | number;
   filled: string | number;
   remaining: string | number;
   cost: string | number;

@@ -1,14 +1,41 @@
 import BigNumber from 'bignumber.js';
-import { dropsToXrp } from 'xrpl';
+// import { dropsToXrp } from 'xrpl';
 import { Amount } from 'xrpl/dist/npm/models/common';
+import { parseAmountValue } from 'xrpl/dist/npm/models/transactions/common';
 
 export const BN = (amount: string) => new BigNumber(amount);
 
-export const parseCurrencyAmount = (amount: Amount): string => {
-  if (typeof amount === 'object') {
-    return amount.value;
+export const parseCurrencyAmount = (amount: Amount, subtractor?: Amount): number => {
+  const amountValue = typeof amount === 'object' ? parseFloat(amount.value) : parseFloat(amount);
+  if (!subtractor) {
+    return amountValue;
   } else {
-    const bigAmount = BN(amount);
-    return dropsToXrp(bigAmount);
+    const subtractorValue = typeof subtractor === 'object' ? parseFloat(subtractor.value) : parseFloat(subtractor);
+    return amountValue - subtractorValue;
   }
+};
+
+export const subtractAmounts = (amount: Amount, subtractor: Amount): Amount => {
+  const amountValue = parseAmountValue(amount);
+  const subtractorValue = parseAmountValue(subtractor);
+  const resultValue = (amountValue - subtractorValue).toString();
+
+  return typeof amount === 'string'
+    ? resultValue
+    : {
+        ...amount,
+        value: resultValue,
+      };
+};
+
+export const subtractAmountValues = (amount: Amount, subtractor: Amount): number => {
+  const amountValue = parseAmountValue(amount);
+  const subtractorValue = parseAmountValue(subtractor);
+  return amountValue - subtractorValue;
+};
+
+export const divideAmountValues = (amount: Amount, divisor: Amount): number => {
+  const amountValue = parseAmountValue(amount);
+  const divisorValue = parseAmountValue(divisor);
+  return amountValue / divisorValue;
 };
