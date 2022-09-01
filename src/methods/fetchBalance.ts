@@ -1,7 +1,8 @@
 import _ from 'lodash';
-import { AccountInfoRequest, AccountLinesRequest, Client } from 'xrpl';
+import { AccountInfoRequest, AccountLinesRequest, Client, dropsToXrp } from 'xrpl';
 import { DEFAULT_LIMIT } from '../constants';
 import { Balances, FetchBalanceParams, FetchBalanceResponse } from '../models';
+import fetchStatus from './fetchStatus';
 
 /**
  * Returns information about an account's balances, sorted by currency
@@ -28,24 +29,29 @@ async function fetchBalance(
       queue: true,
     } as AccountInfoRequest);
 
-    const freeXrp = parseFloat(accountInfoResponse.result.account_data.Balance);
-    const usedXrp = 0;
-    const totalXrp = freeXrp + usedXrp;
+    const accountInfo = accountInfoResponse.result.account_data;
+    const accountObjectCount = accountInfo.OwnerCount;
+
+    const serverState = await fetchStatus.call(this);
+    const { reserve_base: reserveBase, reserve_inc: reserveInc } = serverState.info.server_state.validated_ledger;
+
+    const usedXrp = reserveBase + accountObjectCount * reserveInc;
+    const freeXrp = parseFloat(accountInfo.Balance) - usedXrp;
+    const totalXrp = usedXrp + freeXrp;
 
     balances['XRP'] = {
-      free: freeXrp.toString(),
-      used: usedXrp.toString(),
-      total: totalXrp.toString(),
+      free: dropsToXrp(freeXrp),
+      used: dropsToXrp(usedXrp),
+      total: dropsToXrp(totalXrp),
     };
 
-    info.accountInfo = accountInfoResponse;
+    info.account_info = accountInfoResponse;
   }
 
   // Get token balances
   if (!code || (code && code !== 'XRP')) {
     const limit = DEFAULT_LIMIT;
     let marker: unknown;
-    let page = 1;
     let hasNextPage = true;
 
     while (hasNextPage) {
@@ -62,9 +68,9 @@ async function fetchBalance(
       _.forEach(trustLines, ({ currency, balance }) => {
         if (code && code !== currency) return;
 
-        const freeBalance = parseFloat(balance);
         const usedBalance = 0;
-        const totalBalance = freeBalance + usedBalance;
+        const freeBalance = parseFloat(balance) - usedBalance;
+        const totalBalance = usedBalance + freeBalance;
 
         balances[currency] = {
           free: freeBalance.toString(),
@@ -73,16 +79,9 @@ async function fetchBalance(
         };
       });
 
-      if (!info.accountLines) info.accountLines = {};
-
-      const pageStart = (page - 1) * limit;
-      const pageEnd = page * limit;
-
-      info.accountLines[`${pageStart}-${trustLines.length < limit ? pageStart + trustLines.length : pageEnd}`] =
-        accountTrustLinesResponse;
+      info.account_lines = accountTrustLinesResponse;
 
       marker = accountTrustLinesResponse.result.marker;
-      page += 1;
       if (!marker) hasNextPage = false;
     }
   }

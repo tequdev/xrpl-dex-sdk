@@ -9,11 +9,11 @@ import { ExchangeStatusType, FetchStatusResponse } from '../models';
  * @category Methods
  */
 async function fetchStatus(this: Client): Promise<FetchStatusResponse> {
-  const serverState = (
-    await this.request({
-      command: 'server_state',
-    })
-  ).result.state;
+  const serverStateResponse = await this.request({
+    command: 'server_state',
+  });
+
+  const serverState = serverStateResponse.result.state;
 
   let status: ExchangeStatusType = 'ok';
 
@@ -24,6 +24,7 @@ async function fetchStatus(this: Client): Promise<FetchStatusResponse> {
     updated: Date.parse(serverState.time),
     eta: '',
     url: '',
+    info: { server_state: serverState },
   };
 
   return response;
