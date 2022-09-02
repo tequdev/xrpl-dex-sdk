@@ -22,9 +22,11 @@ import {
   OrderTimeInForce,
   OrderType,
   Trade,
-  TxResult,
+  // TxResult,
 } from '../models';
 import {
+  getAmount,
+  getBaseAmountKey,
   getOrderOrTradeId,
   getTrade,
   handleTxErrors,
@@ -54,14 +56,12 @@ async function createOrder(
   /** Parameters specific to the exchange API endpoint */
   params: CreateOrderParams
 ): Promise<Order> {
-  const [base, quote] = parseMarketSymbol(symbol);
-
   const {
     wallet_private_key,
     wallet_public_key,
     wallet_secret,
-    taker_gets_issuer,
-    taker_pays_issuer,
+    baseCurrencyIssuer,
+    quoteCurrencyIssuer,
     expiration,
     memos,
     flags,
@@ -75,48 +75,41 @@ async function createOrder(
     ? Wallet.fromSecret(wallet_secret)
     : new Wallet(wallet_public_key as string, wallet_private_key as string);
 
-  const takerGetsCurrency = side === OrderSide.Buy ? quote : base;
-  const takerGetsIssuer = taker_gets_issuer || '';
+  const [baseCurrency, quoteCurrency] = parseMarketSymbol(symbol);
 
-  const takerPaysCurrency = side === OrderSide.Buy ? base : quote;
-  const takerPaysIssuer = taker_pays_issuer || '';
+  const baseAmount = getAmount(baseCurrency, amount, baseCurrencyIssuer);
+  const quoteAmount = getAmount(
+    quoteCurrency,
+    (parseFloat(amount) * parseFloat(price)).toString(),
+    quoteCurrencyIssuer
+  );
 
-  if ((takerGetsCurrency !== 'XRP' && !takerGetsIssuer) || (takerPaysCurrency !== 'XRP' && !takerPaysIssuer)) {
-    throw new BadRequest('Non-XRP currencies must specify an issuer');
-  }
+  const baseAmountKey = getBaseAmountKey(side);
 
-  const takerGets: Amount =
-    takerGetsCurrency === 'XRP'
-      ? amount
-      : {
-          currency: takerGetsCurrency,
-          issuer: takerGetsIssuer,
-          value: amount,
-        };
-
-  const takerPays: Amount =
-    takerPaysCurrency === 'XRP'
-      ? amount
-      : {
-          currency: takerPaysCurrency,
-          issuer: takerPaysIssuer,
-          value: amount,
-        };
-
-  const offerCreate: OfferCreate = {
+  const offerCreateRequest: OfferCreate = {
     TransactionType: 'OfferCreate',
     Account: wallet.classicAddress,
-    TakerGets: takerGets,
-    TakerPays: takerPays,
-    Flags: flags,
+    Flags: {
+      ...flags,
+      tfSell: side === OrderSide.Sell ? true : false,
+    },
+    TakerGets: baseAmountKey === 'TakerGets' ? baseAmount : quoteAmount,
+    TakerPays: baseAmountKey === 'TakerPays' ? baseAmount : quoteAmount,
   };
 
-  if (expiration) offerCreate.Expiration = expiration;
-  if (memos) offerCreate.Memos = memos;
+  if (expiration) offerCreateRequest.Expiration = expiration;
+  if (memos) offerCreateRequest.Memos = memos;
 
-  setTransactionFlagsToNumber(offerCreate);
+  setTransactionFlagsToNumber(offerCreateRequest);
 
-  const offerCreateTxResponse = await this.submitAndWait(offerCreate, {
+  // console.log('\nofferCreateRequest');
+  // console.log(offerCreateRequest);
+  // console.log(JSON.stringify(offerCreateRequest));
+
+  // const offerCreateRequestPrepared = await this.autofill(offerCreateRequest);
+  // const offerCreateRequestSigned = wallet.sign(offerCreateRequestPrepared);
+
+  const offerCreateTxResponse = await this.submitAndWait(offerCreateRequest, {
     autofill: true,
     wallet,
   });
@@ -170,21 +163,27 @@ async function createOrder(
     }
 
     if (affectedOffer) {
-      const trade = await getTrade(this, getOrderOrTradeId(affectedOffer.Account, affectedOffer.Sequence), {
-        ...offerCreateTxResponse,
-        result: {
-          ...offerCreateTxResponse.result,
-          TakerGets: affectedOffer.TakerPays,
-          TakerPays: affectedOffer.TakerGets,
-        } as TxResult<OfferCreate>,
-      });
+      const trade = await getTrade(
+        this,
+        getOrderOrTradeId(affectedOffer.Account, affectedOffer.Sequence),
+        affectedOffer,
+        offerCreateTxResponse
+      );
+      // const trade = await getTrade(this, getOrderOrTradeId(affectedOffer.Account, affectedOffer.Sequence), {
+      //   ...offerCreateTxResponse,
+      //   result: {
+      //     ...offerCreateTxResponse.result,
+      //     TakerGets: affectedOffer.TakerPays,
+      //     TakerPays: affectedOffer.TakerGets,
+      //   } as TxResult<OfferCreate>,
+      // });
       orderTrades.push(trade);
       totalTradesPrice += parseFloat(trade.price);
       orderFilled += parseFloat(trade.amount);
     }
   }
 
-  const orderTimeInForce = offerCreateFlagsToTimeInForce(offerCreate);
+  const orderTimeInForce = offerCreateFlagsToTimeInForce(offerCreateRequest);
 
   if (offerCreateTx.meta.TransactionResult !== 'tesSUCCESS') {
     orderStatus = OrderStatus.Rejected;
@@ -204,7 +203,7 @@ async function createOrder(
     status: orderStatus,
     symbol,
     type,
-    timeInForce: offerCreateFlagsToTimeInForce(offerCreate),
+    timeInForce: offerCreateFlagsToTimeInForce(offerCreateRequest),
     side,
     price: parseFloat(price),
     average: orderTrades.length ? totalTradesPrice / orderTrades.length : 0,
@@ -221,6 +220,30 @@ async function createOrder(
   };
 
   return newOrder;
+
+  // return {
+  //   id: '2',
+  //   datetime: '2015-11-18T20:56:30.000Z',
+  //   timestamp: 1447880190000,
+  //   lastTradeTimestamp: 0,
+  //   status: OrderStatus.Open,
+  //   symbol: 'TST/XRP',
+  //   type: 'limit',
+  //   timeInForce: 'GTC',
+  //   side: OrderSide.Sell,
+  //   price: 100,
+  //   average: 0,
+  //   amount: 10,
+  //   filled: 0,
+  //   remaining: 10,
+  //   cost: 0,
+  //   trades: [],
+  //   fee: {
+  //     currency: 'XRP',
+  //     cost: 12,
+  //   },
+  //   info: '{"OfferCreate":{"Account":"rhFDFxjpVHBZe69jw4TvFouPMdMRkXMkgd","Fee":"12","Flags":589824,"LastLedgerSequence":30005504,"Sequence":2,"SigningPubKey":"0330E7FC9D56BB25D6893BA3F317AE5BCF33B3291BD63DB32654A313222F7FD020","TakerGets":{"currency":"USD","issuer":"rMH4UxPrbuMa1spCBR98hLLyNJp4d8p4tM","value":"10.1"},"TakerPays":"254391353000000","TransactionType":"OfferCreate","TxnSignature":"30440221008C13CA1BD56431B643FD145CDE7BE1805424B48FDF40E0D1A8C2FD53FAACA974021F6393721438C01B9E3138D55469049C8B72B4F6A4508ACA3C0036788C300459","date":501195390,"hash":"458101D51051230B1D56E9ACAFAA34451BF65FA000F95DF6F0FF5B3A62D83FC2","inLedger":6,"ledger_index":6,"meta":{"AffectedNodes":[{"ModifiedNode":{"FinalFields":{"Account":"rhFDFxjpVHBZe69jw4TvFouPMdMRkXMkgd","Balance":"99999999259999976","Flags":0,"OwnerCount":0,"Sequence":3},"LedgerEntryType":"AccountRoot","LedgerIndex":"2B6AC232AA4C4BE41BF49D2459FA4A0347E1B543A4C92FCEE0821C0201E2E9A8","PreviousFields":{"Balance":"99999999259999988","Sequence":2},"PreviousTxnID":"4BF785A253AB67875973EE79B3ED939DF371B435696D09F8BE2FB2DADA1BFAB7","PreviousTxnLgrSeq":4}}],"TransactionIndex":0,"TransactionResult":"tecUNFUNDED_OFFER"},"validated":true}}',
+  // };
 }
 
 export default createOrder;

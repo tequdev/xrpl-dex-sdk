@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import { assert } from 'chai';
 import 'mocha';
 import { Client } from 'xrpl';
 
@@ -34,8 +33,6 @@ describe('createOrder', function () {
       price,
       params
     );
-
-    assert(typeof newOrder !== 'undefined');
 
     const { id, datetime, timestamp, fee, info, ...expectedResponse } = responses.createOrder.buy;
 

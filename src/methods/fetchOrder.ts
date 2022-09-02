@@ -2,7 +2,6 @@ import { ArgumentsRequired, BadResponse, BaseError, OrderNotFound } from 'ccxt';
 import _ from 'lodash';
 import {
   Client,
-  OfferCreate,
   OfferCreateFlags,
   rippleTimeToISOTime,
   rippleTimeToUnixTime,
@@ -25,7 +24,6 @@ import {
   CreatedNode,
   Fee,
   OrderSide,
-  TxResult,
   Order,
   Trade,
 } from '../models';
@@ -33,10 +31,9 @@ import {
   fetchOffer,
   fetchTransferRate,
   getAmountCurrencyCode,
-  getBaseAmountKey,
   getMarketSymbol,
+  getTradeOfferFromNode,
   getOrderSideFromOffer,
-  getQuoteAmountKey,
   getTrade,
   parseOrderId,
   subtractAmounts,
@@ -126,9 +123,19 @@ async function fetchOrder(
           previousTxnId = PreviousTxnID;
           break;
         } else if (node.hasOwnProperty('DeletedNode')) {
-          const { LedgerEntryType, LedgerIndex, FinalFields } = (node as DeletedNode).DeletedNode;
+          const { LedgerEntryType, LedgerIndex, FinalFields, PreviousFields } = (node as DeletedNode).DeletedNode;
           if (LedgerEntryType !== 'Offer' || LedgerIndex !== orderIdHash) continue;
           affectedOffer = FinalFields as unknown as Offer;
+          if (PreviousFields) {
+            affectedOffer.TakerGets = subtractAmounts(
+              PreviousFields.TakerGets as Amount,
+              FinalFields.TakerGets as Amount
+            );
+            affectedOffer.TakerPays = subtractAmounts(
+              PreviousFields.TakerPays as Amount,
+              FinalFields.TakerPays as Amount
+            );
+          }
           previousTxnId = affectedOffer.PreviousTxnID;
           orderStatus = OrderStatus.Closed;
           break;
@@ -139,14 +146,7 @@ async function fetchOrder(
         throw new BadResponse("Could not find given Offer in its most recent Transaction's list of affected offers");
       }
 
-      const trade = await getTrade(this, id, {
-        ...previousTxResponse,
-        result: {
-          ...previousTxResponse.result,
-          TakerGets: affectedOffer.TakerPays,
-          TakerPays: affectedOffer.TakerGets,
-        } as TxResult<OfferCreate>,
-      });
+      const trade = await getTrade(this, id, affectedOffer, previousTxResponse);
 
       orderTrades.push(trade);
 
@@ -160,51 +160,21 @@ async function fetchOrder(
       else if (previousTx.Flags === OfferCreateFlags.tfImmediateOrCancel)
         orderTimeInForce = OrderTimeInForce.ImmediateOrCancel;
 
-      orderBaseAmount = previousTx[getBaseAmountKey(orderSide)];
-      orderQuoteAmount = previousTx[getQuoteAmountKey(orderSide)];
+      orderBaseAmount = previousTx.TakerGets;
+      orderQuoteAmount = previousTx.TakerPays;
 
       let didCreateOffer = false;
       for (const node of previousTx.meta.AffectedNodes) {
-        let affectedOffer: Offer | undefined;
-
-        if (node.hasOwnProperty('ModifiedNode')) {
-          const { LedgerEntryType, FinalFields, PreviousFields } = (node as ModifiedNode).ModifiedNode;
-          if (LedgerEntryType !== 'Offer' || !FinalFields || !PreviousFields) continue;
-
-          const updatedOrderTakerGets = subtractAmounts(
-            PreviousFields.TakerGets as Amount,
-            FinalFields.TakerGets as Amount
-          );
-          const updatedOrderTakerPays = subtractAmounts(
-            PreviousFields.TakerPays as Amount,
-            FinalFields.TakerPays as Amount
-          );
-
-          affectedOffer = {
-            ...(FinalFields as unknown as Offer),
-            TakerGets: updatedOrderTakerGets,
-            TakerPays: updatedOrderTakerPays,
-          };
-        } else if (node.hasOwnProperty('DeletedNode')) {
-          const { LedgerEntryType, FinalFields } = (node as DeletedNode).DeletedNode;
-          if (LedgerEntryType !== 'Offer') continue;
-
-          affectedOffer = FinalFields as unknown as Offer;
-        } else if (node.hasOwnProperty('CreatedNode')) {
+        if (node.hasOwnProperty('CreatedNode')) {
           const { LedgerEntryType, NewFields } = (node as CreatedNode).CreatedNode;
-          if (LedgerEntryType === 'Offer' || NewFields.Account === account || NewFields.Sequence === parseInt(id))
-            didCreateOffer = true;
+          if (LedgerEntryType !== 'Offer') continue;
+          didCreateOffer = NewFields.Account === account || NewFields.Sequence === parseInt(id);
         }
 
+        const affectedOffer = getTradeOfferFromNode(node, account);
+
         if (affectedOffer) {
-          const trade = await getTrade(this, id, {
-            ...previousTxResponse,
-            result: {
-              ...previousTxResponse.result,
-              TakerGets: affectedOffer.TakerPays,
-              TakerPays: affectedOffer.TakerGets,
-            } as TxResult<OfferCreate>,
-          });
+          const trade = await getTrade(this, id, affectedOffer, previousTxResponse);
           orderTrades.push(trade);
           totalTradesPrice += parseFloat(trade.price);
           orderFilled += parseFloat(trade.amount);

@@ -4,8 +4,17 @@ import 'mocha';
 import requests from '../fixtures/requests';
 import responses from '../fixtures/responses';
 
-import { fetchOrder } from '../../src/methods';
-import { FetchOrderResponse, RippleNetwork } from '../../src/models';
+import {
+  // createOrder,
+  fetchOrder,
+} from '../../src/methods';
+import {
+  FetchOrderResponse,
+  // CreateOrderParams,
+  // OrderSide,
+  //  OrderType,
+  RippleNetwork,
+} from '../../src/models';
 import networks from '../../src/networks';
 import { setupRemoteClient, teardownRemoteClient } from '../setupClient';
 import { assertResultMatch } from '../testUtils';
@@ -25,6 +34,17 @@ describe('fetchOrder', function () {
   it('should return a partially filled Sell Order with multiple Trades', async function () {
     const order: FetchOrderResponse = await fetchOrder.call(this.client, requests.fetchOrder[NETWORK].sell);
     assertResultMatch(order, responses.fetchOrder[NETWORK].sell);
+  });
+
+  it.only('should do some stuff to set up the tests', async function () {
+    // const order = await fetchOrder.call(this.client, 'rn5umFvUWKXqwrGJSRcV24wz9zZFiG7rsQ:30419119');
+    // console.log(order);
+    // console.log(order.trades);
+    // console.log(JSON.stringify(order));
+
+    const sellOrder = await fetchOrder.call(this.client, 'rpkeJcxB2y5BeAFyycuWwdTTcR3og2a3SR:30419059');
+    console.log(sellOrder);
+    console.log(sellOrder.trades);
   });
 
   // it('should return a completed Sell Order', async function () {});

@@ -1,6 +1,7 @@
+import { BadRequest } from 'ccxt';
 import { OfferCreate, OfferCreateFlags, setTransactionFlagsToNumber } from 'xrpl';
 import { Amount } from 'xrpl/dist/npm/models/common';
-import { AccountAddress, CurrencyCode, MarketSymbol, OrderTimeInForce } from '../models';
+import { AccountAddress, BigNumberish, CurrencyCode, MarketSymbol, OrderTimeInForce } from '../models';
 
 /**
  * Market Symbols
@@ -27,6 +28,19 @@ export const getAmountIssuer = (amount: Amount): AccountAddress | undefined =>
 
 export const getAmountCurrencyCode = (amount: Amount): CurrencyCode =>
   typeof amount === 'object' ? amount.currency : 'XRP';
+
+export const getAmount = (code: CurrencyCode, value: BigNumberish, issuer?: AccountAddress): Amount => {
+  if (code === 'XRP') {
+    return value.toString();
+  } else {
+    if (!issuer) throw new BadRequest('Non-XRP currencies must specify an issuer');
+    return {
+      currency: code,
+      issuer,
+      value: value.toString(),
+    };
+  }
+};
 
 /**
  * Offers

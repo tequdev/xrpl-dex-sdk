@@ -18,8 +18,11 @@ import { hashOfferId } from 'xrpl/dist/npm/utils/hashes';
 import { DEFAULT_LIMIT } from '../constants';
 import {
   AccountAddress,
+  DeletedNode,
   Fee,
   FetchOrderParams,
+  ModifiedNode,
+  Node,
   OrderSide,
   OrderType,
   Trade,
@@ -28,7 +31,39 @@ import {
 } from '../models';
 import { getAmountCurrencyCode, getMarketSymbol } from './conversions';
 import { fetchTransferRate } from './markets';
-import { divideAmountValues } from './numbers';
+import { divideAmountValues, subtractAmounts } from './numbers';
+
+/**
+ * Offers
+ */
+export const getTradeOfferFromNode = (node: Node, account: AccountAddress) => {
+  let affectedOffer: Offer | undefined;
+
+  if (node.hasOwnProperty('ModifiedNode')) {
+    const { LedgerEntryType, FinalFields, PreviousFields } = (node as ModifiedNode).ModifiedNode;
+    if (LedgerEntryType !== 'Offer' || !FinalFields || !PreviousFields || FinalFields.Account === account) return;
+
+    const updatedOrderTakerGets = subtractAmounts(PreviousFields.TakerGets as Amount, FinalFields.TakerGets as Amount);
+    const updatedOrderTakerPays = subtractAmounts(PreviousFields.TakerPays as Amount, FinalFields.TakerPays as Amount);
+
+    affectedOffer = {
+      ...(FinalFields as unknown as Offer),
+      TakerGets: updatedOrderTakerGets,
+      TakerPays: updatedOrderTakerPays,
+    };
+  } else if (node.hasOwnProperty('DeletedNode')) {
+    const { LedgerEntryType, FinalFields, PreviousFields } = (node as DeletedNode).DeletedNode;
+    if (LedgerEntryType !== 'Offer' || FinalFields.Account === account) return;
+
+    affectedOffer = FinalFields as unknown as Offer;
+    if (PreviousFields) {
+      affectedOffer.TakerGets = subtractAmounts(PreviousFields.TakerGets as Amount, FinalFields.TakerGets as Amount);
+      affectedOffer.TakerPays = subtractAmounts(PreviousFields.TakerPays as Amount, FinalFields.TakerPays as Amount);
+    }
+  }
+
+  return affectedOffer;
+};
 
 /**
  * Orders
@@ -68,7 +103,7 @@ export const getTakerOrMaker = (side: OrderSide) => (side === OrderSide.Buy ? 't
 /**
  * Trades
  */
-export const getTrade = async (client: Client, orderId: string, txResponse: TxResponse) => {
+export const getTrade = async (client: Client, orderId: string, affectedOffer: Offer, txResponse: TxResponse) => {
   if (txResponse.result.TransactionType !== 'OfferCreate') {
     throw new BadRequest(`Cannot get Trade data from TransactionType ${txResponse.result.TransactionType}`);
   }
@@ -79,8 +114,8 @@ export const getTrade = async (client: Client, orderId: string, txResponse: TxRe
 
   const tradeSide = getOrderSideFromTx(tx);
 
-  const tradeBaseAmount = tx[getBaseAmountKey(tradeSide)];
-  const tradeQuoteAmount = tx[getQuoteAmountKey(tradeSide)];
+  const tradeBaseAmount = affectedOffer[getBaseAmountKey(tradeSide)];
+  const tradeQuoteAmount = affectedOffer[getQuoteAmountKey(tradeSide)];
 
   const tradeBaseRate = parseFloat(await fetchTransferRate(client, tradeBaseAmount));
   const tradeQuoteRate = parseFloat(await fetchTransferRate(client, tradeQuoteAmount));
@@ -106,7 +141,7 @@ export const getTrade = async (client: Client, orderId: string, txResponse: TxRe
   }
 
   const trade: Trade = {
-    id: getOrderOrTradeId(tx.Account, tx.Sequence),
+    id: getOrderOrTradeId(affectedOffer.Account, affectedOffer.Sequence),
     order: orderId,
     datetime: rippleTimeToISOTime(tx.date || 0),
     timestamp: rippleTimeToUnixTime(tx.date || 0),
