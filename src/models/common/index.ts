@@ -19,6 +19,7 @@ export interface SDK {
  */
 export type AccountAddress = string;
 export type Sequence = string;
+export type AccountSequencePair = string;
 
 export type RippleUrl = string;
 

@@ -18,6 +18,8 @@ import { hashOfferId } from 'xrpl/dist/npm/utils/hashes';
 import { DEFAULT_LIMIT } from '../constants';
 import {
   AccountAddress,
+  // AccountTransaction,
+  // AccountTxResult,
   DeletedNode,
   Fee,
   FetchOrderParams,
@@ -186,7 +188,6 @@ export const fetchOffer = async (
     if ((error.data as ErrorResponse).error !== XrplErrorTypes.EntryNotFound) return;
 
     // This Offer was either closed or canceled - let's do some sleuthing to figure it out
-    let offer: Offer | undefined;
 
     const limit = DEFAULT_LIMIT;
     let marker: unknown;
@@ -206,9 +207,54 @@ export const fetchOffer = async (
 
       marker = accountTxResponse.result.marker;
 
+      accountTxResponse.result.transactions.sort((a, b) => (b.tx?.date || 0) - (a.tx?.date || 0));
+
       for (const transaction of accountTxResponse.result.transactions) {
-        if (transaction.tx?.TransactionType === 'OfferCreate' && transaction.tx?.Sequence === sequence) {
-          offer = {
+        if (
+          !transaction.meta ||
+          !transaction.tx ||
+          transaction.tx.TransactionType !== 'OfferCreate' ||
+          typeof transaction.meta !== 'object'
+        )
+          continue;
+
+        if (transaction.tx.Account !== account || transaction.tx.Sequence !== sequence) {
+          for (const node of transaction.meta.AffectedNodes) {
+            let offerFields: Offer | undefined;
+            if (
+              node.hasOwnProperty('ModifiedNode') &&
+              (node as ModifiedNode).ModifiedNode.LedgerEntryType === 'Offer' &&
+              (node as ModifiedNode).ModifiedNode.FinalFields?.Account === account &&
+              (node as ModifiedNode).ModifiedNode.FinalFields?.Sequence === sequence
+            ) {
+              offerFields = (node as ModifiedNode).ModifiedNode.FinalFields as unknown as Offer;
+            } else if (
+              node.hasOwnProperty('DeletedNode') &&
+              (node as DeletedNode).DeletedNode.LedgerEntryType === 'Offer' &&
+              (node as DeletedNode).DeletedNode.FinalFields.Account === account &&
+              (node as DeletedNode).DeletedNode.FinalFields.Sequence === sequence
+            ) {
+              offerFields = (node as DeletedNode).DeletedNode.FinalFields as unknown as Offer;
+            }
+            if (offerFields) {
+              return {
+                index: hashOfferId(account, sequence),
+                LedgerEntryType: 'Offer',
+                Flags: typeof offerFields.Flags === 'number' ? offerFields.Flags : 0,
+                Account: offerFields.Account,
+                Sequence: offerFields.Sequence,
+                TakerPays: offerFields.TakerPays,
+                TakerGets: offerFields.TakerGets,
+                BookDirectory: '',
+                BookNode: '0',
+                OwnerNode: '0',
+                PreviousTxnID: transaction.tx.hash || '',
+                PreviousTxnLgrSeq: transaction.tx.LastLedgerSequence || 0,
+              };
+            }
+          }
+        } else {
+          return {
             index: hashOfferId(account, sequence),
             LedgerEntryType: 'Offer',
             Flags: typeof transaction.tx.Flags === 'number' ? transaction.tx.Flags : 0,
@@ -222,17 +268,11 @@ export const fetchOffer = async (
             PreviousTxnID: transaction.tx.hash || '',
             PreviousTxnLgrSeq: transaction.tx.LastLedgerSequence || 0,
           };
-
-          marker = undefined;
-
-          break;
         }
       }
 
       if (!marker || limit * page >= maxSearch) hasNextPage = false;
       else page += 1;
     }
-
-    return offer;
   }
 };

@@ -1,5 +1,6 @@
 import { LedgerIndex } from 'xrpl/dist/npm/models/common';
 import { Order } from '../ccxt';
+import { BaseResponse } from '../common';
 
 export interface FetchOrderParams {
   /** Ledger index containing the Order (optional) */
@@ -13,4 +14,4 @@ export interface FetchOrderParams {
  *
  * @category Responses
  */
-export type FetchOrderResponse = Order;
+export type FetchOrderResponse = BaseResponse & Order;

@@ -1,15 +1,15 @@
 import _ from 'lodash';
 import 'mocha';
 
-import requests from '../fixtures/requests';
-import responses from '../fixtures/responses';
+// import requests from '../fixtures/requests';
+// import responses from '../fixtures/responses';
 
 import {
   // createOrder,
   fetchOrder,
 } from '../../src/methods';
 import {
-  FetchOrderResponse,
+  // FetchOrderResponse,
   // CreateOrderParams,
   // OrderSide,
   //  OrderType,
@@ -17,7 +17,7 @@ import {
 } from '../../src/models';
 import networks from '../../src/networks';
 import { setupRemoteClient, teardownRemoteClient } from '../setupClient';
-import { assertResultMatch } from '../testUtils';
+// import { assertResultMatch } from '../testUtils';
 
 const NETWORK = RippleNetwork.Testnet;
 
@@ -31,20 +31,16 @@ describe('fetchOrder', function () {
    * Sell Orders
    */
 
-  it('should return a partially filled Sell Order with multiple Trades', async function () {
-    const order: FetchOrderResponse = await fetchOrder.call(this.client, requests.fetchOrder[NETWORK].sell);
-    assertResultMatch(order, responses.fetchOrder[NETWORK].sell);
-  });
+  // it('should return a partially filled Sell Order with multiple Trades', async function () {
+  //   const order: FetchOrderResponse = await fetchOrder.call(this.client, requests.fetchOrder[NETWORK].sell);
+  //   assertResultMatch(order, responses.fetchOrder[NETWORK].sell);
+  // });
 
   it.only('should do some stuff to set up the tests', async function () {
-    // const order = await fetchOrder.call(this.client, 'rn5umFvUWKXqwrGJSRcV24wz9zZFiG7rsQ:30419119');
-    // console.log(order);
-    // console.log(order.trades);
-    // console.log(JSON.stringify(order));
-
-    const sellOrder = await fetchOrder.call(this.client, 'rpkeJcxB2y5BeAFyycuWwdTTcR3og2a3SR:30419059');
+    // const sellOrder = await fetchOrder.call(this.client, 'rpkeJcxB2y5BeAFyycuWwdTTcR3og2a3SR:30419059');
+    const sellOrder = await fetchOrder.call(this.client, 'rn5umFvUWKXqwrGJSRcV24wz9zZFiG7rsQ:30419119');
     console.log(sellOrder);
-    console.log(sellOrder.trades);
+    // console.log(sellOrder.trades);
   });
 
   // it('should return a completed Sell Order', async function () {});
@@ -61,10 +57,10 @@ describe('fetchOrder', function () {
 
   // it('should return a partially filled Buy Order with multiple Trades', async function () {});
 
-  it('should return a completed Buy Order', async function () {
-    const order: FetchOrderResponse = await fetchOrder.call(this.client, requests.fetchOrder[NETWORK].buy);
-    assertResultMatch(order, responses.fetchOrder[NETWORK].buy);
-  });
+  // it('should return a completed Buy Order', async function () {
+  //   const order: FetchOrderResponse = await fetchOrder.call(this.client, requests.fetchOrder[NETWORK].buy);
+  //   assertResultMatch(order, responses.fetchOrder[NETWORK].buy);
+  // });
 
   // it('should return a canceled Buy Order', async function () {});
 
