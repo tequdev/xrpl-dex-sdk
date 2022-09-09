@@ -1,77 +1,39 @@
-// import { BadRequest } from 'ccxt';
 import {
   AccountTxRequest,
+  AccountTxResponse,
   Client,
   dropsToXrp,
   ErrorResponse,
   LedgerEntryRequest,
   OfferCreate,
-  // OfferCreate,
+  OfferCreateFlags,
   RippledError,
-  rippleTimeToISOTime,
-  rippleTimeToUnixTime,
+  // rippleTimeToISOTime,
+  // rippleTimeToUnixTime,
+  TxRequest,
   TxResponse,
 } from 'xrpl';
 import { Amount } from 'xrpl/dist/npm/models/common';
 import { Offer, OfferFlags } from 'xrpl/dist/npm/models/ledger';
 import { parseAmountValue } from 'xrpl/dist/npm/models/transactions/common';
 import { hashOfferId } from 'xrpl/dist/npm/utils/hashes';
-import { DEFAULT_LIMIT } from '../constants';
 import {
   AccountAddress,
-  // AccountTransaction,
-  // AccountTxResult,
-  DeletedNode,
-  Fee,
-  FetchOrderParams,
-  ModifiedNode,
+  AccountSequencePair,
+  // Fee,
   Node,
   OrderSide,
-  OrderType,
-  Trade,
-  // Transaction,
+  // OrderType,
+  // Trade,
   TransactionData,
-  // TxResult,
   XrplErrorTypes,
 } from '../models';
-import { getAmountCurrencyCode, getMarketSymbol } from './conversions';
-import { fetchTransferRate } from './markets';
+// import { getAmountCurrencyCode, getMarketSymbol } from './conversions';
+// import { fetchTransferRate } from './markets';
 import { divideAmountValues, subtractAmounts } from './numbers';
 
 /**
- * Offers
- */
-export const getTradeOfferFromNode = (node: Node, account: AccountAddress) => {
-  let affectedOffer: Offer | undefined;
-
-  if (node.hasOwnProperty('ModifiedNode')) {
-    const { LedgerEntryType, FinalFields, PreviousFields } = (node as ModifiedNode).ModifiedNode;
-    if (LedgerEntryType !== 'Offer' || !FinalFields || !PreviousFields || FinalFields.Account === account) return;
-
-    const updatedOrderTakerGets = subtractAmounts(PreviousFields.TakerGets as Amount, FinalFields.TakerGets as Amount);
-    const updatedOrderTakerPays = subtractAmounts(PreviousFields.TakerPays as Amount, FinalFields.TakerPays as Amount);
-
-    affectedOffer = {
-      ...(FinalFields as unknown as Offer),
-      TakerGets: updatedOrderTakerGets,
-      TakerPays: updatedOrderTakerPays,
-    };
-  } else if (node.hasOwnProperty('DeletedNode')) {
-    const { LedgerEntryType, FinalFields, PreviousFields } = (node as DeletedNode).DeletedNode;
-    if (LedgerEntryType !== 'Offer' || FinalFields.Account === account) return;
-
-    affectedOffer = FinalFields as unknown as Offer;
-    if (PreviousFields) {
-      affectedOffer.TakerGets = subtractAmounts(PreviousFields.TakerGets as Amount, FinalFields.TakerGets as Amount);
-      affectedOffer.TakerPays = subtractAmounts(PreviousFields.TakerPays as Amount, FinalFields.TakerPays as Amount);
-    }
-  }
-
-  return affectedOffer;
-};
-
-/**
- * Orders
+ * Parsers
  */
 export const parseOrderId = (orderId: string) => {
   const [account, sequenceString] = orderId.split(':');
@@ -79,6 +41,9 @@ export const parseOrderId = (orderId: string) => {
   return { account, sequence, sequenceString };
 };
 
+/**
+ * Getters
+ */
 export const getOrderOrTradeId = (account: AccountAddress, sequence: number) => `${account}:${sequence}`;
 
 export const getOrderSideFromTx = (tx: TxResponse['result']) =>
@@ -106,175 +71,173 @@ export const getOrderCost = (baseAmount: Amount, price: number) => parseAmountVa
 export const getTakerOrMaker = (side: OrderSide) => (side === OrderSide.Buy ? 'taker' : 'maker');
 
 /**
- * Trades
+ * Returns an Offer Ledger object from an AffectedNode
  */
-export const getTrade = async (
-  client: Client,
-  orderId: string,
-  affectedOffer: Offer,
-  txData: TransactionData<OfferCreate>
-): Promise<Trade | undefined> => {
-  const { date, transaction } = txData;
+export const getOfferFromNode = (node: Node): Offer | undefined => {
+  const { PreviousTxnID, LedgerIndex, LedgerEntryType, FinalFields, PreviousFields } = Object.values(node)[0];
 
-  if (!transaction.Sequence) return;
-
-  const tradeSide = transaction.Flags === OfferFlags.lsfSell ? OrderSide.Sell : OrderSide.Buy;
-
-  const tradeBaseAmount = affectedOffer[getBaseAmountKey(tradeSide)];
-  const tradeQuoteAmount = affectedOffer[getQuoteAmountKey(tradeSide)];
-
-  const tradeBaseRate = parseFloat(await fetchTransferRate(client, tradeBaseAmount));
-  const tradeQuoteRate = parseFloat(await fetchTransferRate(client, tradeQuoteAmount));
-
-  const tradeBaseValue = parseAmountValue(tradeBaseAmount);
-  const tradeQuoteValue = parseAmountValue(tradeQuoteAmount);
-
-  const tradePrice = tradeQuoteValue / tradeBaseValue;
-  const tradeCost = tradeBaseValue * tradePrice;
-
-  const tradeFeeCurrency = getAmountCurrencyCode(tradeSide === OrderSide.Buy ? tradeQuoteAmount : tradeBaseAmount);
-  const tradeFeeRate = tradeSide === OrderSide.Buy ? tradeQuoteRate : tradeBaseRate;
-  const tradeFees = tradeBaseValue * tradeFeeRate;
-
-  const tradeFee: Fee = {
-    currency: tradeFeeCurrency,
-    cost: tradeFees.toString(),
-  };
-
-  if (tradeFee.cost != 0) {
-    tradeFee.rate = tradeFeeRate.toString();
-    tradeFee.percentage = true;
-  }
+  if (LedgerEntryType !== 'Offer' || !FinalFields) return;
 
   return {
-    id: getOrderOrTradeId(transaction.Account, transaction.Sequence),
-    order: orderId,
-    datetime: rippleTimeToISOTime(date || 0),
-    timestamp: rippleTimeToUnixTime(date || 0),
-    symbol: getMarketSymbol(tradeBaseAmount, tradeQuoteAmount),
-    type: OrderType.Limit,
-    side: tradeSide,
-    amount: tradeBaseValue.toString(),
-    price: tradePrice.toString(),
-    takerOrMaker: getTakerOrMaker(tradeSide),
-    cost: tradeCost.toString(),
-    fee: tradeFee,
-    info: txData,
-  } as Trade;
+    ...FinalFields,
+    index: LedgerIndex,
+    PreviousTxnID: FinalFields.PreviousTxnID || PreviousTxnID,
+    TakerGets: PreviousFields
+      ? subtractAmounts(PreviousFields.TakerGets as Amount, FinalFields.TakerGets as Amount)
+      : FinalFields.TakerGets,
+    TakerPays: PreviousFields
+      ? subtractAmounts(PreviousFields.TakerPays as Amount, FinalFields.TakerPays as Amount)
+      : FinalFields.TakerPays,
+  };
 };
 
-export const fetchOffer = async (
-  client: Client,
-  account: AccountAddress,
-  sequence: number,
-  params: FetchOrderParams
-): Promise<Offer | undefined> => {
-  const { ledger_index } = params;
+/**
+ * Returns an Offer Ledger object from a Transaction
+ */
+export const getOfferFromTransaction = (
+  transaction: TransactionData<OfferCreate>['transaction']
+): Offer | undefined => {
+  if (transaction.TransactionType !== 'OfferCreate') return;
 
-  const maxSearch = params.max_search || 500;
+  const { Account, Flags, Sequence, TakerGets, TakerPays } = transaction;
 
+  if (!Sequence) return;
+
+  return {
+    Account,
+    BookDirectory: '',
+    BookNode: '0',
+    LedgerEntryType: 'Offer',
+    Flags: Flags as OfferCreateFlags,
+    OwnerNode: '0',
+    Sequence,
+    TakerGets,
+    TakerPays,
+    index: hashOfferId(Account, Sequence),
+    PreviousTxnID: '',
+    PreviousTxnLgrSeq: 0,
+  } as Offer;
+};
+
+/**
+ * Fetchers
+ */
+
+/**
+ * Fetches an Offer's Ledger entry, or returns undefined if not found
+ */
+export const fetchOfferEntry = async (client: Client, orderId: AccountSequencePair): Promise<Offer | undefined> => {
+  const { account, sequence } = parseOrderId(orderId);
   try {
     const offerResult = await client.request({
       command: 'ledger_entry',
-      ledger_index: ledger_index || 'validated',
+      ledger_index: 'validated',
       offer: {
         account,
         seq: sequence,
       },
     } as LedgerEntryRequest);
-
     return offerResult.result.node as Offer;
   } catch (err: unknown) {
     const error = err as RippledError;
-
-    if ((error.data as ErrorResponse).error !== XrplErrorTypes.EntryNotFound) return;
-
-    // This Offer was either closed or canceled - let's do some sleuthing to figure it out
-
-    const limit = DEFAULT_LIMIT;
-    let marker: unknown;
-    let hasNextPage = true;
-    let page = 1;
-
-    while (hasNextPage) {
-      const accountTxResponse = await client.request({
-        command: 'account_tx',
-        account,
-        ledger_index_min: -1,
-        ledger_index_max: -1,
-        binary: false,
-        limit,
-        marker,
-      } as AccountTxRequest);
-
-      marker = accountTxResponse.result.marker;
-
-      accountTxResponse.result.transactions.sort((a, b) => (b.tx?.date || 0) - (a.tx?.date || 0));
-
-      for (const transaction of accountTxResponse.result.transactions) {
-        if (
-          !transaction.meta ||
-          !transaction.tx ||
-          transaction.tx.TransactionType !== 'OfferCreate' ||
-          typeof transaction.meta !== 'object'
-        )
-          continue;
-
-        if (transaction.tx.Account !== account || transaction.tx.Sequence !== sequence) {
-          for (const node of transaction.meta.AffectedNodes) {
-            let offerFields: Offer | undefined;
-            if (
-              node.hasOwnProperty('ModifiedNode') &&
-              (node as ModifiedNode).ModifiedNode.LedgerEntryType === 'Offer' &&
-              (node as ModifiedNode).ModifiedNode.FinalFields?.Account === account &&
-              (node as ModifiedNode).ModifiedNode.FinalFields?.Sequence === sequence
-            ) {
-              offerFields = (node as ModifiedNode).ModifiedNode.FinalFields as unknown as Offer;
-            } else if (
-              node.hasOwnProperty('DeletedNode') &&
-              (node as DeletedNode).DeletedNode.LedgerEntryType === 'Offer' &&
-              (node as DeletedNode).DeletedNode.FinalFields.Account === account &&
-              (node as DeletedNode).DeletedNode.FinalFields.Sequence === sequence
-            ) {
-              offerFields = (node as DeletedNode).DeletedNode.FinalFields as unknown as Offer;
-            }
-            if (offerFields) {
-              return {
-                index: hashOfferId(account, sequence),
-                LedgerEntryType: 'Offer',
-                Flags: typeof offerFields.Flags === 'number' ? offerFields.Flags : 0,
-                Account: offerFields.Account,
-                Sequence: offerFields.Sequence,
-                TakerPays: offerFields.TakerPays,
-                TakerGets: offerFields.TakerGets,
-                BookDirectory: '',
-                BookNode: '0',
-                OwnerNode: '0',
-                PreviousTxnID: transaction.tx.hash || '',
-                PreviousTxnLgrSeq: transaction.tx.LastLedgerSequence || 0,
-              };
-            }
-          }
-        } else {
-          return {
-            index: hashOfferId(account, sequence),
-            LedgerEntryType: 'Offer',
-            Flags: typeof transaction.tx.Flags === 'number' ? transaction.tx.Flags : 0,
-            Account: transaction.tx.Account,
-            Sequence: transaction.tx.Sequence,
-            TakerPays: transaction.tx.TakerPays,
-            TakerGets: transaction.tx.TakerGets,
-            BookDirectory: '',
-            BookNode: '0',
-            OwnerNode: '0',
-            PreviousTxnID: transaction.tx.hash || '',
-            PreviousTxnLgrSeq: transaction.tx.LastLedgerSequence || 0,
-          };
-        }
-      }
-
-      if (!marker || limit * page >= maxSearch) hasNextPage = false;
-      else page += 1;
-    }
+    if ((error.data as ErrorResponse).error !== XrplErrorTypes.EntryNotFound) throw error;
   }
 };
+
+/**
+ * Fetches a Transaction, or returns undefined if not found
+ */
+export const fetchTxn = async (client: Client, txnHash: string): Promise<TxResponse | undefined> => {
+  try {
+    return await client.request({
+      command: 'tx',
+      transaction: txnHash,
+    } as TxRequest);
+  } catch (err: unknown) {
+    const error = err as RippledError;
+    if ((error.data as ErrorResponse).error !== XrplErrorTypes.TxnNotFound) throw error;
+  }
+};
+
+/**
+ * Fetches a list of AccountTransactions, or returns undefined if not found
+ */
+export const fetchAccountTxns = async (
+  client: Client,
+  account: AccountAddress,
+  limit?: number,
+  marker?: any
+): Promise<AccountTxResponse | undefined> => {
+  try {
+    return await client.request({
+      command: 'account_tx',
+      account,
+      ledger_index_min: -1,
+      ledger_index_max: -1,
+      binary: false,
+      limit,
+      marker,
+    } as AccountTxRequest);
+  } catch (err: unknown) {
+    const error = err as RippledError;
+    if ((error.data as ErrorResponse).error !== XrplErrorTypes.TxnNotFound) throw error;
+  }
+};
+
+// /**
+//  * Trades
+//  */
+// export const getTrade = async (
+//   client: Client,
+//   orderId: string,
+//   affectedOffer: Offer,
+//   txData: TransactionData<OfferCreate>
+// ): Promise<Trade | undefined> => {
+//   const { date, transaction } = txData;
+
+//   if (!transaction.Sequence) return;
+
+//   const tradeSide = transaction.Flags === OfferFlags.lsfSell ? OrderSide.Sell : OrderSide.Buy;
+
+//   const tradeBaseAmount = affectedOffer[getBaseAmountKey(tradeSide)];
+//   const tradeQuoteAmount = affectedOffer[getQuoteAmountKey(tradeSide)];
+
+//   const tradeBaseRate = parseFloat(await fetchTransferRate(client, tradeBaseAmount));
+//   const tradeQuoteRate = parseFloat(await fetchTransferRate(client, tradeQuoteAmount));
+
+//   const tradeBaseValue = parseAmountValue(tradeBaseAmount);
+//   const tradeQuoteValue = parseAmountValue(tradeQuoteAmount);
+
+//   const tradePrice = tradeQuoteValue / tradeBaseValue;
+//   const tradeCost = tradeBaseValue * tradePrice;
+
+//   const tradeFeeCurrency = getAmountCurrencyCode(tradeSide === OrderSide.Buy ? tradeQuoteAmount : tradeBaseAmount);
+//   const tradeFeeRate = tradeSide === OrderSide.Buy ? tradeQuoteRate : tradeBaseRate;
+//   const tradeFees = tradeBaseValue * tradeFeeRate;
+
+//   const tradeFee: Fee = {
+//     currency: tradeFeeCurrency,
+//     cost: tradeFees.toString(),
+//   };
+
+//   if (tradeFee.cost != 0) {
+//     tradeFee.rate = tradeFeeRate.toString();
+//     tradeFee.percentage = true;
+//   }
+
+//   return {
+//     id: getOrderOrTradeId(transaction.Account, transaction.Sequence),
+//     order: orderId,
+//     datetime: rippleTimeToISOTime(date || 0),
+//     timestamp: rippleTimeToUnixTime(date || 0),
+//     symbol: getMarketSymbol(tradeBaseAmount, tradeQuoteAmount),
+//     type: OrderType.Limit,
+//     side: tradeSide,
+//     amount: tradeBaseValue.toString(),
+//     price: tradePrice.toString(),
+//     takerOrMaker: getTakerOrMaker(tradeSide),
+//     cost: tradeCost.toString(),
+//     fee: tradeFee,
+//     info: txData,
+//   } as Trade;
+// };
