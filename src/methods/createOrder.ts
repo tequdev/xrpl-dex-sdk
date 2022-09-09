@@ -28,7 +28,7 @@ import {
   getAmount,
   getBaseAmountKey,
   getOrderOrTradeId,
-  getTrade,
+  // getTrade,
   handleTxErrors,
   offerCreateFlagsToTimeInForce,
   parseMarketSymbol,
@@ -163,23 +163,15 @@ async function createOrder(
     }
 
     if (affectedOffer) {
-      const trade = await getTrade(
-        this,
-        getOrderOrTradeId(affectedOffer.Account, affectedOffer.Sequence),
-        affectedOffer,
-        offerCreateTxResponse
-      );
-      // const trade = await getTrade(this, getOrderOrTradeId(affectedOffer.Account, affectedOffer.Sequence), {
-      //   ...offerCreateTxResponse,
-      //   result: {
-      //     ...offerCreateTxResponse.result,
-      //     TakerGets: affectedOffer.TakerPays,
-      //     TakerPays: affectedOffer.TakerGets,
-      //   } as TxResult<OfferCreate>,
-      // });
-      orderTrades.push(trade);
-      totalTradesPrice += parseFloat(trade.price);
-      orderFilled += parseFloat(trade.amount);
+      // const trade = await getTrade(
+      //   this,
+      //   getOrderOrTradeId(affectedOffer.Account, affectedOffer.Sequence),
+      //   affectedOffer,
+      //   offerCreateTxResponse
+      // );
+      // orderTrades.push(trade);
+      // totalTradesPrice += parseFloat(trade.price);
+      // orderFilled += parseFloat(trade.amount);
     }
   }
 

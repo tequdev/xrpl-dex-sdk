@@ -19,7 +19,7 @@ async function cancelOrder(
 ): Promise<CancelOrderResponse | undefined> {
   const { wallet_private_key, wallet_public_key, wallet_secret } = params;
 
-  const { sequenceNumber } = parseOrderId(id);
+  const { sequence } = parseOrderId(id);
 
   if (!wallet_secret && (!wallet_public_key || !wallet_private_key)) {
     throw new BadRequest('Must provide either `wallet_secret` or `wallet_public_key` and `wallet_private_key`');
@@ -32,7 +32,7 @@ async function cancelOrder(
   const offerCancel: OfferCancel = {
     TransactionType: 'OfferCancel',
     Account: wallet.classicAddress,
-    OfferSequence: sequenceNumber,
+    OfferSequence: sequence,
   };
 
   const offerCancelResult = await this.submitAndWait(offerCancel, { autofill: true, wallet });

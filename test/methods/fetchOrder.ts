@@ -9,6 +9,7 @@ import {
   fetchOrder,
 } from '../../src/methods';
 import {
+  FetchOrderResponse,
   // FetchOrderResponse,
   // CreateOrderParams,
   // OrderSide,
@@ -37,9 +38,18 @@ describe('fetchOrder', function () {
   // });
 
   it.only('should do some stuff to set up the tests', async function () {
-    // const sellOrder = await fetchOrder.call(this.client, 'rpkeJcxB2y5BeAFyycuWwdTTcR3og2a3SR:30419059');
-    const sellOrder = await fetchOrder.call(this.client, 'rn5umFvUWKXqwrGJSRcV24wz9zZFiG7rsQ:30419119');
-    console.log(sellOrder);
+    // const sellOrder = (await fetchOrder.call(this.client, 'rpkeJcxB2y5BeAFyycuWwdTTcR3og2a3SR:30419059')) as
+    // const sellOrder = (await fetchOrder.call(this.client, 'rpkeJcxB2y5BeAFyycuWwdTTcR3og2a3SR:30419057')) as
+    const sellOrder = (await fetchOrder.call(this.client, 'rn5umFvUWKXqwrGJSRcV24wz9zZFiG7rsQ:30419117')) as
+      | FetchOrderResponse
+      | undefined;
+    //   | FetchOrderResponse
+    //   | undefined;
+    if (sellOrder) {
+      const { info, trades, ...order } = sellOrder;
+      console.log(order);
+      console.log(trades);
+    }
     // console.log(sellOrder.trades);
   });
 

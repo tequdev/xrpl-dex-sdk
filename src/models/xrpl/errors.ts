@@ -4,4 +4,5 @@ export enum XrplErrorTypes {
   NoCurrentLedger = 'noCurrent',
   NoNetwork = 'noNetwork',
   TooBusy = 'tooBusy',
+  TxnNotFound = 'txnNotFound',
 }

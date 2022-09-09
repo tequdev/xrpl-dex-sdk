@@ -11,7 +11,6 @@ export enum OrderStatus {
 
 export enum OrderType {
   Limit = 'limit',
-  Market = 'market',
 }
 
 export enum OrderTimeInForce {
@@ -35,8 +34,8 @@ export default interface Order {
   lastTradeTimestamp: number;
   status: OrderStatus;
   symbol: MarketSymbol;
-  type: string;
-  timeInForce?: string;
+  type: OrderType;
+  timeInForce?: OrderTimeInForce;
   side: OrderSide;
   amount: string | number;
   price?: string | number; // May be empty for Market orders

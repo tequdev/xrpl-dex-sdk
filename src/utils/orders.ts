@@ -1,4 +1,4 @@
-import { BadRequest } from 'ccxt';
+// import { BadRequest } from 'ccxt';
 import {
   AccountTxRequest,
   Client,
@@ -6,6 +6,7 @@ import {
   ErrorResponse,
   LedgerEntryRequest,
   OfferCreate,
+  // OfferCreate,
   RippledError,
   rippleTimeToISOTime,
   rippleTimeToUnixTime,
@@ -28,7 +29,9 @@ import {
   OrderSide,
   OrderType,
   Trade,
-  TxResult,
+  // Transaction,
+  TransactionData,
+  // TxResult,
   XrplErrorTypes,
 } from '../models';
 import { getAmountCurrencyCode, getMarketSymbol } from './conversions';
@@ -71,9 +74,9 @@ export const getTradeOfferFromNode = (node: Node, account: AccountAddress) => {
  * Orders
  */
 export const parseOrderId = (orderId: string) => {
-  const [account, sequence] = orderId.split(':');
-  const sequenceNumber = parseInt(sequence);
-  return { account, sequence, sequenceNumber };
+  const [account, sequenceString] = orderId.split(':');
+  const sequence = parseInt(sequenceString);
+  return { account, sequence, sequenceString };
 };
 
 export const getOrderOrTradeId = (account: AccountAddress, sequence: number) => `${account}:${sequence}`;
@@ -105,16 +108,17 @@ export const getTakerOrMaker = (side: OrderSide) => (side === OrderSide.Buy ? 't
 /**
  * Trades
  */
-export const getTrade = async (client: Client, orderId: string, affectedOffer: Offer, txResponse: TxResponse) => {
-  if (txResponse.result.TransactionType !== 'OfferCreate') {
-    throw new BadRequest(`Cannot get Trade data from TransactionType ${txResponse.result.TransactionType}`);
-  }
+export const getTrade = async (
+  client: Client,
+  orderId: string,
+  affectedOffer: Offer,
+  txData: TransactionData<OfferCreate>
+): Promise<Trade | undefined> => {
+  const { date, transaction } = txData;
 
-  const tx = txResponse.result as TxResult<OfferCreate>;
+  if (!transaction.Sequence) return;
 
-  if (!tx.Sequence) throw new BadRequest(`Couldn't find Sequence number for Transaction hash ${tx.hash}`);
-
-  const tradeSide = getOrderSideFromTx(tx);
+  const tradeSide = transaction.Flags === OfferFlags.lsfSell ? OrderSide.Sell : OrderSide.Buy;
 
   const tradeBaseAmount = affectedOffer[getBaseAmountKey(tradeSide)];
   const tradeQuoteAmount = affectedOffer[getQuoteAmountKey(tradeSide)];
@@ -142,11 +146,11 @@ export const getTrade = async (client: Client, orderId: string, affectedOffer: O
     tradeFee.percentage = true;
   }
 
-  const trade: Trade = {
-    id: getOrderOrTradeId(affectedOffer.Account, affectedOffer.Sequence),
+  return {
+    id: getOrderOrTradeId(transaction.Account, transaction.Sequence),
     order: orderId,
-    datetime: rippleTimeToISOTime(tx.date || 0),
-    timestamp: rippleTimeToUnixTime(tx.date || 0),
+    datetime: rippleTimeToISOTime(date || 0),
+    timestamp: rippleTimeToUnixTime(date || 0),
     symbol: getMarketSymbol(tradeBaseAmount, tradeQuoteAmount),
     type: OrderType.Limit,
     side: tradeSide,
@@ -155,10 +159,8 @@ export const getTrade = async (client: Client, orderId: string, affectedOffer: O
     takerOrMaker: getTakerOrMaker(tradeSide),
     cost: tradeCost.toString(),
     fee: tradeFee,
-    info: { Transaction: tx },
-  };
-
-  return trade;
+    info: txData,
+  } as Trade;
 };
 
 export const fetchOffer = async (
