@@ -1,5 +1,5 @@
 import { BadRequest } from 'ccxt';
-import { OfferCreate, OfferCreateFlags, setTransactionFlagsToNumber } from 'xrpl';
+import { OfferCreate, OfferCreateFlags, setTransactionFlagsToNumber, xrpToDrops } from 'xrpl';
 import { Amount } from 'xrpl/dist/npm/models/common';
 import { AccountAddress, BigNumberish, CurrencyCode, MarketSymbol, OrderTimeInForce } from '../models';
 
@@ -31,7 +31,7 @@ export const getAmountCurrencyCode = (amount: Amount): CurrencyCode =>
 
 export const getAmount = (code: CurrencyCode, value: BigNumberish, issuer?: AccountAddress): Amount => {
   if (code === 'XRP') {
-    return value.toString();
+    return value.toString().includes('.') ? xrpToDrops(value) : value.toString();
   } else {
     if (!issuer) throw new BadRequest('Non-XRP currencies must specify an issuer');
     return {
@@ -49,13 +49,13 @@ export const offerCreateFlagsToTimeInForce = (tx: OfferCreate): OrderTimeInForce
   setTransactionFlagsToNumber(tx);
   const flags = tx.Flags as number;
   if (flags === 0 && !tx.Expiration) {
-    return OrderTimeInForce.GoodTillCanceled;
+    return 'GTC';
   } else if ((flags & OfferCreateFlags.tfFillOrKill) === OfferCreateFlags.tfFillOrKill) {
-    return OrderTimeInForce.FillOrKill;
+    return 'FOK';
   } else if ((flags & OfferCreateFlags.tfImmediateOrCancel) === OfferCreateFlags.tfImmediateOrCancel) {
-    return OrderTimeInForce.ImmediateOrCancel;
+    return 'IOC';
   } else if ((flags & OfferCreateFlags.tfPassive) === OfferCreateFlags.tfPassive) {
-    return OrderTimeInForce.PostOnly;
+    return 'PO';
   }
 };
 

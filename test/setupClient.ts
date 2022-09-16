@@ -1,8 +1,11 @@
 /* eslint-disable no-param-reassign -- Necessary for test setup */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types -- Necessary for test setup */
 import { Client, BroadcastClient } from 'xrpl';
+import SDK from '../src';
+import { XrplNetwork } from '../src/models';
 
 import createMockRippled from './createMockRippled';
+import { addresses } from './fixtures';
 import serverUrl from './serverUrl';
 import { getFreePort } from './testUtils';
 
@@ -15,11 +18,18 @@ async function setupMockRippledConnection(
   testcase: any,
   port: number
 ): Promise<void> {
-  return new Promise<void>((resolve, reject) => {
+  return new Promise<void>(async (resolve, reject) => {
     testcase.mockRippled = createMockRippled(port);
     testcase._mockedServerPort = port;
-    testcase.client = new Client(`ws://localhost:${port}`);
-    testcase.client.connect().then(resolve).catch(reject);
+    // testcase.client = new Client(`ws://localhost:${port}`);
+    // testcase.client.connect().then(resolve).catch(reject);
+    testcase.sellerSdk = new SDK({
+      walletSecret: addresses.AKT_SELLER_SECRET,
+      websocketsUrl: `ws://localhost:${port}`,
+    });
+    await testcase.sellerSdk.connect();
+    testcase.buyerSdk = new SDK({ walletSecret: addresses.AKT_BUYER_SECRET, websocketsUrl: `ws://localhost:${port}` });
+    await testcase.buyerSdk.connect();
   });
 }
 
@@ -51,7 +61,9 @@ async function setupBroadcast(this: unknown): Promise<void> {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Typing is too complicated
-function teardownClient(this: any, done: () => void): void {
+async function teardownClient(this: any, done: () => void): Promise<void> {
+  await this.sellerSdk.disconnect();
+  await this.buyerSdk.disconnect();
   this.client
     .disconnect()
     .then(() => {
@@ -80,4 +92,34 @@ export async function teardownRemoteClient(this: Mocha.Context): Promise<void> {
 export async function setupRemoteClient(this: Mocha.Context, server = serverUrl): Promise<void> {
   this.client = new Client(server);
   await this.client.connect();
+}
+
+/**
+ * SDK with remote client
+ */
+export async function setupRemoteSDK(this: Mocha.Context, network: XrplNetwork): Promise<void> {
+  this.sellerSdk = new SDK({ walletSecret: addresses.AKT_SELLER_SECRET, network });
+  await this.sellerSdk.connect();
+  this.buyerSdk = new SDK({ walletSecret: addresses.AKT_BUYER_SECRET, network });
+  await this.buyerSdk.connect();
+}
+
+export async function teardownRemoteSDK(this: Mocha.Context): Promise<void> {
+  await this.sellerSdk.disconnect();
+  await this.buyerSdk.disconnect();
+}
+
+/**
+ * SDK with local client
+ */
+export async function setupLocalSDK(this: Mocha.Context, walletSecret: string): Promise<void> {
+  const port = await getFreePort();
+  await setupMockRippledConnection(this, port);
+  const websocketsUrl = `ws://localhost:${port}`;
+  this.sdk = new SDK({ walletSecret, websocketsUrl });
+  await this.sdk.connect();
+}
+
+export async function teardownLocalSDK(this: Mocha.Context): Promise<void> {
+  await this.sdk.disconnect();
 }

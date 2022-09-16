@@ -1,7 +1,7 @@
 import _ from 'lodash';
-import { AccountInfoRequest, AccountLinesRequest, Client, dropsToXrp } from 'xrpl';
+import { AccountInfoRequest, AccountLinesRequest, dropsToXrp } from 'xrpl';
 import { DEFAULT_LIMIT } from '../constants';
-import { Balances, FetchBalanceParams, FetchBalanceResponse } from '../models';
+import { Balances, FetchBalanceParams, FetchBalanceResponse, SDKContext } from '../models';
 import fetchStatus from './fetchStatus';
 
 /**
@@ -11,7 +11,7 @@ import fetchStatus from './fetchStatus';
  * @category Methods
  */
 async function fetchBalance(
-  this: Client,
+  this: SDKContext,
   /* Request parameters */
   params: FetchBalanceParams
 ): Promise<FetchBalanceResponse | undefined> {
@@ -22,7 +22,7 @@ async function fetchBalance(
 
   // Get XRP balances
   if (!code || (code && code === 'XRP')) {
-    const accountInfoResponse = await this.request({
+    const accountInfoResponse = await this.client.request({
       command: 'account_info',
       account,
       ledger_index: 'current',
@@ -55,7 +55,7 @@ async function fetchBalance(
     let hasNextPage = true;
 
     while (hasNextPage) {
-      const accountTrustLinesResponse = await this.request({
+      const accountTrustLinesResponse = await this.client.request({
         command: 'account_lines',
         account,
         ledger_index: 'current',

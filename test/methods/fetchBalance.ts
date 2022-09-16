@@ -1,12 +1,7 @@
 import _ from 'lodash';
 import 'mocha';
 
-import requests from '../fixtures/requests';
-import responses from '../fixtures/responses';
-import rippled from '../fixtures/rippled';
-
-import { fetchBalance } from '../../src/methods';
-import { FetchBalanceResponse } from '../../src/models';
+import { requests, responses, rippled } from '../fixtures';
 import { setupClient, teardownClient } from '../setupClient';
 import { assertResultMatch } from '../testUtils';
 
@@ -20,7 +15,7 @@ describe('fetchBalance', function () {
 
     const { params } = requests.fetchBalance;
 
-    const balances: FetchBalanceResponse | undefined = await fetchBalance.call(this.client, params);
+    const balances = await this.sellerSdk.fetchBalance(params);
 
     assertResultMatch(balances, responses.fetchBalance);
   });

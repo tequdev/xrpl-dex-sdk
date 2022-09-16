@@ -8,28 +8,16 @@ import {
   OfferCreate,
   OfferCreateFlags,
   RippledError,
-  // rippleTimeToISOTime,
-  // rippleTimeToUnixTime,
+  TransactionMetadata,
   TxRequest,
   TxResponse,
+  unixTimeToRippleTime,
 } from 'xrpl';
 import { Amount } from 'xrpl/dist/npm/models/common';
 import { Offer, OfferFlags } from 'xrpl/dist/npm/models/ledger';
 import { parseAmountValue } from 'xrpl/dist/npm/models/transactions/common';
 import { hashOfferId } from 'xrpl/dist/npm/utils/hashes';
-import {
-  AccountAddress,
-  AccountSequencePair,
-  // Fee,
-  Node,
-  OrderSide,
-  // OrderType,
-  // Trade,
-  TransactionData,
-  XrplErrorTypes,
-} from '../models';
-// import { getAmountCurrencyCode, getMarketSymbol } from './conversions';
-// import { fetchTransferRate } from './markets';
+import { AccountAddress, AccountSequencePair, AccountTransaction, Node, OrderSide, TransactionData, TxResult, XrplErrorTypes } from '../models';
 import { divideAmountValues, subtractAmounts } from './numbers';
 
 /**
@@ -46,13 +34,12 @@ export const parseOrderId = (orderId: string) => {
  */
 export const getOrderOrTradeId = (account: AccountAddress, sequence: number) => `${account}:${sequence}`;
 
-export const getOrderSideFromTx = (tx: TxResponse['result']) =>
-  tx.Flags === OfferFlags.lsfSell ? OrderSide.Sell : OrderSide.Buy;
-export const getOrderSideFromOffer = (offer: Offer) =>
-  offer.Flags === OfferFlags.lsfSell ? OrderSide.Sell : OrderSide.Buy;
+export const getOrderSideFromTx = (tx: TxResponse['result']): OrderSide =>
+  tx.Flags === OfferFlags.lsfSell ? 'sell' : 'buy';
+export const getOrderSideFromOffer = (offer: Offer): OrderSide => (offer.Flags === OfferFlags.lsfSell ? 'sell' : 'buy');
 
-export const getBaseAmountKey = (side: OrderSide) => (side === OrderSide.Buy ? 'TakerPays' : 'TakerGets');
-export const getQuoteAmountKey = (side: OrderSide) => (side === OrderSide.Buy ? 'TakerGets' : 'TakerPays');
+export const getBaseAmountKey = (side: OrderSide) => (side === 'buy' ? 'TakerPays' : 'TakerGets');
+export const getQuoteAmountKey = (side: OrderSide) => (side === 'buy' ? 'TakerGets' : 'TakerPays');
 export const getAmountKeys = (side: OrderSide): [base: string, quote: string] => [
   getBaseAmountKey(side),
   getQuoteAmountKey(side),
@@ -68,7 +55,7 @@ export const getOrderPrice = (baseAmount: Amount, quoteAmount: Amount) => divide
 export const getOrderCost = (baseAmount: Amount, price: number) => parseAmountValue(baseAmount) * price;
 
 // TODO: verify this result is correct
-export const getTakerOrMaker = (side: OrderSide) => (side === OrderSide.Buy ? 'taker' : 'maker');
+export const getTakerOrMaker = (side: OrderSide) => (side === 'buy' ? 'taker' : 'maker');
 
 /**
  * Returns an Offer Ledger object from an AffectedNode
@@ -184,6 +171,82 @@ export const fetchAccountTxns = async (
   }
 };
 
+/**
+   * Filter out irrelevant Transactions, parse AffectedNodes, and normalize results
+   */
+ export const parseTransaction = (
+  orderId: AccountSequencePair,
+  transaction: TxResponse | AccountTransaction
+): TransactionData<OfferCreate> | undefined => {
+  const { account, sequence } = parseOrderId(orderId);
+  const offerLedgerIndex = hashOfferId(account, sequence);
+
+  let previousTxnHash: string | undefined;
+
+  const tx = transaction.hasOwnProperty('result')
+    ? ((transaction as TxResponse).result as TxResult<OfferCreate>)
+    : ((transaction as AccountTransaction).tx as TxResult<OfferCreate>);
+
+  const metadata = transaction.hasOwnProperty('result')
+    ? ((transaction as TxResponse).result.meta as TransactionMetadata)
+    : ((transaction as AccountTransaction).meta as TransactionMetadata);
+
+  if (!tx.hash || tx?.TransactionType !== 'OfferCreate' || typeof metadata !== 'object') return;
+
+  const parsedNodes: Node[] = [];
+  const tradeOffers: Offer[] = [];
+
+  if (tx.Account === account && tx.Sequence === sequence) {
+    metadata.AffectedNodes.forEach((affectedNode: Node) => {
+      const offer = getOfferFromNode(affectedNode);
+      if (offer && offer.Account !== account) {
+        tradeOffers.push(offer);
+        parsedNodes.push(affectedNode);
+      }
+    });
+
+    previousTxnHash = undefined;
+  } else {
+    if (tx.Account !== account) {
+      metadata.AffectedNodes.forEach((affectedNode: Node) => {
+        const offer = getOfferFromNode(affectedNode);
+        if (offer && offer.index === offerLedgerIndex) {
+          previousTxnHash = offer.PreviousTxnID;
+
+          // In this case, the Transaction is the Trade data, with the Offer's amounts
+          const tradeOffer = {
+            ...getOfferFromTransaction(tx),
+            PreviousTxnID: offer.PreviousTxnID,
+            TakerGets: offer.TakerGets,
+            TakerPays: offer.TakerPays,
+          } as Offer;
+          if (!tradeOffer) return;
+
+          tradeOffers.push(tradeOffer);
+          parsedNodes.push(affectedNode);
+        }
+      });
+    }
+  }
+
+  if (!tradeOffers.length) return;
+
+  // Strip out the `meta` prop in case the transaction is of type TxResponse['result']
+  const { meta, ...txData } = tx;
+
+  return {
+    transaction: {
+      ...txData,
+    },
+    metadata: {
+      ...metadata,
+      AffectedNodes: parsedNodes,
+    } as TransactionMetadata,
+    offers: tradeOffers,
+    previousTxnId: previousTxnHash,
+    date: tx.date || txData.date || unixTimeToRippleTime(0),
+  };
+};
 // /**
 //  * Trades
 //  */

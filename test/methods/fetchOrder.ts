@@ -1,52 +1,30 @@
 import _ from 'lodash';
 import 'mocha';
 
-// import requests from '../fixtures/requests';
-// import responses from '../fixtures/responses';
+import { requests, responses } from '../fixtures';
+import { XrplNetwork } from '../../src/models';
+import { assertResultMatch } from '../testUtils';
+import { setupRemoteSDK, teardownRemoteSDK } from '../setupClient';
 
-import {
-  // createOrder,
-  fetchOrder,
-} from '../../src/methods';
-import {
-  FetchOrderResponse,
-  // FetchOrderResponse,
-  // CreateOrderParams,
-  // OrderSide,
-  //  OrderType,
-  RippleNetwork,
-} from '../../src/models';
-import networks from '../../src/networks';
-import { setupRemoteClient, teardownRemoteClient } from '../setupClient';
-// import { assertResultMatch } from '../testUtils';
-
-const NETWORK = RippleNetwork.Testnet;
+const NETWORK = XrplNetwork.Testnet;
 
 describe('fetchOrder', function () {
   this.timeout(25000);
 
-  beforeEach(_.partial(setupRemoteClient, networks[NETWORK].websockets));
-  afterEach(teardownRemoteClient);
+  beforeEach(_.partial(setupRemoteSDK, NETWORK));
+  afterEach(teardownRemoteSDK);
 
   /**
    * Sell Orders
    */
 
-  // it('should return a partially filled Sell Order with multiple Trades', async function () {
-  //   const order: FetchOrderResponse | undefined = await fetchOrder.call(this.client, requests.fetchOrder[NETWORK].sell);
-  //   assertResultMatch(order, responses.fetchOrder[NETWORK].sell);
-  // });
+  // it('should return a partially filled Sell Order with multiple Trades', async function () {});
 
-  it.only('should let us debug a few things', async function () {
-    const sellOrder = (await fetchOrder.call(this.client, 'rn5umFvUWKXqwrGJSRcV24wz9zZFiG7rsQ:30419117')) as
-      | FetchOrderResponse
-      | undefined;
-    if (sellOrder) {
-      const { info, trades, ...order } = sellOrder;
-      console.log(order);
-      console.log(trades);
-    }
-  });
+  // it('should retrieve a completed Sell order with multiple Trades', async function () {
+  //   const sellOrder = await fetchOrder.call(this.sellerSdk, requests.fetchOrder[NETWORK].sell);
+  //   assert(typeof sellOrder !== 'undefined');
+  //   assertResultMatch(sellOrder, responses.fetchOrder[NETWORK].completedBuy);
+  // });
 
   // it('should return a completed Sell Order', async function () {});
 
@@ -62,10 +40,10 @@ describe('fetchOrder', function () {
 
   // it('should return a partially filled Buy Order with multiple Trades', async function () {});
 
-  // it('should return a completed Buy Order', async function () {
-  //   const order: FetchOrderResponse = await fetchOrder.call(this.client, requests.fetchOrder[NETWORK].buy);
-  //   assertResultMatch(order, responses.fetchOrder[NETWORK].buy);
-  // });
+  it('should retrieve a completed Buy order with a Trade', async function () {
+    const buyOrder = await this.sellerSdk.fetchOrder(requests.fetchOrder[NETWORK].buy);
+    assertResultMatch(buyOrder, responses.fetchOrder[NETWORK].completedBuy);
+  });
 
   // it('should return a canceled Buy Order', async function () {});
 

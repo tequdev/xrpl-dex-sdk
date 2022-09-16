@@ -1,18 +1,4 @@
 import BigNumber from 'bignumber.js';
-import { Client } from 'xrpl';
-import { Currencies, Markets } from '../ccxt';
-import { Issuers } from '../xrpl';
-
-/**
- * SDK
- */
-export interface SDK {
-  client: Client;
-  markets?: Markets;
-  currencies?: Currencies;
-  issuers?: Issuers;
-  [key: string]: unknown;
-}
 
 /**
  * Aliases
@@ -28,6 +14,12 @@ export type CurrencyCode = string;
 export type MarketSymbol = string;
 
 /**
+ * Datetime
+ */
+export type UnixTimestamp = number; // ms since Unix epoch
+export type XrplTimestamp = number; // ms since Ripple epoch
+
+/**
  * Numbers
  */
 export type BigNumberish = BigNumber | number | string;
@@ -41,7 +33,7 @@ export type Drops = BigNumberish;
 /**
  * Enumerations
  */
-export enum RippleNetwork {
+export enum XrplNetwork {
   Mainnet = 'mainnet',
   MainnetFullHistory1 = 'mainnet_full_history_1',
   MainnetFullHistory2 = 'mainnet_full_history_2',
@@ -65,7 +57,7 @@ export interface PaginationParams {
  * Requests
  */
 export interface BaseParams {
-  network?: RippleNetwork;
+  network?: XrplNetwork;
 }
 
 /**

@@ -1,5 +1,4 @@
-import { Client } from 'xrpl';
-import { FetchTradingFeeResponse, MarketSymbol } from '../models';
+import { SDKContext, FetchTradingFeeResponse, MarketSymbol } from '../models';
 import fetchMarkets from './fetchMarkets';
 
 /**
@@ -9,7 +8,7 @@ import fetchMarkets from './fetchMarkets';
  * @category Methods
  */
 async function fetchTradingFee(
-  this: Client,
+  this: SDKContext,
   /** Unified Market Symbol to look up */
   symbol: MarketSymbol
 ): Promise<FetchTradingFeeResponse | undefined> {

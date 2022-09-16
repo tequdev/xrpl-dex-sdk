@@ -1,4 +1,5 @@
-import accountInfo from './accountInfo.json';
+import * as accountInfo from './accountInfo';
+import accountInfoNormal from './accountInfo.json';
 import accountInfoIssuer from './accountInfoIssuer.json';
 import accountInfoMaker from './accountInfoMaker.json';
 import accountLines from './accountLines.json';
@@ -16,7 +17,8 @@ import serverInfo from './serverInfo.json';
 import normalServerState from './serverState.json';
 
 const account_info = {
-  normal: accountInfo,
+  new: accountInfo,
+  normal: accountInfoNormal,
   issuer: accountInfoIssuer,
   maker: accountInfoMaker,
 };

@@ -1,5 +1,11 @@
-import { Client, FeeRequest } from 'xrpl';
-import { CurrencyCode, FetchTransactionFeesParams, FetchTransactionFeesResponse, TransactionFee } from '../models';
+import { FeeRequest } from 'xrpl';
+import {
+  SDKContext,
+  CurrencyCode,
+  FetchTransactionFeesParams,
+  FetchTransactionFeesResponse,
+  TransactionFee,
+} from '../models';
 import fetchCurrencies from './fetchCurrencies';
 
 /**
@@ -9,13 +15,13 @@ import fetchCurrencies from './fetchCurrencies';
  * @category Methods
  */
 async function fetchTransactionFees(
-  this: Client,
+  this: SDKContext,
   /** Currency codes to get fees for */
   codes: CurrencyCode[],
   /** Parameters specific to the exchange API endpoint */
   params: FetchTransactionFeesParams = {}
 ): Promise<FetchTransactionFeesResponse | undefined> {
-  const { result: feesResult } = await this.request({ command: 'fee' } as FeeRequest);
+  const { result: feesResult } = await this.client.request({ command: 'fee' } as FeeRequest);
 
   const currencies = await fetchCurrencies.call(this);
 

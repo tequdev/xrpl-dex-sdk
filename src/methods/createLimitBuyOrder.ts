@@ -1,6 +1,5 @@
 import _ from 'lodash';
-import { Client } from 'xrpl';
-import { CreateLimitBuyOrderParams, MarketSymbol, Order, OrderSide, OrderType } from '../models';
+import { CreateLimitBuyOrderParams, MarketSymbol, Order, SDKContext } from '../models';
 import createOrder from './createOrder';
 
 /**
@@ -10,7 +9,7 @@ import createOrder from './createOrder';
  * @category Methods
  */
 async function createLimitBuyOrder(
-  this: Client,
+  this: SDKContext,
   /** Token pair (called Unified Market Symbol in CCXT) */
   symbol: MarketSymbol,
   /** How much currency you want to trade (usually, but not always) in units of the base currency) */
@@ -19,8 +18,8 @@ async function createLimitBuyOrder(
   price: string,
   /** Parameters specific to the exchange API endpoint */
   params: CreateLimitBuyOrderParams
-): Promise<Order> {
-  const newOrder: Order = await createOrder.call(this, symbol, OrderSide.Buy, OrderType.Limit, amount, price, params);
+): Promise<Order | undefined> {
+  const newOrder = await createOrder.call(this, symbol, 'buy', 'limit', amount, price, params);
 
   return newOrder;
 }

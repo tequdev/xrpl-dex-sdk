@@ -1,7 +1,145 @@
-import { RippleNetwork } from '../../../src/models';
+import { XrplNetwork } from '../../../src/models';
 
-export default {
-  [RippleNetwork.Testnet]: {
+const responses: Record<string, Record<string, unknown>> = {
+  [XrplNetwork.Testnet]: {
+    completedBuy: {
+      id: 'rn5umFvUWKXqwrGJSRcV24wz9zZFiG7rsQ:30419117',
+      clientOrderId: '2E3C60623505B61BF967FE1BB8C791DB8FA590C0C36508E7BAF92E7EAC559285',
+      datetime: '2022-08-24T19:50:10.000Z',
+      timestamp: 1661370610000,
+      lastTradeTimestamp: 1661370610000,
+      status: 'closed',
+      symbol: 'AKT/XRP',
+      type: 'limit',
+      timeInForce: 'GTC',
+      side: 'buy',
+      amount: '10',
+      price: '1',
+      average: '10',
+      filled: '10',
+      remaining: '0',
+      cost: '10',
+      trades: [
+        {
+          id: 'rpkeJcxB2y5BeAFyycuWwdTTcR3og2a3SR:30419057',
+          order: 'rn5umFvUWKXqwrGJSRcV24wz9zZFiG7rsQ:30419117',
+          datetime: '2022-08-24T19:50:10.000Z',
+          timestamp: 1661370610000,
+          symbol: 'AKT/XRP',
+          type: 'limit',
+          side: 'sell',
+          amount: '10',
+          price: '0.8',
+          takerOrMaker: 'maker',
+          cost: '8',
+          info: {
+            offer: {
+              Account: 'rpkeJcxB2y5BeAFyycuWwdTTcR3og2a3SR',
+              BookDirectory: '203FEB02A5A97B4F348B30577807B4ED600CA192CCAFE44E541C6BF526340000',
+              BookNode: '0',
+              Flags: 131072,
+              OwnerNode: '0',
+              Sequence: 30419057,
+              TakerGets: {
+                currency: 'AKT',
+                issuer: 'rMZoAqwRn3BLbmFYL3exNVNVKrceYcNy6B',
+                value: '10',
+              },
+              TakerPays: '8',
+              index: 'ABBDE28603ED3040FB76701A4CD130E301553432B89A74C3D09BCFB7B6F5FCAA',
+              PreviousTxnID: '399D8877C81804A2A1E8E9ADCACF64BF6F01C158B594D3ACE91D7AEB46BC6898',
+            },
+          },
+          fee: {
+            currency: 'AKT',
+            cost: '0.05',
+            rate: '0.005',
+            percentage: true,
+          },
+        },
+      ],
+      info: {
+        transactionData: {
+          transaction: {
+            Account: 'rn5umFvUWKXqwrGJSRcV24wz9zZFiG7rsQ',
+            Fee: '12',
+            Flags: 0,
+            LastLedgerSequence: 30604394,
+            Sequence: 30419117,
+            SigningPubKey: '03C8D190247CF46B9A694B73F365387B2FD60DAF464394FD7727EBBE0C0D059D3F',
+            TakerGets: '10',
+            TakerPays: {
+              currency: 'AKT',
+              issuer: 'rMZoAqwRn3BLbmFYL3exNVNVKrceYcNy6B',
+              value: '10',
+            },
+            TransactionType: 'OfferCreate',
+            TxnSignature:
+              '304402203201DE46976B1FEE7B2FA1B7404F9E0EA2745D7CCDFF80899FC003C9CAD5351802207FA12A9BAD2FE6A2F17B719B7603B711F9D676F706CD873496AB76379625FBCA',
+            date: 714685810,
+            hash: '182F0B9382F85A24522A5D57E41B3EBBE5EB7890AF5E7E4603AD27A8DEEADC51',
+            inLedger: 30604375,
+            ledger_index: 30604375,
+          },
+          previousTxnId: undefined,
+          metadata: {
+            AffectedNodes: [
+              {
+                ModifiedNode: {
+                  FinalFields: {
+                    Account: 'rpkeJcxB2y5BeAFyycuWwdTTcR3og2a3SR',
+                    BookDirectory: '203FEB02A5A97B4F348B30577807B4ED600CA192CCAFE44E541C6BF526340000',
+                    BookNode: '0',
+                    Flags: 131072,
+                    OwnerNode: '0',
+                    Sequence: 30419057,
+                    TakerGets: {
+                      currency: 'AKT',
+                      issuer: 'rMZoAqwRn3BLbmFYL3exNVNVKrceYcNy6B',
+                      value: '70',
+                    },
+                    TakerPays: '56',
+                  },
+                  LedgerEntryType: 'Offer',
+                  LedgerIndex: 'ABBDE28603ED3040FB76701A4CD130E301553432B89A74C3D09BCFB7B6F5FCAA',
+                  PreviousFields: {
+                    TakerGets: {
+                      currency: 'AKT',
+                      issuer: 'rMZoAqwRn3BLbmFYL3exNVNVKrceYcNy6B',
+                      value: '80',
+                    },
+                    TakerPays: '64',
+                  },
+                  PreviousTxnID: '399D8877C81804A2A1E8E9ADCACF64BF6F01C158B594D3ACE91D7AEB46BC6898',
+                  PreviousTxnLgrSeq: 30604345,
+                },
+              },
+            ],
+            TransactionIndex: 4,
+            TransactionResult: 'tesSUCCESS',
+          },
+          offers: [
+            {
+              Account: 'rpkeJcxB2y5BeAFyycuWwdTTcR3og2a3SR',
+              BookDirectory: '203FEB02A5A97B4F348B30577807B4ED600CA192CCAFE44E541C6BF526340000',
+              BookNode: '0',
+              Flags: 131072,
+              OwnerNode: '0',
+              Sequence: 30419057,
+              TakerGets: {
+                currency: 'AKT',
+                issuer: 'rMZoAqwRn3BLbmFYL3exNVNVKrceYcNy6B',
+                value: '10',
+              },
+              TakerPays: '8',
+              index: 'ABBDE28603ED3040FB76701A4CD130E301553432B89A74C3D09BCFB7B6F5FCAA',
+              PreviousTxnID: '399D8877C81804A2A1E8E9ADCACF64BF6F01C158B594D3ACE91D7AEB46BC6898',
+            },
+          ],
+          date: 714685810,
+        },
+      },
+    },
     buy: {
       id: 'rn5umFvUWKXqwrGJSRcV24wz9zZFiG7rsQ:30419117',
       clientOrderId: '2E3C60623505B61BF967FE1BB8C791DB8FA590C0C36508E7BAF92E7EAC559285',
@@ -785,3 +923,5 @@ export default {
     },
   },
 };
+
+export default responses;

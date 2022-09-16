@@ -1,7 +1,7 @@
 import _ from 'lodash';
-import { Client, transferRateToDecimal } from 'xrpl';
+import { transferRateToDecimal } from 'xrpl';
 import { markets } from '../data';
-import { Markets, FetchMarketsResponse } from '../models';
+import { FetchMarketsResponse, SDKContext, XrplNetwork } from '../models';
 
 /**
  * Retrieves a list of markets being traded on the dEX. Returns
@@ -9,8 +9,8 @@ import { Markets, FetchMarketsResponse } from '../models';
  *
  * @category Methods
  */
-async function fetchMarkets(this: Client): Promise<FetchMarketsResponse> {
-  const response = markets as Markets;
+async function fetchMarkets(this: SDKContext): Promise<FetchMarketsResponse> {
+  const response = markets[this.params.network || XrplNetwork.Mainnet];
 
   const marketKeys = Object.keys(response);
 
@@ -20,7 +20,7 @@ async function fetchMarkets(this: Client): Promise<FetchMarketsResponse> {
     const market = response[marketKey];
 
     if (market.baseIssuer) {
-      const { result: baseIssuerResult } = await this.request({
+      const { result: baseIssuerResult } = await this.client.request({
         command: 'account_info',
         account: market.baseIssuer,
       });
@@ -33,7 +33,7 @@ async function fetchMarkets(this: Client): Promise<FetchMarketsResponse> {
     }
 
     if (market.quoteIssuer) {
-      const { result: quoteIssuerResult } = await this.request({
+      const { result: quoteIssuerResult } = await this.client.request({
         command: 'account_info',
         account: market.quoteIssuer,
       });

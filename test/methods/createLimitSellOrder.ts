@@ -1,32 +1,30 @@
 import _ from 'lodash';
-import { assert } from 'chai';
 import 'mocha';
 
-import requests from '../fixtures/requests';
-import responses from '../fixtures/responses';
-
-import { createLimitSellOrder } from '../../src/methods';
-import { Order } from '../../src/models';
-import { setupRemoteClient, teardownRemoteClient } from '../setupClient';
-import networks from '../../src/networks';
+import { requests, responses } from '../fixtures';
+import { CreateLimitSellOrderResponse, XrplNetwork } from '../../src/models';
+import { setupRemoteSDK, teardownRemoteSDK } from '../setupClient';
 import { assertResultMatch } from '../testUtils';
 
 const TIMEOUT = 10000;
+const NETWORK = XrplNetwork.Testnet;
 
 describe('createLimitSellOrder', function () {
   this.timeout(TIMEOUT);
 
-  beforeEach(_.partial(setupRemoteClient, networks.testnet.websockets));
-  afterEach(teardownRemoteClient);
+  beforeEach(_.partial(setupRemoteSDK, NETWORK));
+  afterEach(teardownRemoteSDK);
 
   it('should create a Limit Sell Order', async function () {
     const { symbol, amount, price, params } = requests.createOrder.sell;
-    const newOrder: Order = await createLimitSellOrder.call(this.client, symbol, amount, price, params);
-
-    assert(typeof newOrder !== 'undefined');
+    const newOrder = (await this.sellerSdk.createLimitSellOrder(
+      symbol,
+      amount,
+      price,
+      params
+    )) as CreateLimitSellOrderResponse;
 
     const { id, datetime, timestamp, fee, info, status, ...expectedResponse } = responses.createOrder.sell;
-
     assertResultMatch(newOrder, { ...newOrder, ...expectedResponse });
   });
 });

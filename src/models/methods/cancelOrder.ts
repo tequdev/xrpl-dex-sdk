@@ -1,4 +1,4 @@
-import { BaseParams, BaseResponse, Sequence } from '../common';
+import { BaseParams, Sequence } from '../common';
 
 /**
  * Request parameters for a cancelOrder call
@@ -19,4 +19,4 @@ export interface CancelOrderParams extends BaseParams {
  *
  * @category Responses
  */
-export type CancelOrderResponse = BaseResponse & { id: Sequence };
+export type CancelOrderResponse = { id: Sequence; info: any };

@@ -1,11 +1,6 @@
 import 'mocha';
 
-import requests from '../fixtures/requests';
-import responses from '../fixtures/responses';
-import rippled from '../fixtures/rippled';
-
-import { fetchOrderBook } from '../../src/methods';
-import { FetchOrderBookResponse } from '../../src/models';
+import { requests, responses, rippled } from '../fixtures';
 import { setupClient, teardownClient } from '../setupClient';
 import { assertResultMatch } from '../testUtils';
 
@@ -18,8 +13,7 @@ describe('fetchOrderBook', function () {
 
     const { symbol, limit, params } = requests.fetchOrderBook;
 
-    const response: FetchOrderBookResponse = await fetchOrderBook.call(this.client, symbol, limit, params);
-
-    assertResultMatch(response, responses.fetchOrderBook);
+    const orderBook = await this.sellerSdk.fetchOrderBook(symbol, limit, params);
+    assertResultMatch(orderBook, responses.fetchOrderBook);
   });
 });

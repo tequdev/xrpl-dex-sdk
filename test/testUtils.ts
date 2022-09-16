@@ -13,8 +13,8 @@ import { hashSignedTx } from 'xrpl/dist/npm/utils/hashes';
  * Setup to run tests on both classic addresses and X-addresses.
  */
 export const addressTests = [
-  { type: 'Classic Address', address: addresses.ACCOUNT },
-  { type: 'X-Address', address: addresses.ACCOUNT_X },
+  { type: 'Classic Address', address: addresses.AKT_BUYER },
+  { type: 'X-Address', address: addresses.AKT_SELLER },
 ];
 
 /**

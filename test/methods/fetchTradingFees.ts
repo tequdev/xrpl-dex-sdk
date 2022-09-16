@@ -1,10 +1,7 @@
 import _ from 'lodash';
 import 'mocha';
 
-import responses from '../fixtures/responses';
-import rippled from '../fixtures/rippled';
-
-import { fetchTradingFees } from '../../src/methods';
+import { responses, rippled } from '../fixtures';
 import { setupClient, teardownClient } from '../setupClient';
 import { assertResultMatch } from '../testUtils';
 
@@ -20,8 +17,7 @@ describe('fetchTradingFees', function () {
       this.mockRippled.addResponse('account_info', rippled.account_info.issuer);
     }
 
-    const response = await fetchTradingFees.call(this.client);
-
-    assertResultMatch(response, responses.fetchTradingFees);
+    const tradingFees = await this.sellerSdk.fetchTradingFees();
+    assertResultMatch(tradingFees, responses.fetchTradingFees);
   });
 });

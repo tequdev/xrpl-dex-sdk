@@ -1,10 +1,6 @@
 import 'mocha';
 
-import responses from '../fixtures/responses';
-import rippled from '../fixtures/rippled';
-
-import { fetchStatus } from '../../src/methods';
-import { FetchStatusResponse } from '../../src/models';
+import { responses, rippled } from '../fixtures';
 import { setupClient, teardownClient } from '../setupClient';
 import { assertResultMatch } from '../testUtils';
 
@@ -15,8 +11,7 @@ describe('fetchStatus', function () {
   it("should return 'ok' if the exchange server is running", async function () {
     this.mockRippled.addResponse('server_state', () => rippled.server_state.normal);
 
-    const response: FetchStatusResponse = await fetchStatus.call(this.client);
-
-    assertResultMatch(response, responses.fetchStatus);
+    const status = await this.sellerSdk.fetchStatus();
+    assertResultMatch(status, responses.fetchStatus);
   });
 });

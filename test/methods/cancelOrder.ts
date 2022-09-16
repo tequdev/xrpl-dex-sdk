@@ -1,43 +1,33 @@
 import _ from 'lodash';
 import { assert } from 'chai';
 import 'mocha';
-import { Client } from 'xrpl';
 
-import requests from '../fixtures/requests';
-
-import { cancelOrder, createOrder } from '../../src/methods';
-import { Order, OrderSide, OrderType } from '../../src/models';
-import { teardownRemoteClient } from '../setupClient';
-import networks from '../../src/networks';
+import { requests } from '../fixtures';
+import { CreateOrderResponse, OrderSide, OrderType, XrplNetwork } from '../../src/models';
+import { setupRemoteSDK, teardownRemoteSDK } from '../setupClient';
 
 const TIMEOUT = 20000;
+const NETWORK = XrplNetwork.Testnet;
 
 describe('cancelOrder', function () {
   this.timeout(TIMEOUT);
 
-  beforeEach(async function (this) {
-    this.client = new Client(networks.testnet.websockets);
-    await this.client.connect();
-  });
-  afterEach(teardownRemoteClient);
+  beforeEach(_.partial(setupRemoteSDK, NETWORK));
+  afterEach(teardownRemoteSDK);
 
   it('should create and then cancel an Order', async function () {
     const { symbol, side, type, amount, price, params } = requests.createOrder.buy;
-    const newOrder: Order = await createOrder.call(
-      this.client,
+    const newOrder = (await this.buyerSdk.createOrder(
       symbol,
       side as OrderSide,
       type as OrderType,
       amount,
       price,
       params
-    );
+    )) as CreateOrderResponse;
 
-    assert(typeof newOrder !== 'undefined');
+    const canceledOrder = await this.buyerSdk.cancelOrder(newOrder.id, { wallet_secret: params.wallet_secret });
 
-    const canceledOrder = await cancelOrder.call(this.client, newOrder.id, { wallet_secret: params.wallet_secret });
-
-    assert(typeof canceledOrder !== 'undefined');
     assert(canceledOrder.id === newOrder.id);
   });
 });

@@ -13,6 +13,6 @@ export default interface Trade {
   price: string; // float price in quote currency
   takerOrMaker: 'taker' | 'maker'; // string, 'taker' or 'maker'
   cost: string; // total cost (including fees), `price * amount`
-  fee: Fee;
+  fee?: Fee;
   info: any; // the original decoded JSON as is
 }

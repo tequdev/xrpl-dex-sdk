@@ -1,7 +1,7 @@
 import { BadRequest } from 'ccxt';
 import _ from 'lodash';
-import { Client, OfferCancel, Wallet } from 'xrpl';
-import { CancelOrderParams, CancelOrderResponse } from '../models';
+import { OfferCancel, Wallet } from 'xrpl';
+import { AccountSequencePair, CancelOrderParams, CancelOrderResponse, SDKContext } from '../models';
 import { parseOrderId } from '../utils';
 
 /**
@@ -11,9 +11,9 @@ import { parseOrderId } from '../utils';
  * @category Methods
  */
 async function cancelOrder(
-  this: Client,
+  this: SDKContext,
   /** ID of the Order to cancel */
-  id: string,
+  id: AccountSequencePair,
   /** Exchange-specific parameters */
   params: CancelOrderParams
 ): Promise<CancelOrderResponse | undefined> {
@@ -35,7 +35,7 @@ async function cancelOrder(
     OfferSequence: sequence,
   };
 
-  const offerCancelResult = await this.submitAndWait(offerCancel, { autofill: true, wallet });
+  const offerCancelResult = await this.client.submitAndWait(offerCancel, { autofill: true, wallet });
 
   const response: CancelOrderResponse = {
     id,

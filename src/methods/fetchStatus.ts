@@ -1,5 +1,4 @@
-import { Client } from 'xrpl';
-import { ExchangeStatusType, FetchStatusResponse } from '../models';
+import { SDKContext, ExchangeStatusType, FetchStatusResponse } from '../models';
 
 /**
  * Returns information regarding {@link ExchangeStatus} from either the info
@@ -8,8 +7,8 @@ import { ExchangeStatusType, FetchStatusResponse } from '../models';
  *
  * @category Methods
  */
-async function fetchStatus(this: Client): Promise<FetchStatusResponse> {
-  const serverStateResponse = await this.request({
+async function fetchStatus(this: SDKContext): Promise<FetchStatusResponse> {
+  const serverStateResponse = await this.client.request({
     command: 'server_state',
   });
 
