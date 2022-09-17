@@ -6,6 +6,6 @@
   "price": "100",
   "params": {
     "wallet_secret": "spuZqrBF6SV9TyKJriggFV63Q46cd",
-    "taker_gets_issuer": "rMH4UxPrbuMa1spCBR98hLLyNJp4d8p4tM"
+    "baseCurrencyIssuer": "rMH4UxPrbuMa1spCBR98hLLyNJp4d8p4tM"
   }
 }

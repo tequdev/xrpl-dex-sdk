@@ -47,6 +47,10 @@ export interface UnifiedTransaction {
 //   ledger_index?: number;
 // }
 
+export type LedgerTransaction<T> = T & {
+  metaData?: TransactionMetadata | undefined;
+};
+
 export interface AccountTransaction {
   ledger_index: number;
   meta: string | TransactionMetadata;

@@ -6,3 +6,7 @@ export enum XrplErrorTypes {
   TooBusy = 'tooBusy',
   TxnNotFound = 'txnNotFound',
 }
+
+export enum XrplTransactionErrorTypes {
+  NoIssuer = 'tecNO_ISSUER',
+}

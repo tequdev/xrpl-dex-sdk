@@ -1,3 +1,4 @@
+import { BadResponse } from 'ccxt';
 import {
   AccountTxRequest,
   AccountTxResponse,
@@ -13,11 +14,22 @@ import {
   TxResponse,
   unixTimeToRippleTime,
 } from 'xrpl';
-import { Amount } from 'xrpl/dist/npm/models/common';
+import { Amount, LedgerIndex } from 'xrpl/dist/npm/models/common';
 import { Offer, OfferFlags } from 'xrpl/dist/npm/models/ledger';
 import { parseAmountValue } from 'xrpl/dist/npm/models/transactions/common';
 import { hashOfferId } from 'xrpl/dist/npm/utils/hashes';
-import { AccountAddress, AccountSequencePair, AccountTransaction, Node, OrderSide, TransactionData, TxResult, XrplErrorTypes } from '../models';
+import { DEFAULT_LIMIT, DEFAULT_SEARCH_LIMIT } from '../constants';
+import {
+  AccountAddress,
+  AccountSequencePair,
+  AccountTransaction,
+  LedgerTransaction,
+  Node,
+  OrderSide,
+  TransactionData,
+  TxResult,
+  XrplErrorTypes,
+} from '../models';
 import { divideAmountValues, subtractAmounts } from './numbers';
 
 /**
@@ -113,12 +125,16 @@ export const getOfferFromTransaction = (
 /**
  * Fetches an Offer's Ledger entry, or returns undefined if not found
  */
-export const fetchOfferEntry = async (client: Client, orderId: AccountSequencePair): Promise<Offer | undefined> => {
+export const fetchOfferEntry = async (
+  client: Client,
+  orderId: AccountSequencePair,
+  ledgerIndex: LedgerIndex = 'validated'
+): Promise<Offer | undefined> => {
   const { account, sequence } = parseOrderId(orderId);
   try {
     const offerResult = await client.request({
       command: 'ledger_entry',
-      ledger_index: 'validated',
+      ledger_index: ledgerIndex,
       offer: {
         account,
         seq: sequence,
@@ -172,24 +188,47 @@ export const fetchAccountTxns = async (
 };
 
 /**
-   * Filter out irrelevant Transactions, parse AffectedNodes, and normalize results
-   */
- export const parseTransaction = (
+ * Filter out irrelevant Transactions, parse AffectedNodes, and normalize results
+ */
+export const parseTransaction = (
   orderId: AccountSequencePair,
-  transaction: TxResponse | AccountTransaction
+  transaction:
+    | TxResponse
+    | AccountTransaction
+    | (OfferCreate & {
+        metaData?: TransactionMetadata | undefined;
+      })
 ): TransactionData<OfferCreate> | undefined => {
   const { account, sequence } = parseOrderId(orderId);
   const offerLedgerIndex = hashOfferId(account, sequence);
 
   let previousTxnHash: string | undefined;
 
-  const tx = transaction.hasOwnProperty('result')
-    ? ((transaction as TxResponse).result as TxResult<OfferCreate>)
-    : ((transaction as AccountTransaction).tx as TxResult<OfferCreate>);
+  let tx: TxResult<OfferCreate>;
+  let metadata: string | TransactionMetadata | undefined;
 
-  const metadata = transaction.hasOwnProperty('result')
-    ? ((transaction as TxResponse).result.meta as TransactionMetadata)
-    : ((transaction as AccountTransaction).meta as TransactionMetadata);
+  if (transaction.hasOwnProperty('result')) {
+    if ((transaction as TxResponse).result.TransactionType !== 'OfferCreate') return;
+    tx = (transaction as TxResponse).result as TxResult<OfferCreate>;
+    metadata = tx.meta;
+  } else if (transaction.hasOwnProperty('tx')) {
+    if ((transaction as AccountTransaction).tx?.TransactionType !== 'OfferCreate') return;
+    tx = (transaction as AccountTransaction).tx as TxResult<OfferCreate>;
+    metadata = (transaction as AccountTransaction).meta;
+  } else if (transaction.hasOwnProperty('metaData')) {
+    if ((transaction as LedgerTransaction<OfferCreate>).TransactionType !== 'OfferCreate') return;
+    const { metaData, ...ledgerTx } = transaction as LedgerTransaction<OfferCreate>;
+    tx = ledgerTx as TxResult<OfferCreate>;
+    metadata = metaData;
+  } else return;
+
+  // const tx = transaction.hasOwnProperty('result')
+  //   ? ((transaction as TxResponse).result as TxResult<OfferCreate>)
+  //   : ((transaction as AccountTransaction).tx as TxResult<OfferCreate>);
+
+  // const metadata = transaction.hasOwnProperty('result')
+  //   ? ((transaction as TxResponse).result.meta as TransactionMetadata)
+  //   : ((transaction as AccountTransaction).meta as TransactionMetadata);
 
   if (!tx.hash || tx?.TransactionType !== 'OfferCreate' || typeof metadata !== 'object') return;
 
@@ -229,8 +268,6 @@ export const fetchAccountTxns = async (
     }
   }
 
-  if (!tradeOffers.length) return;
-
   // Strip out the `meta` prop in case the transaction is of type TxResponse['result']
   const { meta, ...txData } = tx;
 
@@ -247,6 +284,54 @@ export const fetchAccountTxns = async (
     date: tx.date || txData.date || unixTimeToRippleTime(0),
   };
 };
+
+/**
+ * Get the most recent Transaction to affect an Order
+ */
+export const getMostRecentTxId = async (
+  client: Client,
+  id: AccountSequencePair,
+  /** This is to prevent us spending forever searching through an account's Transactions for an Order */
+  searchLimit: number = DEFAULT_SEARCH_LIMIT
+) => {
+  const ledgerOffer = await fetchOfferEntry(client, id);
+
+  if (ledgerOffer) {
+    return ledgerOffer.PreviousTxnID;
+  } else {
+    const { account } = parseOrderId(id);
+
+    const limit = DEFAULT_LIMIT;
+    let marker: unknown;
+    let hasNextPage = true;
+    let page = 1;
+
+    while (hasNextPage) {
+      const accountTxResponse = await fetchAccountTxns(client, account, limit, marker);
+      if (!accountTxResponse) return;
+      marker = accountTxResponse.result.marker;
+
+      accountTxResponse.result.transactions.sort((a, b) => (b.tx?.date || 0) - (a.tx?.date || 0));
+
+      for (const transaction of accountTxResponse.result.transactions) {
+        // if (transaction.tx?.TransactionType === 'OfferCancel' && transaction.tx.Account === account) {
+        //   status = 'canceled';
+        // }
+
+        const previousTxnData = parseTransaction(id, transaction);
+        if (previousTxnData) return previousTxnData?.previousTxnId;
+      }
+
+      if (!marker || limit * page >= searchLimit) hasNextPage = false;
+      else {
+        page += 1;
+      }
+    }
+
+    throw new BadResponse(`Could not find Transaction history for Order ${id}`);
+  }
+};
+
 // /**
 //  * Trades
 //  */

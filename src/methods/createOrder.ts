@@ -2,7 +2,7 @@ import { BadResponse } from 'ccxt';
 import _ from 'lodash';
 import { OfferCreate, setTransactionFlagsToNumber } from 'xrpl';
 import { CreateOrderParams, MarketSymbol, Order, OrderSide, OrderType, SDKContext } from '../models';
-import { getAmount, getBaseAmountKey, parseMarketSymbol } from '../utils';
+import { getAmount, getBaseAmountKey, getOrderOrTradeId, handleTxErrors, parseMarketSymbol } from '../utils';
 
 /**
  * Creates a new Order on the Ripple dEX. Returns an {@link CreateOrderResponse}
@@ -54,14 +54,12 @@ async function createOrder(
 
   setTransactionFlagsToNumber(offerCreateRequest);
 
-  console.log(offerCreateRequest);
-
   const offerCreateTxResponse = await this.client.submitAndWait(offerCreateRequest, {
     autofill: true,
     wallet: this.wallet,
   });
 
-  // handleTxErrors(offerCreateTxResponse);
+  handleTxErrors(offerCreateTxResponse);
 
   const offerCreateTx = offerCreateTxResponse.result;
 
@@ -69,15 +67,15 @@ async function createOrder(
     throw new BadResponse(`Bad data for OrderCreate Transaction with hash ${offerCreateTx.hash}`);
   }
 
-  // const orderId = getOrderOrTradeId(offerCreateTx.Account, offerCreateTx.Sequence);
+  const orderId = getOrderOrTradeId(offerCreateTx.Account, offerCreateTx.Sequence);
 
-  // const { info, ...order } = (await fetchOrder.call(this, orderId)) as FetchOrderResponse;
+  const order = await this.fetchOrder(orderId);
 
-  // console.log(order);
+  console.log(order);
 
-  // // return order as Order;
+  return order as Order;
 
-  return;
+  // return;
 
   // const orderTrades: Trade[] = [];
 

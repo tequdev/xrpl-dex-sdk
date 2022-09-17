@@ -2,7 +2,7 @@ import { Order } from '../ccxt';
 
 export interface FetchOrdersParams {
   /** Max Transactions to search through looking for Order data before giving up */
-  maxSearch?: number;
+  searchLimit?: number;
   /** Whether to return Open orders */
   showOpen?: boolean;
   /** Whether to return Closed orders */

@@ -3,7 +3,8 @@ import { assert } from 'chai';
 import 'mocha';
 
 import { requests } from '../fixtures';
-import { CreateOrderResponse, OrderSide, OrderType, XrplNetwork } from '../../src/models';
+import { OrderSide, OrderType, SDKContext } from '../../src/models';
+import { XrplNetwork } from '../../src/models';
 import { setupRemoteSDK, teardownRemoteSDK } from '../setupClient';
 
 const TIMEOUT = 20000;
@@ -16,18 +17,18 @@ describe('cancelOrder', function () {
   afterEach(teardownRemoteSDK);
 
   it('should create and then cancel an Order', async function () {
-    const { symbol, side, type, amount, price, params } = requests.createOrder.buy;
-    const newOrder = (await this.buyerSdk.createOrder(
+    const { symbol, side, type, amount, price, params } = requests.createOrder.smallBuyOrder;
+    const newOrder = await (this.buyerSdk as SDKContext).createOrder(
       symbol,
       side as OrderSide,
       type as OrderType,
       amount,
       price,
       params
-    )) as CreateOrderResponse;
+    );
+    assert(typeof newOrder !== 'undefined');
 
-    const canceledOrder = await this.buyerSdk.cancelOrder(newOrder.id, { wallet_secret: params.wallet_secret });
-
+    const canceledOrder = await this.buyerSdk.cancelOrder(newOrder.id);
     assert(canceledOrder.id === newOrder.id);
   });
 });

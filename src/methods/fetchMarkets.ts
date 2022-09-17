@@ -10,6 +10,8 @@ import { FetchMarketsResponse, SDKContext, XrplNetwork } from '../models';
  * @category Methods
  */
 async function fetchMarkets(this: SDKContext): Promise<FetchMarketsResponse> {
+  if (this.markets) return this.markets;
+
   const response = markets[this.params.network || XrplNetwork.Mainnet];
 
   const marketKeys = Object.keys(response);

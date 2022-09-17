@@ -10,6 +10,8 @@ import { FetchMarketResponse, MarketSymbol, SDKContext, XrplNetwork } from '../m
  * @category Methods
  */
 async function fetchMarket(this: SDKContext, symbol: MarketSymbol): Promise<FetchMarketResponse | undefined> {
+  if (this.markets && this.markets[symbol]) return this.markets[symbol];
+
   const market = markets[this.params.network || XrplNetwork.Mainnet][symbol];
 
   if (!market) return;

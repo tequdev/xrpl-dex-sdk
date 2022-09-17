@@ -19,11 +19,11 @@ async function fetchCanceledOrders(
   /** eslint-disable-next-line */
   params: FetchCanceledOrdersParams = {}
 ): Promise<FetchCanceledOrdersResponse> {
-  const { maxSearch } = params;
+  const { searchLimit } = params;
 
   const orders =
     (await this.fetchOrders(symbol, since, limit, {
-      maxSearch,
+      searchLimit,
       showOpen: false,
       showClosed: false,
       showCanceled: true,

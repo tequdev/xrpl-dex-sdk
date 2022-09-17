@@ -1,10 +1,8 @@
-import { BadResponse } from 'ccxt';
 import _ from 'lodash';
 import { OfferCreate, OfferCreateFlags, rippleTimeToISOTime, rippleTimeToUnixTime } from 'xrpl';
 import { OfferFlags } from 'xrpl/dist/npm/models/ledger';
 import { parseAmountValue } from 'xrpl/dist/npm/models/transactions/common';
 import { hashOfferId } from 'xrpl/dist/npm/utils/hashes';
-import { DEFAULT_LIMIT, DEFAULT_MAX_SEARCH } from '../constants';
 import {
   FetchOrderParams,
   FetchOrderResponse,
@@ -19,13 +17,12 @@ import {
   SDKContext,
 } from '../models';
 import {
-  fetchAccountTxns,
-  fetchOfferEntry,
   fetchTransferRate,
   fetchTxn,
   getAmountCurrencyCode,
   getBaseAmountKey,
   getMarketSymbol,
+  getMostRecentTxId,
   getOrderOrTradeId,
   getQuoteAmountKey,
   getTakerOrMaker,
@@ -50,63 +47,8 @@ async function fetchOrder(
   const transactions: TransactionData<OfferCreate>[] = [];
 
   let status: OrderStatus = 'open';
-  let previousTxnId: string | undefined;
+  let previousTxnId = await getMostRecentTxId(this.client, id, params.searchLimit);
   let previousTxnData: TransactionData<OfferCreate> | undefined;
-
-  /**
-   * Get the most recent Transaction to affect our Order
-   */
-  const ledgerOffer = await fetchOfferEntry(this.client, id);
-
-  if (ledgerOffer) {
-    previousTxnId = ledgerOffer.PreviousTxnID;
-    const previousTxnResponse = await fetchTxn(this.client, previousTxnId);
-    if (!previousTxnResponse) {
-      previousTxnId = undefined;
-      return;
-    }
-    if (typeof previousTxnResponse?.result.meta !== 'object') return;
-    previousTxnData = parseTransaction(id, previousTxnResponse);
-  } else {
-    status = 'closed';
-
-    // This is to prevent us spending forever searching through an account's Transactions for the Order
-    const maxSearch = params.maxSearch || DEFAULT_MAX_SEARCH;
-
-    const limit = DEFAULT_LIMIT;
-    let marker: unknown;
-    let hasNextPage = true;
-    let page = 1;
-
-    while (hasNextPage) {
-      const accountTxResponse = await fetchAccountTxns(this.client, account, limit, marker);
-      if (!accountTxResponse) return;
-      marker = accountTxResponse.result.marker;
-
-      accountTxResponse.result.transactions.sort((a, b) => (b.tx?.date || 0) - (a.tx?.date || 0));
-
-      for (const transaction of accountTxResponse.result.transactions) {
-        if (transaction.tx?.TransactionType === 'OfferCancel' && transaction.tx.Account === account) {
-          status = 'canceled';
-        }
-
-        previousTxnData = parseTransaction(id, transaction);
-        if (previousTxnData) break;
-      }
-
-      if (previousTxnData || !marker || limit * page >= maxSearch) hasNextPage = false;
-      else {
-        page += 1;
-      }
-    }
-  }
-
-  if (previousTxnData) {
-    transactions.push(previousTxnData);
-    previousTxnId = previousTxnData.previousTxnId;
-  } else {
-    throw new BadResponse(`Could not find Transaction history for Order ${id}`);
-  }
 
   /**
    * Build a Transaction history for this Order

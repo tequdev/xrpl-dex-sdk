@@ -10,6 +10,8 @@ import { FetchCurrenciesResponse, SDKContext, XrplNetwork } from '../models';
  * @category Methods
  */
 async function fetchCurrencies(this: SDKContext): Promise<FetchCurrenciesResponse> {
+  if (this.currencies) return this.currencies;
+
   const response = currencies[this.params.network || XrplNetwork.Mainnet];
 
   const currencyKeys = Object.keys(response);

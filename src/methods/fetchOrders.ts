@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { LedgerRequest, OfferCreateFlags, rippleTimeToUnixTime } from 'xrpl';
-import { DEFAULT_LIMIT } from '../constants';
+import { DEFAULT_LIMIT, DEFAULT_SEARCH_LIMIT } from '../constants';
 import { FetchOrdersParams, FetchOrdersResponse, MarketSymbol, UnixTimestamp, SDKContext, Order } from '../models';
 import { getBaseAmountKey, getMarketSymbol, getOrderOrTradeId, getQuoteAmountKey } from '../utils';
 
@@ -15,7 +15,7 @@ async function fetchOrders(
   /** eslint-disable-next-line */
   params: FetchOrdersParams = {}
 ): Promise<FetchOrdersResponse> {
-  const { maxSearch } = params;
+  const searchLimit = params.searchLimit || DEFAULT_SEARCH_LIMIT;
   const showOpen = params.showOpen || true;
   const showClosed = params.showClosed || true;
   const showCanceled = params.showCanceled || true;
@@ -48,6 +48,8 @@ async function fetchOrders(
 
     if (!transactions) continue;
 
+    let txCount = 0;
+
     for (const transaction of transactions) {
       if (typeof transaction !== 'object' || !transaction.Sequence) continue;
 
@@ -69,20 +71,25 @@ async function fetchOrders(
         }
 
         const orderId = getOrderOrTradeId(transaction.Account, transaction.Sequence);
-        const order = await this.fetchOrder(orderId, undefined, { maxSearch });
+
+        const order = await this.fetchOrder(orderId, undefined, { searchLimit });
 
         if (!order) continue;
 
         /** Filter by status if `showOpen`, `showClosed`, or `showCanceled` is defined */
-        if (order.status === 'open' && !showOpen) continue;
-        if (order.status === 'closed' && !showClosed) continue;
-        if (order.status === 'canceled' && !showCanceled) continue;
+        if (showOpen && order.status !== 'open') continue;
+        if (showClosed && order.status !== 'closed') continue;
+        if (showCanceled && order.status !== 'canceled') continue;
 
         orders.push(order);
+
+        if (orders.length >= limit) break;
       }
+      txCount += 1;
+      if (txCount >= searchLimit) break;
     }
 
-    hasNextPage = orders.length <= limit;
+    hasNextPage = orders.length < limit && txCount < searchLimit;
   }
 
   return orders;

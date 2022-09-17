@@ -13,11 +13,11 @@ async function fetchClosedOrders(
   /** eslint-disable-next-line */
   params: FetchClosedOrdersParams = {}
 ): Promise<FetchClosedOrdersResponse> {
-  const { maxSearch } = params;
+  const { searchLimit } = params;
 
   const orders =
     (await this.fetchOrders(symbol, since, limit, {
-      maxSearch,
+      searchLimit,
       showOpen: false,
       showClosed: true,
       showCanceled: false,

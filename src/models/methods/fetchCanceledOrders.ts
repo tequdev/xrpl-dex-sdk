@@ -2,7 +2,7 @@ import { Order } from '../ccxt';
 
 export interface FetchCanceledOrdersParams {
   /** Max Transactions to search through looking for Order data before giving up */
-  maxSearch?: number;
+  searchLimit?: number;
 }
 
 /**

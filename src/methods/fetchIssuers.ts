@@ -9,7 +9,7 @@ import { FetchIssuersResponse, SDKContext, XrplNetwork } from '../models';
  * @category Methods
  */
 async function fetchIssuers(this: SDKContext): Promise<FetchIssuersResponse> {
-  return issuers[this.params.network || XrplNetwork.Mainnet];
+  return this.issuers || issuers[this.params.network || XrplNetwork.Mainnet];
 }
 
 export default fetchIssuers;
