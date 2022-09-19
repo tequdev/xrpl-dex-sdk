@@ -1,3 +1,4 @@
+import { rippleTimeToUnixTime } from 'xrpl';
 import { SDKContext, ExchangeStatusType, FetchStatusResponse } from '../models';
 
 /**
@@ -20,10 +21,10 @@ async function fetchStatus(this: SDKContext): Promise<FetchStatusResponse> {
 
   const response: FetchStatusResponse = {
     status,
-    updated: Date.parse(serverState.time),
+    updated: rippleTimeToUnixTime(parseInt(serverState.time)),
     eta: '',
     url: '',
-    info: { server_state: serverState },
+    info: { serverState },
   };
 
   return response;

@@ -1,12 +1,13 @@
+import _ from 'lodash';
 import 'mocha';
 
 import { requests, responses, rippled } from '../fixtures';
-import { setupClient, teardownClient } from '../setupClient';
+import { setupLocalSDK, teardownLocalSDK } from '../setupClient';
 import { assertResultMatch } from '../testUtils';
 
 describe('fetchOrderBooks', function () {
-  beforeEach(setupClient);
-  afterEach(teardownClient);
+  beforeEach(setupLocalSDK);
+  afterEach(teardownLocalSDK);
 
   it('should return an array of OrderBook objects', async function () {
     this.mockRippled.addResponse('book_offers', rippled.book_offers.usdBtc);

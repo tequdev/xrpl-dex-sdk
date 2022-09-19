@@ -24,7 +24,7 @@ export type XrplTimestamp = number; // ms since Ripple epoch
  */
 export type BigNumberish = BigNumber | number | string;
 
-export type PercentDecimal = number;
+export type PercentDecimal = number | string;
 
 // 1 Drop = 0.000001 XRP
 // 1000000 Drops = 1

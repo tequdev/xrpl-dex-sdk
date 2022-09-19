@@ -1,7 +1,4 @@
 import { FetchFeesResponse, SDKContext } from '../models';
-import fetchCurrencies from './fetchCurrencies';
-import fetchTradingFees from './fetchTradingFees';
-import fetchTransactionFees from './fetchTransactionFees';
 
 /**
  * Returns information about fees incurred for performing transactions with a
@@ -10,13 +7,13 @@ import fetchTransactionFees from './fetchTransactionFees';
  * @category Methods
  */
 async function fetchFees(this: SDKContext): Promise<FetchFeesResponse | undefined> {
-  const currencies = await fetchCurrencies.call(this);
-  const transactionFees = await fetchTransactionFees.call(this, Object.keys(currencies));
-  const tradingFees = await fetchTradingFees.call(this);
+  const currencies = await this.fetchCurrencies();
+  const transactions = currencies ? (await this.fetchTransactionFees(Object.keys(currencies), {})) || [] : [];
+  const trading = (await this.fetchTradingFees()) || [];
 
   const response: FetchFeesResponse = {
-    transactions: transactionFees || [],
-    trading: tradingFees || [],
+    transactions,
+    trading,
   };
 
   return response;

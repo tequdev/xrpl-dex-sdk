@@ -30,7 +30,7 @@ async function fetchMarkets(this: SDKContext): Promise<FetchMarketsResponse> {
       if (baseIssuerResult.account_data.TransferRate) {
         const baseRate = baseIssuerResult.account_data.TransferRate;
         const baseFee = transferRateToDecimal(typeof baseRate === 'string' ? parseInt(baseRate) : baseRate);
-        response[marketKey].baseFee = parseFloat(baseFee);
+        response[marketKey].baseFee = baseFee;
       }
     }
 
@@ -43,7 +43,7 @@ async function fetchMarkets(this: SDKContext): Promise<FetchMarketsResponse> {
       if (quoteIssuerResult.account_data.TransferRate) {
         const quoteRate = quoteIssuerResult.account_data.TransferRate;
         const quoteFee = transferRateToDecimal(typeof quoteRate === 'string' ? parseInt(quoteRate) : quoteRate);
-        response[marketKey].quoteFee = parseFloat(quoteFee);
+        response[marketKey].quoteFee = quoteFee;
       }
     }
   }

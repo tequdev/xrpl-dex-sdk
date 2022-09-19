@@ -19,17 +19,25 @@ async function setupMockRippledConnection(
   port: number
 ): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
-    testcase.mockRippled = createMockRippled(port);
-    testcase._mockedServerPort = port;
-    // testcase.client = new Client(`ws://localhost:${port}`);
-    // testcase.client.connect().then(resolve).catch(reject);
-    testcase.sellerSdk = new SDK({
-      walletSecret: addresses.AKT_SELLER_SECRET,
-      websocketsUrl: `ws://localhost:${port}`,
-    });
-    await testcase.sellerSdk.connect();
-    testcase.buyerSdk = new SDK({ walletSecret: addresses.AKT_BUYER_SECRET, websocketsUrl: `ws://localhost:${port}` });
-    await testcase.buyerSdk.connect();
+    try {
+      testcase.mockRippled = createMockRippled(port);
+      testcase._mockedServerPort = port;
+      // testcase.client = new Client(`ws://localhost:${port}`);
+      // testcase.client.connect().then(resolve).catch(reject);
+      testcase.sellerSdk = new SDK({
+        walletSecret: addresses.AKT_SELLER_SECRET,
+        websocketsUrl: `ws://localhost:${port}`,
+      });
+      await testcase.sellerSdk.connect();
+      testcase.buyerSdk = new SDK({
+        walletSecret: addresses.AKT_BUYER_SECRET,
+        websocketsUrl: `ws://localhost:${port}`,
+      });
+      await testcase.buyerSdk.connect();
+      resolve();
+    } catch (err: unknown) {
+      reject(err);
+    }
   });
 }
 
@@ -112,14 +120,12 @@ export async function teardownRemoteSDK(this: Mocha.Context): Promise<void> {
 /**
  * SDK with local client
  */
-export async function setupLocalSDK(this: Mocha.Context, walletSecret: string): Promise<void> {
+export async function setupLocalSDK(this: Mocha.Context): Promise<void> {
   const port = await getFreePort();
-  await setupMockRippledConnection(this, port);
-  const websocketsUrl = `ws://localhost:${port}`;
-  this.sdk = new SDK({ walletSecret, websocketsUrl });
-  await this.sdk.connect();
+  return await setupMockRippledConnection(this, port);
 }
 
 export async function teardownLocalSDK(this: Mocha.Context): Promise<void> {
-  await this.sdk.disconnect();
+  await this.sellerSdk.disconnect();
+  await this.buyerSdk.disconnect();
 }

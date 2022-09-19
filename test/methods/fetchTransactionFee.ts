@@ -2,12 +2,12 @@ import _ from 'lodash';
 import 'mocha';
 
 import { responses, rippled } from '../fixtures';
-import { setupClient, teardownClient } from '../setupClient';
+import { setupLocalSDK, teardownLocalSDK } from '../setupClient';
 import { assertResultMatch } from '../testUtils';
 
 describe('fetchTransactionFee', function () {
-  beforeEach(setupClient);
-  afterEach(teardownClient);
+  beforeEach(setupLocalSDK);
+  afterEach(teardownLocalSDK);
 
   it('should return the transaction fee for a single currency', async function () {
     this.mockRippled.addResponse('fee', rippled.fee.normal);

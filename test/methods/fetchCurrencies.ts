@@ -2,12 +2,12 @@ import _ from 'lodash';
 import 'mocha';
 
 import { responses, rippled } from '../fixtures';
-import { setupClient, teardownClient } from '../setupClient';
+import { setupLocalSDK, teardownLocalSDK } from '../setupClient';
 import { assertResultMatch } from '../testUtils';
 
 describe('fetchCurrencies', function () {
-  beforeEach(setupClient);
-  afterEach(teardownClient);
+  beforeEach(setupLocalSDK);
+  afterEach(teardownLocalSDK);
 
   it('should return a list of active currencies on the exchange', async function () {
     // TODO: figure out a cleaner way to do this

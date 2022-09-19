@@ -13,7 +13,7 @@ describe('fetchOrders', function () {
   beforeEach(_.partial(setupRemoteSDK, NETWORK));
   afterEach(teardownRemoteSDK);
 
-  it.only('should retrieve a list of Orders', async function () {
+  it('should retrieve a list of Orders', async function () {
     const orders = await (this.sellerSdk as SDKContext).fetchOrders(undefined, undefined, 5);
     assert(orders.length === 5);
   });

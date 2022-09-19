@@ -47,11 +47,17 @@ export class SDK implements SDKContext {
   constructor(params: SDKParams) {
     const { network, websocketsOptions, walletPrivateKey, walletPublicKey, walletSecret } = params;
 
-    const jsonRpcUrl = network ? networks[network].jsonRpc : params.jsonRpcUrl;
-    const websocketsUrl = network ? networks[network].websockets : params.websocketsUrl;
+    const jsonRpcUrl = params.jsonRpcUrl ? params.jsonRpcUrl : network ? networks[network].jsonRpc : undefined;
+    const websocketsUrl = params.websocketsUrl
+      ? params.websocketsUrl
+      : network
+      ? networks[network].websockets
+      : undefined;
 
-    if (!network || (!jsonRpcUrl && !websocketsUrl)) {
-      throw new Error('No XRPL network URL provided! Either `jsonRpcUrl` or `websocketsUrl` must be defined');
+    if (!network) {
+      if (!jsonRpcUrl && !websocketsUrl) {
+        throw new Error('No XRPL network URL provided! Either `jsonRpcUrl` or `websocketsUrl` must be defined');
+      }
     }
 
     if (!walletSecret && (!walletPublicKey || !walletPrivateKey)) {

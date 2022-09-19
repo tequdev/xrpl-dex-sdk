@@ -30,7 +30,7 @@ async function fetchCurrencies(this: SDKContext): Promise<FetchCurrenciesRespons
       if (accountInfoResult.account_data.TransferRate) {
         const rate = accountInfoResult.account_data.TransferRate;
         const fee = transferRateToDecimal(typeof rate === 'string' ? parseInt(rate) : rate);
-        response[currencyKey][i].fee = parseFloat(fee);
+        response[currencyKey][i].fee = fee;
       }
     }
   }

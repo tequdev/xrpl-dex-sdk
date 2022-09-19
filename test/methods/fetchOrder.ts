@@ -41,7 +41,7 @@ describe('fetchOrder', function () {
   // it('should return a partially filled Buy Order with multiple Trades', async function () {});
 
   it('should retrieve a completed Buy order with a Trade', async function () {
-    const buyOrder = await this.sellerSdk.fetchOrder(requests.fetchOrder[NETWORK].buy);
+    const buyOrder = await this.buyerSdk.fetchOrder(requests.fetchOrder[NETWORK].buy);
     assertResultMatch(buyOrder, responses.fetchOrder[NETWORK].completedBuy);
   });
 

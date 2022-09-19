@@ -7,7 +7,7 @@ import { setupRemoteSDK, teardownRemoteSDK } from '../setupClient';
 import { assertResultMatch } from '../testUtils';
 
 const TIMEOUT = 20000;
-const NETWORK = XrplNetwork.Testnet;
+const NETWORK = XrplNetwork.Mainnet;
 
 describe('fetchIssuers', function () {
   this.timeout(TIMEOUT);
@@ -17,6 +17,6 @@ describe('fetchIssuers', function () {
 
   it('should return a list of trusted issuers on the exchange', async function () {
     const issuers = await this.sellerSdk.fetchIssuers();
-    assertResultMatch(issuers, responses.fetchIssuers);
+    assertResultMatch(issuers, responses.fetchIssuers[NETWORK]);
   });
 });

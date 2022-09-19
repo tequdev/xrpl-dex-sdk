@@ -27,7 +27,7 @@ async function fetchMarket(this: SDKContext, symbol: MarketSymbol): Promise<Fetc
     if (baseIssuerResult.account_data.TransferRate) {
       const baseRate = baseIssuerResult.account_data.TransferRate || 0;
       const baseFee = transferRateToDecimal(typeof baseRate === 'string' ? parseInt(baseRate) : baseRate);
-      response.baseFee = parseFloat(baseFee);
+      response.baseFee = baseFee;
     }
   }
 
@@ -40,7 +40,7 @@ async function fetchMarket(this: SDKContext, symbol: MarketSymbol): Promise<Fetc
     if (quoteIssuerResult.account_data.TransferRate) {
       const quoteRate = quoteIssuerResult.account_data.TransferRate || 0;
       const quoteFee = transferRateToDecimal(typeof quoteRate === 'string' ? parseInt(quoteRate) : quoteRate);
-      response.quoteFee = parseFloat(quoteFee);
+      response.quoteFee = quoteFee;
     }
   }
 

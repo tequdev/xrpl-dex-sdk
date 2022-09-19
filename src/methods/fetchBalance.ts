@@ -22,7 +22,7 @@ async function fetchBalance(
 
   // Get XRP balances
   if (!code || (code && code === 'XRP')) {
-    const accountInfoResponse = await this.client.request({
+    const { id, ...accountInfoResponse } = await this.client.request({
       command: 'account_info',
       account,
       ledger_index: 'current',
@@ -45,7 +45,7 @@ async function fetchBalance(
       total: dropsToXrp(totalXrp),
     };
 
-    info.account_info = accountInfoResponse;
+    info.accountInfo = accountInfoResponse;
   }
 
   // Get token balances
@@ -55,7 +55,7 @@ async function fetchBalance(
     let hasNextPage = true;
 
     while (hasNextPage) {
-      const accountTrustLinesResponse = await this.client.request({
+      const { id, ...accountTrustLinesResponse } = await this.client.request({
         command: 'account_lines',
         account,
         ledger_index: 'current',
@@ -79,7 +79,7 @@ async function fetchBalance(
         };
       });
 
-      info.account_lines = accountTrustLinesResponse;
+      info.accountLines = accountTrustLinesResponse;
 
       marker = accountTrustLinesResponse.result.marker;
       if (!marker) hasNextPage = false;

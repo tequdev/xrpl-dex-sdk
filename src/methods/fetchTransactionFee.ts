@@ -6,7 +6,6 @@ import {
   FetchTransactionFeeResponse,
   TransactionFee,
 } from '../models';
-import fetchCurrencies from './fetchCurrencies';
 
 /**
  * Returns information about fees incurred for performing transactions with a given
@@ -23,7 +22,9 @@ async function fetchTransactionFee(
 ): Promise<FetchTransactionFeeResponse | undefined> {
   const { result: feesResult } = await this.client.request({ command: 'fee' } as FeeRequest);
 
-  const currencies = await fetchCurrencies.call(this);
+  const currencies = await this.fetchCurrencies();
+
+  if (!currencies) return;
 
   const transferRates: TransactionFee['transfer'] = {};
 
@@ -35,16 +36,16 @@ async function fetchTransactionFee(
   currency.forEach(({ fee, issuer }) => {
     if (params.issuer) {
       if (params.issuer === issuer) {
-        transferRates[issuer] = fee || 0;
+        transferRates[issuer] = fee?.toString() || '0';
       }
     } else {
-      transferRates[issuer] = fee || 0;
+      transferRates[issuer] = fee?.toString() || '0';
     }
   });
 
   const response: FetchTransactionFeeResponse = {
     code,
-    current: parseInt(feesResult.drops.open_ledger_fee),
+    current: feesResult.drops.open_ledger_fee,
     transfer: transferRates,
     info: JSON.stringify({ feesResult, currency }),
   };
