@@ -73,3 +73,52 @@ export const aktBuyer = {
   status: 'success',
   type: 'response',
 };
+
+export const tstBuyer = {
+  id: 2,
+  result: {
+    account_data: {
+      Account: 'rGR8cy4gqXEyNFKjeUsK3MuHRXCLHZUH6K',
+      Balance: '999999988',
+      Flags: 0,
+      LedgerEntryType: 'AccountRoot',
+      OwnerCount: 1,
+      PreviousTxnID: '60FAA93DDE9DCCEF437BAB0475FE0CB97E266B4BB822E2E661172284BF859873',
+      PreviousTxnLgrSeq: 31317536,
+      Sequence: 31317481,
+      index: 'CE5AF304FF0F6177A39FF11250BBBF60D6599697893227AC2A1B37B713C662C2',
+    },
+    ledger_current_index: 31317627,
+    queue_data: {
+      txn_count: 0,
+    },
+    validated: false,
+  },
+  status: 'success',
+  type: 'response',
+};
+
+export const tstIssuer = {
+  id: 2,
+  result: {
+    account_data: {
+      Account: 'rP9jPyP5kyvFRb6ZiRghAGw5u8SGAmU4bd',
+      Balance: '41734655570',
+      Domain: '7872706C2E6F7267',
+      Flags: 8388608,
+      LedgerEntryType: 'AccountRoot',
+      OwnerCount: 2,
+      PreviousTxnID: '82382E395A14A48C182F548EDEA76A4112A1044F4E748B23DC61A637BBDF2E58',
+      PreviousTxnLgrSeq: 31294090,
+      Sequence: 26105475,
+      index: 'E9D51582719D9591393D88318C07B19B413150CA07C76E9B7A03097EDECE2364',
+    },
+    ledger_current_index: 31318032,
+    queue_data: {
+      txn_count: 0,
+    },
+    validated: false,
+  },
+  status: 'success',
+  type: 'response',
+};

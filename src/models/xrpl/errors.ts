@@ -9,4 +9,5 @@ export enum XrplErrorTypes {
 
 export enum XrplTransactionErrorTypes {
   NoIssuer = 'tecNO_ISSUER',
+  UnfundedOffer = 'tecUNFUNDED_OFFER',
 }

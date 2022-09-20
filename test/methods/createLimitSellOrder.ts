@@ -1,12 +1,13 @@
 import _ from 'lodash';
+import { assert } from 'chai';
 import 'mocha';
 
 import { requests, responses } from '../fixtures';
-import { CreateLimitSellOrderResponse, XrplNetwork } from '../../src/models';
+import { SDKContext, XrplNetwork } from '../../src/models';
 import { setupRemoteSDK, teardownRemoteSDK } from '../setupClient';
 import { assertResultMatch } from '../testUtils';
 
-const TIMEOUT = 10000;
+const TIMEOUT = 20000;
 const NETWORK = XrplNetwork.Testnet;
 
 describe('createLimitSellOrder', function () {
@@ -16,15 +17,15 @@ describe('createLimitSellOrder', function () {
   afterEach(teardownRemoteSDK);
 
   it('should create a Limit Sell Order', async function () {
-    const { symbol, amount, price, params } = requests.createOrder.sell;
-    const newOrder = (await this.sellerSdk.createLimitSellOrder(
-      symbol,
-      amount,
-      price,
-      params
-    )) as CreateLimitSellOrderResponse;
+    const { symbol, amount, price, params } = requests.createOrder.smallSellOrder;
+    const newOrder = await (this.sellerSdk as SDKContext).createLimitSellOrder(symbol, amount, price, params);
+    assert(typeof newOrder !== 'undefined');
 
-    const { id, datetime, timestamp, fee, info, status, ...expectedResponse } = responses.createOrder.sell;
-    assertResultMatch(newOrder, { ...newOrder, ...expectedResponse });
+    const fetchOrderResponse = await this.sellerSdk.fetchOrder(newOrder.id);
+    const omittedFields = ['id', 'clientOrderId', 'lastTradeTimestamp', 'datetime', 'timestamp', 'fee', 'info'];
+    assertResultMatch(
+      _.omit(fetchOrderResponse, omittedFields),
+      _.omit(responses.createOrder.new.sell.small, omittedFields)
+    );
   });
 });

@@ -7,7 +7,7 @@ import { OrderSide, OrderType, SDKContext } from '../../src/models';
 import { XrplNetwork } from '../../src/models';
 import { setupRemoteSDK, teardownRemoteSDK } from '../setupClient';
 
-const TIMEOUT = 20000;
+const TIMEOUT = 25000;
 const NETWORK = XrplNetwork.Testnet;
 
 describe('cancelOrder', function () {
@@ -17,7 +17,7 @@ describe('cancelOrder', function () {
   afterEach(teardownRemoteSDK);
 
   it('should create and then cancel an Order', async function () {
-    const { symbol, side, type, amount, price, params } = requests.createOrder.smallBuyOrder;
+    const { symbol, side, type, amount, price, params } = requests.createOrder.smallBuyOrder2;
     const newOrder = await (this.buyerSdk as SDKContext).createOrder(
       symbol,
       side as OrderSide,
@@ -31,4 +31,6 @@ describe('cancelOrder', function () {
     const canceledOrder = await this.buyerSdk.cancelOrder(newOrder.id);
     assert(canceledOrder.id === newOrder.id);
   });
+
+  it("should throw an error if an account tries to cancel another account's Order", async function () {});
 });

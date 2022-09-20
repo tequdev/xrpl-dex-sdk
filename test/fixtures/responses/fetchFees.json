@@ -133,7 +133,7 @@
       "base": "0.003",
       "quote": "0",
       "percentage": true,
-      "info": "{\"market\":{\"id\":\"534F4C4F00000000000000000000000000000000/XRP\",\"symbol\":\"534F4C4F00000000000000000000000000000000/XRP\",\"base\":\"534F4C4F00000000000000000000000000000000\",\"baseIssuer\":\"rsoLo2S1kiGeCcn6hCUXVrCpGMWLrRrLZz\",\"quote\":\"XRP\",\"baseFee\":0.003}}",
+      "info": "{\"market\":{\"id\":\"534F4C4F00000000000000000000000000000000/XRP\",\"symbol\":\"534F4C4F00000000000000000000000000000000/XRP\",\"base\":\"534F4C4F00000000000000000000000000000000\",\"baseIssuer\":\"rsoLo2S1kiGeCcn6hCUXVrCpGMWLrRrLZz\",\"quote\":\"XRP\",\"baseFee\":\"0.003\"}}",
       "baseIssuer": "rsoLo2S1kiGeCcn6hCUXVrCpGMWLrRrLZz"
     },
     {
@@ -141,7 +141,7 @@
       "base": "0.003",
       "quote": "0",
       "percentage": true,
-      "info": "{\"market\":{\"id\":\"434F524500000000000000000000000000000000/XRP\",\"symbol\":\"434F524500000000000000000000000000000000/XRP\",\"base\":\"434F524500000000000000000000000000000000\",\"baseIssuer\":\"rcoreNywaoz2ZCQ8Lg2EbSLnGuRBmun6D\",\"quote\":\"XRP\",\"baseFee\":0.003}}",
+      "info": "{\"market\":{\"id\":\"434F524500000000000000000000000000000000/XRP\",\"symbol\":\"434F524500000000000000000000000000000000/XRP\",\"base\":\"434F524500000000000000000000000000000000\",\"baseIssuer\":\"rcoreNywaoz2ZCQ8Lg2EbSLnGuRBmun6D\",\"quote\":\"XRP\",\"baseFee\":\"0.003\"}}",
       "baseIssuer": "rcoreNywaoz2ZCQ8Lg2EbSLnGuRBmun6D"
     },
     {
@@ -149,7 +149,7 @@
       "base": "0.003",
       "quote": "0.003",
       "percentage": true,
-      "info": "{\"market\":{\"id\":\"434F524500000000000000000000000000000000/534F4C4F00000000000000000000000000000000\",\"symbol\":\"434F524500000000000000000000000000000000/534F4C4F00000000000000000000000000000000\",\"base\":\"434F524500000000000000000000000000000000\",\"baseIssuer\":\"rcoreNywaoz2ZCQ8Lg2EbSLnGuRBmun6D\",\"quote\":\"534F4C4F00000000000000000000000000000000\",\"quoteIssuer\":\"rsoLo2S1kiGeCcn6hCUXVrCpGMWLrRrLZz\",\"baseFee\":0.003,\"quoteFee\":0.003}}",
+      "info": "{\"market\":{\"id\":\"434F524500000000000000000000000000000000/534F4C4F00000000000000000000000000000000\",\"symbol\":\"434F524500000000000000000000000000000000/534F4C4F00000000000000000000000000000000\",\"base\":\"434F524500000000000000000000000000000000\",\"baseIssuer\":\"rcoreNywaoz2ZCQ8Lg2EbSLnGuRBmun6D\",\"quote\":\"534F4C4F00000000000000000000000000000000\",\"quoteIssuer\":\"rsoLo2S1kiGeCcn6hCUXVrCpGMWLrRrLZz\",\"baseFee\":\"0.003\",\"quoteFee\":\"0.003\"}}",
       "baseIssuer": "rcoreNywaoz2ZCQ8Lg2EbSLnGuRBmun6D",
       "quoteIssuer": "rsoLo2S1kiGeCcn6hCUXVrCpGMWLrRrLZz"
     },
@@ -158,7 +158,7 @@
       "base": "0.003",
       "quote": "0.003",
       "percentage": true,
-      "info": "{\"market\":{\"id\":\"534F4C4F00000000000000000000000000000000/USD\",\"symbol\":\"534F4C4F00000000000000000000000000000000/USD\",\"base\":\"534F4C4F00000000000000000000000000000000\",\"baseIssuer\":\"rsoLo2S1kiGeCcn6hCUXVrCpGMWLrRrLZz\",\"quote\":\"USD\",\"quoteIssuer\":\"rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B\",\"baseFee\":0.003,\"quoteFee\":0.003}}",
+      "info": "{\"market\":{\"id\":\"534F4C4F00000000000000000000000000000000/USD\",\"symbol\":\"534F4C4F00000000000000000000000000000000/USD\",\"base\":\"534F4C4F00000000000000000000000000000000\",\"baseIssuer\":\"rsoLo2S1kiGeCcn6hCUXVrCpGMWLrRrLZz\",\"quote\":\"USD\",\"quoteIssuer\":\"rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B\",\"baseFee\":\"0.003\",\"quoteFee\":\"0.003\"}}",
       "baseIssuer": "rsoLo2S1kiGeCcn6hCUXVrCpGMWLrRrLZz",
       "quoteIssuer": "rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B"
     },
@@ -167,7 +167,7 @@
       "base": "0",
       "quote": "0.003",
       "percentage": true,
-      "info": "{\"market\":{\"id\":\"XRP/USD\",\"symbol\":\"XRP/USD\",\"base\":\"XRP\",\"quote\":\"USD\",\"quoteIssuer\":\"rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq\",\"quoteFee\":0.003}}",
+      "info": "{\"market\":{\"id\":\"XRP/USD\",\"symbol\":\"XRP/USD\",\"base\":\"XRP\",\"quote\":\"USD\",\"quoteIssuer\":\"rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq\",\"quoteFee\":\"0.003\"}}",
       "quoteIssuer": "rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq"
     },
     {
@@ -175,7 +175,7 @@
       "base": "0",
       "quote": "0.003",
       "percentage": true,
-      "info": "{\"market\":{\"id\":\"XRP/EUR\",\"symbol\":\"XRP/EUR\",\"base\":\"XRP\",\"quote\":\"EUR\",\"quoteIssuer\":\"rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq\",\"quoteFee\":0.003}}",
+      "info": "{\"market\":{\"id\":\"XRP/EUR\",\"symbol\":\"XRP/EUR\",\"base\":\"XRP\",\"quote\":\"EUR\",\"quoteIssuer\":\"rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq\",\"quoteFee\":\"0.003\"}}",
       "quoteIssuer": "rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq"
     },
     {
@@ -183,7 +183,7 @@
       "base": "0",
       "quote": "0.003",
       "percentage": true,
-      "info": "{\"market\":{\"id\":\"XRP/SGB\",\"symbol\":\"XRP/SGB\",\"base\":\"XRP\",\"quote\":\"SGB\",\"quoteIssuer\":\"rctArjqVvTHihekzDeecKo6mkTYTUSBNc\",\"quoteFee\":0.003}}",
+      "info": "{\"market\":{\"id\":\"XRP/SGB\",\"symbol\":\"XRP/SGB\",\"base\":\"XRP\",\"quote\":\"SGB\",\"quoteIssuer\":\"rctArjqVvTHihekzDeecKo6mkTYTUSBNc\",\"quoteFee\":\"0.003\"}}",
       "quoteIssuer": "rctArjqVvTHihekzDeecKo6mkTYTUSBNc"
     },
     {
@@ -191,7 +191,7 @@
       "base": "0",
       "quote": "0.003",
       "percentage": true,
-      "info": "{\"market\":{\"id\":\"XRP/ETH\",\"symbol\":\"XRP/ETH\",\"base\":\"XRP\",\"quote\":\"ETH\",\"quoteIssuer\":\"rcA8X3TVMST1n3CJeAdGk1RdRCHii7N2h\",\"quoteFee\":0.003}}",
+      "info": "{\"market\":{\"id\":\"XRP/ETH\",\"symbol\":\"XRP/ETH\",\"base\":\"XRP\",\"quote\":\"ETH\",\"quoteIssuer\":\"rcA8X3TVMST1n3CJeAdGk1RdRCHii7N2h\",\"quoteFee\":\"0.003\"}}",
       "quoteIssuer": "rcA8X3TVMST1n3CJeAdGk1RdRCHii7N2h"
     },
     {
@@ -199,7 +199,7 @@
       "base": "0",
       "quote": "0.003",
       "percentage": true,
-      "info": "{\"market\":{\"id\":\"XRP/XTK\",\"symbol\":\"XRP/XTK\",\"base\":\"XRP\",\"quote\":\"XTK\",\"quoteIssuer\":\"rXTKdHWuppSjkbiKoEv53bfxHAn1MxmTb\",\"quoteFee\":0.003}}",
+      "info": "{\"market\":{\"id\":\"XRP/XTK\",\"symbol\":\"XRP/XTK\",\"base\":\"XRP\",\"quote\":\"XTK\",\"quoteIssuer\":\"rXTKdHWuppSjkbiKoEv53bfxHAn1MxmTb\",\"quoteFee\":\"0.003\"}}",
       "quoteIssuer": "rXTKdHWuppSjkbiKoEv53bfxHAn1MxmTb"
     },
     {
@@ -207,7 +207,7 @@
       "base": "0",
       "quote": "0.003",
       "percentage": true,
-      "info": "{\"market\":{\"id\":\"XRP/5852646F67650000000000000000000000000000\",\"symbol\":\"XRP/5852646F67650000000000000000000000000000\",\"base\":\"XRP\",\"quote\":\"5852646F67650000000000000000000000000000\",\"quoteIssuer\":\"rLqUC2eCPohYvJCEBJ77eCCqVL2uEiczjA\",\"quoteFee\":0.003}}",
+      "info": "{\"market\":{\"id\":\"XRP/5852646F67650000000000000000000000000000\",\"symbol\":\"XRP/5852646F67650000000000000000000000000000\",\"base\":\"XRP\",\"quote\":\"5852646F67650000000000000000000000000000\",\"quoteIssuer\":\"rLqUC2eCPohYvJCEBJ77eCCqVL2uEiczjA\",\"quoteFee\":\"0.003\"}}",
       "quoteIssuer": "rLqUC2eCPohYvJCEBJ77eCCqVL2uEiczjA"
     },
     {
@@ -215,7 +215,7 @@
       "base": "0",
       "quote": "0.003",
       "percentage": true,
-      "info": "{\"market\":{\"id\":\"XRP/58464C4F4B490000000000000000000000000000\",\"symbol\":\"XRP/58464C4F4B490000000000000000000000000000\",\"base\":\"XRP\",\"quote\":\"58464C4F4B490000000000000000000000000000\",\"quoteIssuer\":\"rUtXeAXonpFpgKubAa7LxcLd7NFep92T1t\",\"quoteFee\":0.003}}",
+      "info": "{\"market\":{\"id\":\"XRP/58464C4F4B490000000000000000000000000000\",\"symbol\":\"XRP/58464C4F4B490000000000000000000000000000\",\"base\":\"XRP\",\"quote\":\"58464C4F4B490000000000000000000000000000\",\"quoteIssuer\":\"rUtXeAXonpFpgKubAa7LxcLd7NFep92T1t\",\"quoteFee\":\"0.003\"}}",
       "quoteIssuer": "rUtXeAXonpFpgKubAa7LxcLd7NFep92T1t"
     },
     {
@@ -223,7 +223,7 @@
       "base": "0",
       "quote": "0.003",
       "percentage": true,
-      "info": "{\"market\":{\"id\":\"XRP/4A554E4B00000000000000000000000000000000\",\"symbol\":\"XRP/4A554E4B00000000000000000000000000000000\",\"base\":\"XRP\",\"quote\":\"4A554E4B00000000000000000000000000000000\",\"quoteIssuer\":\"r4pDJ7bT1rANe9nAdFR9pyVRwtJZQUEFpj\",\"quoteFee\":0.003}}",
+      "info": "{\"market\":{\"id\":\"XRP/4A554E4B00000000000000000000000000000000\",\"symbol\":\"XRP/4A554E4B00000000000000000000000000000000\",\"base\":\"XRP\",\"quote\":\"4A554E4B00000000000000000000000000000000\",\"quoteIssuer\":\"r4pDJ7bT1rANe9nAdFR9pyVRwtJZQUEFpj\",\"quoteFee\":\"0.003\"}}",
       "quoteIssuer": "r4pDJ7bT1rANe9nAdFR9pyVRwtJZQUEFpj"
     },
     {
@@ -231,7 +231,7 @@
       "base": "0",
       "quote": "0.003",
       "percentage": true,
-      "info": "{\"market\":{\"id\":\"XRP/5844554445000000000000000000000000000000\",\"symbol\":\"XRP/5844554445000000000000000000000000000000\",\"base\":\"XRP\",\"quote\":\"5844554445000000000000000000000000000000\",\"quoteIssuer\":\"rU5LE7X6yyu9DuHsLdHhWSiUVTgpyRK1vz\",\"quoteFee\":0.003}}",
+      "info": "{\"market\":{\"id\":\"XRP/5844554445000000000000000000000000000000\",\"symbol\":\"XRP/5844554445000000000000000000000000000000\",\"base\":\"XRP\",\"quote\":\"5844554445000000000000000000000000000000\",\"quoteIssuer\":\"rU5LE7X6yyu9DuHsLdHhWSiUVTgpyRK1vz\",\"quoteFee\":\"0.003\"}}",
       "quoteIssuer": "rU5LE7X6yyu9DuHsLdHhWSiUVTgpyRK1vz"
     },
     {
@@ -239,7 +239,7 @@
       "base": "0",
       "quote": "0.003",
       "percentage": true,
-      "info": "{\"market\":{\"id\":\"XRP/457175696C69627269756D000000000000000000\",\"symbol\":\"XRP/457175696C69627269756D000000000000000000\",\"base\":\"XRP\",\"quote\":\"457175696C69627269756D000000000000000000\",\"quoteIssuer\":\"rpakCr61Q92abPXJnVboKENmpKssWyHpwu\",\"quoteFee\":0.003}}",
+      "info": "{\"market\":{\"id\":\"XRP/457175696C69627269756D000000000000000000\",\"symbol\":\"XRP/457175696C69627269756D000000000000000000\",\"base\":\"XRP\",\"quote\":\"457175696C69627269756D000000000000000000\",\"quoteIssuer\":\"rpakCr61Q92abPXJnVboKENmpKssWyHpwu\",\"quoteFee\":\"0.003\"}}",
       "quoteIssuer": "rpakCr61Q92abPXJnVboKENmpKssWyHpwu"
     },
     {
@@ -247,7 +247,7 @@
       "base": "0",
       "quote": "0.003",
       "percentage": true,
-      "info": "{\"market\":{\"id\":\"XRP/ELS\",\"symbol\":\"XRP/ELS\",\"base\":\"XRP\",\"quote\":\"ELS\",\"quoteIssuer\":\"rHXuEaRYnnJHbDeuBH5w8yPh5uwNVh5zAg\",\"quoteFee\":0.003}}",
+      "info": "{\"market\":{\"id\":\"XRP/ELS\",\"symbol\":\"XRP/ELS\",\"base\":\"XRP\",\"quote\":\"ELS\",\"quoteIssuer\":\"rHXuEaRYnnJHbDeuBH5w8yPh5uwNVh5zAg\",\"quoteFee\":\"0.003\"}}",
       "quoteIssuer": "rHXuEaRYnnJHbDeuBH5w8yPh5uwNVh5zAg"
     },
     {
@@ -255,7 +255,7 @@
       "base": "0.003",
       "quote": "0.003",
       "percentage": true,
-      "info": "{\"market\":{\"id\":\"BTC/USD\",\"symbol\":\"BTC/USD\",\"base\":\"BTC\",\"baseIssuer\":\"rchGBxcD1A1C2tdxF6papQYZ8kjRKMYcL\",\"quote\":\"USD\",\"quoteIssuer\":\"rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq\",\"baseFee\":0.003,\"quoteFee\":0.003}}",
+      "info": "{\"market\":{\"id\":\"BTC/USD\",\"symbol\":\"BTC/USD\",\"base\":\"BTC\",\"baseIssuer\":\"rchGBxcD1A1C2tdxF6papQYZ8kjRKMYcL\",\"quote\":\"USD\",\"quoteIssuer\":\"rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq\",\"baseFee\":\"0.003\",\"quoteFee\":\"0.003\"}}",
       "baseIssuer": "rchGBxcD1A1C2tdxF6papQYZ8kjRKMYcL",
       "quoteIssuer": "rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq"
     },
@@ -264,7 +264,7 @@
       "base": "0.003",
       "quote": "0.003",
       "percentage": true,
-      "info": "{\"market\":{\"id\":\"ETH/USD\",\"symbol\":\"ETH/USD\",\"base\":\"ETH\",\"baseIssuer\":\"rcA8X3TVMST1n3CJeAdGk1RdRCHii7N2h\",\"quote\":\"USD\",\"quoteIssuer\":\"rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq\",\"baseFee\":0.003,\"quoteFee\":0.003}}",
+      "info": "{\"market\":{\"id\":\"ETH/USD\",\"symbol\":\"ETH/USD\",\"base\":\"ETH\",\"baseIssuer\":\"rcA8X3TVMST1n3CJeAdGk1RdRCHii7N2h\",\"quote\":\"USD\",\"quoteIssuer\":\"rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq\",\"baseFee\":\"0.003\",\"quoteFee\":\"0.003\"}}",
       "baseIssuer": "rcA8X3TVMST1n3CJeAdGk1RdRCHii7N2h",
       "quoteIssuer": "rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq"
     }

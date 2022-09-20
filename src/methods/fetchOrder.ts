@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { OfferCreate, OfferCreateFlags, rippleTimeToISOTime, rippleTimeToUnixTime } from 'xrpl';
+import { dropsToXrp, OfferCreate, OfferCreateFlags, rippleTimeToISOTime, rippleTimeToUnixTime } from 'xrpl';
 import { OfferFlags } from 'xrpl/dist/npm/models/ledger';
 import { parseAmountValue } from 'xrpl/dist/npm/models/transactions/common';
 import { hashOfferId } from 'xrpl/dist/npm/utils/hashes';
@@ -89,8 +89,13 @@ async function fetchOrder(
       const baseRate = parseFloat(await fetchTransferRate(this.client, baseAmount));
       const quoteRate = parseFloat(await fetchTransferRate(this.client, quoteAmount));
 
-      const baseValue = parseAmountValue(baseAmount);
-      const quoteValue = parseAmountValue(quoteAmount);
+      const baseCurrency = getAmountCurrencyCode(baseAmount);
+      const quoteCurrency = getAmountCurrencyCode(quoteAmount);
+
+      const baseValue =
+        baseCurrency === 'XRP' ? parseInt(dropsToXrp(parseAmountValue(baseAmount))) : parseAmountValue(baseAmount);
+      const quoteValue =
+        quoteCurrency === 'XRP' ? parseInt(dropsToXrp(parseAmountValue(quoteAmount))) : parseAmountValue(quoteAmount);
 
       const price = quoteValue / baseValue;
       const cost = baseValue * price;
@@ -145,8 +150,13 @@ async function fetchOrder(
       const baseRate = parseFloat(await fetchTransferRate(this.client, baseAmount));
       const quoteRate = parseFloat(await fetchTransferRate(this.client, quoteAmount));
 
-      const baseValue = parseAmountValue(baseAmount);
-      const quoteValue = parseAmountValue(quoteAmount);
+      const baseCurrency = getAmountCurrencyCode(baseAmount);
+      const quoteCurrency = getAmountCurrencyCode(quoteAmount);
+
+      const baseValue =
+        baseCurrency === 'XRP' ? parseInt(dropsToXrp(parseAmountValue(baseAmount))) : parseAmountValue(baseAmount);
+      const quoteValue =
+        quoteCurrency === 'XRP' ? parseInt(dropsToXrp(parseAmountValue(quoteAmount))) : parseAmountValue(quoteAmount);
 
       const orderPrice = quoteValue / baseValue;
       const cost = filled * orderPrice;

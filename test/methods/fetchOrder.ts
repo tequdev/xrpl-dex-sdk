@@ -15,16 +15,32 @@ describe('fetchOrder', function () {
   afterEach(teardownRemoteSDK);
 
   /**
+   * Buy Orders
+   */
+
+  it('should return an open Buy Order', async function () {
+    const fetchOrderResponse = await this.buyerSdk.fetchOrder(requests.fetchOrder.testnet.tstBuy);
+    const omittedFields = ['id', 'clientOrderId', 'lastTradeTimestamp', 'datetime', 'timestamp', 'fee', 'info'];
+    assertResultMatch(_.omit(fetchOrderResponse, omittedFields), _.omit(responses.fetchOrder.tstBuy, omittedFields));
+  });
+
+  // it('should return a partially filled Buy Order with multiple Trades', async function () {});
+
+  // it('should retrieve a completed Buy order with a Trade', async function () {});
+
+  // it('should return a canceled Buy Order', async function () {});
+
+  // it('should return a "Fill or Kill" Buy Order', async function () {});
+
+  // it('should return an "Immediate or Cancel" Buy Order', async function () {});
+
+  /**
    * Sell Orders
    */
 
   // it('should return a partially filled Sell Order with multiple Trades', async function () {});
 
-  // it('should retrieve a completed Sell order with multiple Trades', async function () {
-  //   const sellOrder = await fetchOrder.call(this.sellerSdk, requests.fetchOrder[NETWORK].sell);
-  //   assert(typeof sellOrder !== 'undefined');
-  //   assertResultMatch(sellOrder, responses.fetchOrder[NETWORK].completedBuy);
-  // });
+  // it('should retrieve a completed Sell order with multiple Trades', async function () {});
 
   // it('should return a completed Sell Order', async function () {});
 
@@ -33,21 +49,4 @@ describe('fetchOrder', function () {
   // it('should return a "Fill or Kill" Sell Order', async function () {});
 
   // it('should return an "Immediate or Cancel" Sell Order', async function () {});
-
-  /**
-   * Buy Orders
-   */
-
-  // it('should return a partially filled Buy Order with multiple Trades', async function () {});
-
-  it('should retrieve a completed Buy order with a Trade', async function () {
-    const buyOrder = await this.buyerSdk.fetchOrder(requests.fetchOrder[NETWORK].buy);
-    assertResultMatch(buyOrder, responses.fetchOrder[NETWORK].completedBuy);
-  });
-
-  // it('should return a canceled Buy Order', async function () {});
-
-  // it('should return a "Fill or Kill" Buy Order', async function () {});
-
-  // it('should return an "Immediate or Cancel" Buy Order', async function () {});
 });

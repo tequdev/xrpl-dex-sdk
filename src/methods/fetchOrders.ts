@@ -77,9 +77,12 @@ async function fetchOrders(
         if (!order) continue;
 
         /** Filter by status if `showOpen`, `showClosed`, or `showCanceled` is defined */
-        if (showOpen && order.status !== 'open') continue;
-        if (showClosed && order.status !== 'closed') continue;
-        if (showCanceled && order.status !== 'canceled') continue;
+        if (
+          (order.status === 'open' && !showOpen) ||
+          (order.status === 'closed' && !showClosed) ||
+          (order.status === 'canceled' && !showCanceled)
+        )
+          continue;
 
         orders.push(order);
 

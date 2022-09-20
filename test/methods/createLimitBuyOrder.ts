@@ -1,12 +1,13 @@
 import _ from 'lodash';
+import { assert } from 'chai';
 import 'mocha';
 
 import { requests, responses } from '../fixtures';
-import { CreateLimitBuyOrderResponse, XrplNetwork } from '../../src/models';
+import { SDKContext, XrplNetwork } from '../../src/models';
 import { setupRemoteSDK, teardownRemoteSDK } from '../setupClient';
 import { assertResultMatch } from '../testUtils';
 
-const TIMEOUT = 10000;
+const TIMEOUT = 20000;
 const NETWORK = XrplNetwork.Testnet;
 
 describe('createLimitBuyOrder', function () {
@@ -17,14 +18,11 @@ describe('createLimitBuyOrder', function () {
 
   it('should create a Limit Buy Order', async function () {
     const { symbol, amount, price, params } = requests.createOrder.buy;
-    const newOrder = (await this.buyerSdk.createLimitBuyOrder(
-      symbol,
-      amount,
-      price,
-      params
-    )) as CreateLimitBuyOrderResponse;
+    const newOrder = await (this.buyerSdk as SDKContext).createLimitBuyOrder(symbol, amount, price, params);
+    assert(typeof newOrder !== 'undefined');
 
-    const { id, datetime, timestamp, fee, info, ...expectedResponse } = responses.createOrder.buy;
-    assertResultMatch(newOrder, { ...newOrder, ...expectedResponse });
+    const fetchOrderResponse = await this.buyerSdk.fetchOrder(newOrder.id);
+    const omittedFields = ['id', 'clientOrderId', 'lastTradeTimestamp', 'datetime', 'timestamp', 'fee', 'info'];
+    assertResultMatch(_.omit(fetchOrderResponse, omittedFields), _.omit(responses.createOrder.buy, omittedFields));
   });
 });

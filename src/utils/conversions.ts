@@ -31,7 +31,7 @@ export const getAmountCurrencyCode = (amount: Amount): CurrencyCode =>
 
 export const getAmount = (code: CurrencyCode, value: BigNumberish, issuer?: AccountAddress): Amount => {
   if (code === 'XRP') {
-    return value.toString().includes('.') ? xrpToDrops(value) : value.toString();
+    return xrpToDrops(value);
   } else {
     if (!issuer) throw new BadRequest('Non-XRP currencies must specify an issuer');
     return {

@@ -23,7 +23,9 @@ export const handleTxErrors = (txResponse: TxResponse) => {
     throw new OrderNotFound('No `result` field found');
   } else if (typeof txResponse.result.meta === 'object') {
     if (txResponse.result.meta.TransactionResult === XrplTransactionErrorTypes.NoIssuer) {
-      throw new BadRequest(`Issuer not found`);
+      throw new BadRequest('Issuer not found');
+    } else if (txResponse.result.meta.TransactionResult === XrplTransactionErrorTypes.UnfundedOffer) {
+      throw new BadRequest('Unfunded offer');
     }
   }
 };

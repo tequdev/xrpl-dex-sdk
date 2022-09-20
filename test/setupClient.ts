@@ -34,6 +34,11 @@ async function setupMockRippledConnection(
         websocketsUrl: `ws://localhost:${port}`,
       });
       await testcase.buyerSdk.connect();
+      testcase.tstBuyerSdk = new SDK({
+        walletSecret: addresses.TST_BUYER_SECRET,
+        websocketsUrl: `ws://localhost:${port}`,
+      });
+      await testcase.tstBuyerSdk.connect();
       resolve();
     } catch (err: unknown) {
       reject(err);
@@ -128,4 +133,5 @@ export async function setupLocalSDK(this: Mocha.Context): Promise<void> {
 export async function teardownLocalSDK(this: Mocha.Context): Promise<void> {
   await this.sellerSdk.disconnect();
   await this.buyerSdk.disconnect();
+  await this.tstBuyerSdk.disconnect();
 }

@@ -2,7 +2,6 @@ import _ from 'lodash';
 import { AccountInfoRequest, AccountLinesRequest, dropsToXrp } from 'xrpl';
 import { DEFAULT_LIMIT } from '../constants';
 import { Balances, FetchBalanceParams, FetchBalanceResponse, SDKContext } from '../models';
-import fetchStatus from './fetchStatus';
 
 /**
  * Returns information about an account's balances, sorted by currency
@@ -32,8 +31,8 @@ async function fetchBalance(
     const accountInfo = accountInfoResponse.result.account_data;
     const accountObjectCount = accountInfo.OwnerCount;
 
-    const serverState = await fetchStatus.call(this);
-    const { reserve_base: reserveBase, reserve_inc: reserveInc } = serverState.info.server_state.validated_ledger;
+    const serverState = await this.fetchStatus();
+    const { reserve_base: reserveBase, reserve_inc: reserveInc } = serverState?.info.serverState.validated_ledger;
 
     const usedXrp = reserveBase + accountObjectCount * reserveInc;
     const freeXrp = parseFloat(accountInfo.Balance) - usedXrp;

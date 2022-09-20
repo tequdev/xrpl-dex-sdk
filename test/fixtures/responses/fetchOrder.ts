@@ -1,5 +1,50 @@
 import { XrplNetwork } from '../../../src/models';
 
+export const tstBuy = {
+  id: 'rn5umFvUWKXqwrGJSRcV24wz9zZFiG7rsQ:30419151',
+  clientOrderId: '0D5A1CD41A637B533D123EE3408F898875E0F8FCA743CF98599E347F55D606DC',
+  datetime: '2022-09-20T00:06:51.000Z',
+  timestamp: 1663632411000,
+  lastTradeTimestamp: 1663632411000,
+  status: 'open',
+  symbol: 'TST/XRP',
+  type: 'limit',
+  timeInForce: 'GTC',
+  side: 'buy',
+  amount: '10',
+  price: '10',
+  average: '0',
+  filled: '0',
+  remaining: '10',
+  cost: '0',
+  trades: [],
+  info: {
+    transactionData: {
+      transaction: {
+        Account: 'rn5umFvUWKXqwrGJSRcV24wz9zZFiG7rsQ',
+        Fee: '12',
+        Flags: 0,
+        LastLedgerSequence: 31319508,
+        Sequence: 30419151,
+        SigningPubKey: '03C8D190247CF46B9A694B73F365387B2FD60DAF464394FD7727EBBE0C0D059D3F',
+        TakerGets: '100000000',
+        TakerPays: { currency: 'TST', issuer: 'rP9jPyP5kyvFRb6ZiRghAGw5u8SGAmU4bd', value: '10' },
+        TransactionType: 'OfferCreate',
+        TxnSignature:
+          '3045022100BC8D892350C36AAECF0EB79296AECA50CFDBC745431D02348A35EA4F8EF28E370220561843E36BFE9B4BAA46ACFD532B8D4C1E104464A5321592592C10F18E0DB0FD',
+        date: 716947611,
+        hash: '77D8B4889A59DDAE101900317AC415A83983459BCE0FAE3FD8CD41B8122095BF',
+        inLedger: 31319490,
+        ledger_index: 31319490,
+        validated: true,
+      },
+      metadata: { AffectedNodes: [], TransactionIndex: 0, TransactionResult: 'tesSUCCESS' },
+      offers: [],
+      date: 716947611,
+    },
+  },
+};
+
 const responses: Record<string, Record<string, unknown>> = {
   [XrplNetwork.Testnet]: {
     completedBuy: {
