@@ -5,7 +5,7 @@ export interface FetchOrderParams {
   /** Ledger index containing the Order (optional) */
   ledger_index?: LedgerIndex;
   /** Max items to search through looking for an Order before giving up */
-  max_search?: number;
+  searchLimit?: number;
 }
 
 /**
@@ -13,4 +13,4 @@ export interface FetchOrderParams {
  *
  * @category Responses
  */
-export type FetchOrderResponse = Order;
+export type FetchOrderResponse = Order | undefined;

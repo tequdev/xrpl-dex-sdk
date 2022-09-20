@@ -1,6 +1,4 @@
-import { Client } from 'xrpl';
-import { FetchTradingFeeResponse, FetchTradingFeesResponse, MarketSymbol } from '../models';
-import fetchMarkets from './fetchMarkets';
+import { SDKContext, FetchTradingFeeResponse, FetchTradingFeesResponse, MarketSymbol } from '../models';
 
 /**
  * Returns information about the fees incurred while trading on any market.
@@ -8,8 +6,10 @@ import fetchMarkets from './fetchMarkets';
  *
  * @category Methods
  */
-async function fetchTradingFees(this: Client): Promise<FetchTradingFeesResponse | undefined> {
-  const markets = await fetchMarkets.call(this);
+async function fetchTradingFees(this: SDKContext): Promise<FetchTradingFeesResponse | undefined> {
+  const markets = await this.fetchMarkets();
+
+  if (!markets) return;
 
   const responses: FetchTradingFeesResponse = [];
 
@@ -20,8 +20,8 @@ async function fetchTradingFees(this: Client): Promise<FetchTradingFeesResponse 
 
     const response: FetchTradingFeeResponse = {
       symbol,
-      base: baseFee || 0,
-      quote: quoteFee || 0,
+      base: baseFee?.toString() || '0',
+      quote: quoteFee?.toString() || '0',
       percentage: true,
       info: JSON.stringify({ market: markets[symbol] }),
     };

@@ -1,18 +1,55 @@
-export { default as cancelOrder } from './cancelOrder';
-export { default as createLimitBuyOrder } from './createLimitBuyOrder';
-export { default as createLimitSellOrder } from './createLimitSellOrder';
-export { default as createOrder } from './createOrder';
-export { default as fetchBalance } from './fetchBalance';
-export { default as fetchCurrencies } from './fetchCurrencies';
-export { default as fetchFees } from './fetchFees';
-export { default as fetchIssuers } from './fetchIssuers';
-export { default as fetchMarket } from './fetchMarket';
-export { default as fetchMarkets } from './fetchMarkets';
-export { default as fetchOrder } from './fetchOrder';
-export { default as fetchOrderBook } from './fetchOrderBook';
-export { default as fetchOrderBooks } from './fetchOrderBooks';
-export { default as fetchStatus } from './fetchStatus';
-export { default as fetchTradingFee } from './fetchTradingFee';
-export { default as fetchTradingFees } from './fetchTradingFees';
-export { default as fetchTransactionFee } from './fetchTransactionFee';
-export { default as fetchTransactionFees } from './fetchTransactionFees';
+import cancelOrder from './cancelOrder';
+import createLimitBuyOrder from './createLimitBuyOrder';
+import createLimitSellOrder from './createLimitSellOrder';
+import createOrder from './createOrder';
+import fetchBalance from './fetchBalance';
+import fetchCanceledOrders from './fetchCanceledOrders';
+import fetchClosedOrders from './fetchClosedOrders';
+import fetchCurrencies from './fetchCurrencies';
+import fetchFees from './fetchFees';
+import fetchIssuers from './fetchIssuers';
+import fetchMarket from './fetchMarket';
+import fetchMarkets from './fetchMarkets';
+import fetchOpenOrders from './fetchOpenOrders';
+import fetchOrder from './fetchOrder';
+import fetchOrderBook from './fetchOrderBook';
+import fetchOrderBooks from './fetchOrderBooks';
+import fetchOrders from './fetchOrders';
+import fetchStatus from './fetchStatus';
+import fetchTradingFee from './fetchTradingFee';
+import fetchTradingFees from './fetchTradingFees';
+import fetchTransactionFee from './fetchTransactionFee';
+import fetchTransactionFees from './fetchTransactionFees';
+import loadCurrencies from './loadCurrencies';
+import loadIssuers from './loadIssuers';
+import loadMarkets from './loadMarkets';
+
+const methods: Record<string, any> = {
+  cancelOrder,
+  createLimitBuyOrder,
+  createLimitSellOrder,
+  createOrder,
+  fetchBalance,
+  fetchCanceledOrders,
+  fetchClosedOrders,
+  fetchCurrencies,
+  fetchFees,
+  fetchIssuers,
+  fetchMarket,
+  fetchMarkets,
+  fetchOpenOrders,
+  fetchOrder,
+  fetchOrderBook,
+  fetchOrderBooks,
+  fetchOrders,
+  fetchStatus,
+  fetchTradingFee,
+  fetchTradingFees,
+  fetchTransactionFee,
+  fetchTransactionFees,
+  loadCurrencies,
+  loadIssuers,
+  loadMarkets,
+};
+
+export default methods;

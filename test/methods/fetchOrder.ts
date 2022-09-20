@@ -1,31 +1,46 @@
 import _ from 'lodash';
 import 'mocha';
 
-import requests from '../fixtures/requests';
-import responses from '../fixtures/responses';
-
-import { fetchOrder } from '../../src/methods';
-import { FetchOrderResponse, RippleNetwork } from '../../src/models';
-import networks from '../../src/networks';
-import { setupRemoteClient, teardownRemoteClient } from '../setupClient';
+import { requests, responses } from '../fixtures';
+import { XrplNetwork } from '../../src/models';
 import { assertResultMatch } from '../testUtils';
+import { setupRemoteSDK, teardownRemoteSDK } from '../setupClient';
 
-const NETWORK = RippleNetwork.Testnet;
+const NETWORK = XrplNetwork.Testnet;
 
 describe('fetchOrder', function () {
   this.timeout(25000);
 
-  beforeEach(_.partial(setupRemoteClient, networks[NETWORK].websockets));
-  afterEach(teardownRemoteClient);
+  beforeEach(_.partial(setupRemoteSDK, NETWORK));
+  afterEach(teardownRemoteSDK);
+
+  /**
+   * Buy Orders
+   */
+
+  it('should return an open Buy Order', async function () {
+    const fetchOrderResponse = await this.buyerSdk.fetchOrder(requests.fetchOrder.testnet.tstBuy);
+    const omittedFields = ['id', 'clientOrderId', 'lastTradeTimestamp', 'datetime', 'timestamp', 'fee', 'info'];
+    assertResultMatch(_.omit(fetchOrderResponse, omittedFields), _.omit(responses.fetchOrder.tstBuy, omittedFields));
+  });
+
+  // it('should return a partially filled Buy Order with multiple Trades', async function () {});
+
+  // it('should retrieve a completed Buy order with a Trade', async function () {});
+
+  // it('should return a canceled Buy Order', async function () {});
+
+  // it('should return a "Fill or Kill" Buy Order', async function () {});
+
+  // it('should return an "Immediate or Cancel" Buy Order', async function () {});
 
   /**
    * Sell Orders
    */
 
-  it('should return a partially filled Sell Order with multiple Trades', async function () {
-    const order: FetchOrderResponse = await fetchOrder.call(this.client, requests.fetchOrder[NETWORK].sell);
-    assertResultMatch(order, responses.fetchOrder[NETWORK].sell);
-  });
+  // it('should return a partially filled Sell Order with multiple Trades', async function () {});
+
+  // it('should retrieve a completed Sell order with multiple Trades', async function () {});
 
   // it('should return a completed Sell Order', async function () {});
 
@@ -34,21 +49,4 @@ describe('fetchOrder', function () {
   // it('should return a "Fill or Kill" Sell Order', async function () {});
 
   // it('should return an "Immediate or Cancel" Sell Order', async function () {});
-
-  /**
-   * Buy Orders
-   */
-
-  // it('should return a partially filled Buy Order with multiple Trades', async function () {});
-
-  it('should return a completed Buy Order', async function () {
-    const order: FetchOrderResponse = await fetchOrder.call(this.client, requests.fetchOrder[NETWORK].buy);
-    assertResultMatch(order, responses.fetchOrder[NETWORK].buy);
-  });
-
-  // it('should return a canceled Buy Order', async function () {});
-
-  // it('should return a "Fill or Kill" Buy Order', async function () {});
-
-  // it('should return an "Immediate or Cancel" Buy Order', async function () {});
 });

@@ -1,0 +1,11 @@
+{
+  "symbol": "TST/XRP",
+  "side": "buy",
+  "type": "limit",
+  "amount": "10",
+  "price": "9.5",
+  "params": {
+    "wallet_secret": "ssYqQi5KF8YaNQyMvZKP28uA7GbWq",
+    "baseCurrencyIssuer": "rP9jPyP5kyvFRb6ZiRghAGw5u8SGAmU4bd"
+  }
+}

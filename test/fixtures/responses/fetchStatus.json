@@ -1,6 +1,65 @@
 {
   "status": "ok",
-  "updated": 1629837883466,
+  "updated": 946686822000,
   "eta": "",
-  "url": ""
+  "url": "",
+  "info": {
+    "serverState": {
+      "build_version": "1.9.3",
+      "complete_ledgers": "30499649-31314711",
+      "initial_sync_duration_us": "274288753",
+      "io_latency_ms": 1,
+      "jq_trans_overflow": "0",
+      "last_close": {
+        "converge_time": 2000,
+        "proposers": 6
+      },
+      "load_base": 256,
+      "load_factor": 256,
+      "load_factor_fee_escalation": 256,
+      "load_factor_fee_queue": 256,
+      "load_factor_fee_reference": 256,
+      "load_factor_server": 256,
+      "network_id": 1,
+      "peer_disconnects": "29700",
+      "peer_disconnects_resources": "205",
+      "peers": 106,
+      "pubkey_node": "n9L2HuFXqzmRFctApnyTzcVukKSw3KfsvrrBUKQsk8Z3s3yRH4cj",
+      "server_state": "full",
+      "server_state_duration_us": "1551419038871",
+      "state_accounting": {
+        "connected": {
+          "duration_us": "268187008",
+          "transitions": "2"
+        },
+        "disconnected": {
+          "duration_us": "1097521",
+          "transitions": "2"
+        },
+        "full": {
+          "duration_us": "1551419038871",
+          "transitions": "1"
+        },
+        "syncing": {
+          "duration_us": "5004197",
+          "transitions": "1"
+        },
+        "tracking": {
+          "duration_us": "26",
+          "transitions": "1"
+        }
+      },
+      "time": "2022-Sep-19 19:56:09.873938 UTC",
+      "uptime": 1551693,
+      "validated_ledger": {
+        "base_fee": 10,
+        "close_time": 716932570,
+        "hash": "C3A93D409BCC8FFF7256FABFF461051BA243A6110B3170DDBBDB39C3425D5BD7",
+        "reserve_base": 10000000,
+        "reserve_inc": 2000000,
+        "seq": 31314711
+      },
+      "validation_quorum": 5
+    }
+  }
 }

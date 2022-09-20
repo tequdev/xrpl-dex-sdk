@@ -1,17 +1,13 @@
 import _ from 'lodash';
 import 'mocha';
 
-import responses from '../fixtures/responses';
-import rippled from '../fixtures/rippled';
-
-import { fetchCurrencies } from '../../src/methods';
-import { Currencies } from '../../src/models';
-import { setupClient, teardownClient } from '../setupClient';
+import { responses, rippled } from '../fixtures';
+import { setupLocalSDK, teardownLocalSDK } from '../setupClient';
 import { assertResultMatch } from '../testUtils';
 
 describe('fetchCurrencies', function () {
-  beforeEach(setupClient);
-  afterEach(teardownClient);
+  beforeEach(setupLocalSDK);
+  afterEach(teardownLocalSDK);
 
   it('should return a list of active currencies on the exchange', async function () {
     // TODO: figure out a cleaner way to do this
@@ -19,8 +15,7 @@ describe('fetchCurrencies', function () {
       this.mockRippled.addResponse('account_info', rippled.account_info.issuer);
     }
 
-    const response: Currencies = await fetchCurrencies.call(this.client);
-
-    assertResultMatch(response, responses.fetchCurrencies);
+    const currencies = await this.sellerSdk.fetchCurrencies();
+    assertResultMatch(currencies, responses.fetchCurrencies);
   });
 });

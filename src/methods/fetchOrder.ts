@@ -1,280 +1,200 @@
-import { ArgumentsRequired, BadResponse, BaseError, OrderNotFound } from 'ccxt';
 import _ from 'lodash';
-import {
-  Client,
-  OfferCreate,
-  OfferCreateFlags,
-  rippleTimeToISOTime,
-  rippleTimeToUnixTime,
-  TxRequest,
-  TxResponse,
-} from 'xrpl';
-import { Amount } from 'xrpl/dist/npm/models/common';
-import { Offer } from 'xrpl/dist/npm/models/ledger';
+import { dropsToXrp, OfferCreate, OfferCreateFlags, rippleTimeToISOTime, rippleTimeToUnixTime } from 'xrpl';
+import { OfferFlags } from 'xrpl/dist/npm/models/ledger';
 import { parseAmountValue } from 'xrpl/dist/npm/models/transactions/common';
 import { hashOfferId } from 'xrpl/dist/npm/utils/hashes';
 import {
   FetchOrderParams,
   FetchOrderResponse,
   MarketSymbol,
-  OrderType,
-  OrderStatus,
-  OrderTimeInForce,
-  ModifiedNode,
-  DeletedNode,
-  CreatedNode,
-  Fee,
-  OrderSide,
-  TxResult,
+  AccountSequencePair,
+  TransactionData,
   Order,
   Trade,
+  OrderStatus,
+  OrderSide,
+  OrderTimeInForce,
+  SDKContext,
 } from '../models';
 import {
-  fetchOffer,
   fetchTransferRate,
+  fetchTxn,
   getAmountCurrencyCode,
   getBaseAmountKey,
   getMarketSymbol,
-  getOrderSideFromOffer,
+  getMostRecentTxId,
+  getOrderOrTradeId,
   getQuoteAmountKey,
-  getTrade,
+  getTakerOrMaker,
   parseOrderId,
-  subtractAmounts,
+  parseTransaction,
 } from '../utils';
 
 async function fetchOrder(
-  this: Client,
+  this: SDKContext,
   /** The Order's Account and Sequence number, separated by a colon */
-  id: string,
+  id: AccountSequencePair,
   /** Symbol field is not used */
   /* eslint-disable-next-line */
   symbol: MarketSymbol | undefined = undefined,
   params: FetchOrderParams = {}
 ): Promise<FetchOrderResponse> {
-  const { account, sequenceNumber } = parseOrderId(id);
+  /**
+   * Set things up
+   */
+  const { account, sequence } = parseOrderId(id);
+
+  const transactions: TransactionData<OfferCreate>[] = [];
+
+  let status: OrderStatus = 'open';
+  let previousTxnId = await getMostRecentTxId(this.client, id, params.searchLimit);
+  let previousTxnData: TransactionData<OfferCreate> | undefined;
 
   /**
-   * Validate request
+   * Build a Transaction history for this Order
    */
-  if (!account) throw new ArgumentsRequired('Params field `account` is required');
-
-  /**
-   * Look up Offer data
-   */
-
-  const offer = await fetchOffer(this, account, sequenceNumber, params);
-  if (!offer) throw new OrderNotFound(`Order ${id} from account ${account} not found`);
-
-  /**
-   * Prepare Order return data
-   */
-  const orderTrades: Trade[] = [];
-  const orderSide = getOrderSideFromOffer(offer);
-  const orderIdHash = hashOfferId(account, sequenceNumber);
-
-  let orderStatus = OrderStatus.Open;
-  let orderTimestamp = rippleTimeToUnixTime(0);
-  let orderTimeInForce = OrderTimeInForce.GoodTillCanceled;
-
-  let orderFilled = 0;
-  let orderBaseAmount: Amount | undefined;
-  let orderQuoteAmount: Amount | undefined;
-
-  /**
-   * Loop back through Transactions to get Trades data
-   */
-  let previousTxnId: string | undefined = offer.PreviousTxnID;
-  let lastTradeTimestamp;
-  let totalTradesPrice = 0;
-  let requestNonce = 0;
-
   while (previousTxnId) {
-    const previousTxResponse: TxResponse = await this.request({
-      id: (requestNonce += 1),
-      command: 'tx',
-      transaction: previousTxnId,
-      binary: false,
-    } as TxRequest);
-
-    const previousTx = previousTxResponse.result;
-
-    if (
-      !previousTx.meta ||
-      typeof previousTx.meta !== 'object' ||
-      previousTx.TransactionType !== 'OfferCreate' ||
-      !previousTx.Sequence
-    ) {
-      throw new BadResponse(`Bad data for Order's previous Transaction with hash ${previousTx.hash}`);
+    const previousTxnResponse = await fetchTxn(this.client, previousTxnId);
+    if (previousTxnResponse) {
+      previousTxnData = parseTransaction(id, previousTxnResponse);
+      if (previousTxnData) {
+        transactions.push(previousTxnData);
+        previousTxnId = previousTxnData.previousTxnId;
+      }
     }
-
-    if (!lastTradeTimestamp) lastTradeTimestamp = previousTx.date;
-
-    if (previousTx.Account !== account) {
-      // Someone else's Transaction - look up how it affected ours
-
-      let affectedOffer: Offer | undefined;
-      for (const node of previousTx.meta.AffectedNodes) {
-        if (node.hasOwnProperty('ModifiedNode')) {
-          const { LedgerEntryType, LedgerIndex, FinalFields, PreviousFields, PreviousTxnID } = (node as ModifiedNode)
-            .ModifiedNode;
-          if (LedgerEntryType !== 'Offer' || LedgerIndex !== orderIdHash || !FinalFields || !PreviousFields) continue;
-          affectedOffer = {
-            ...(FinalFields as unknown as Offer),
-            TakerGets: subtractAmounts(PreviousFields.TakerGets as Amount, FinalFields.TakerGets as Amount),
-            TakerPays: subtractAmounts(PreviousFields.TakerPays as Amount, FinalFields.TakerPays as Amount),
-          };
-          previousTxnId = PreviousTxnID;
-          break;
-        } else if (node.hasOwnProperty('DeletedNode')) {
-          const { LedgerEntryType, LedgerIndex, FinalFields } = (node as DeletedNode).DeletedNode;
-          if (LedgerEntryType !== 'Offer' || LedgerIndex !== orderIdHash) continue;
-          affectedOffer = FinalFields as unknown as Offer;
-          previousTxnId = affectedOffer.PreviousTxnID;
-          orderStatus = OrderStatus.Closed;
-          break;
-        }
-      }
-
-      if (!affectedOffer) {
-        throw new BadResponse("Could not find given Offer in its most recent Transaction's list of affected offers");
-      }
-
-      const trade = await getTrade(this, id, {
-        ...previousTxResponse,
-        result: {
-          ...previousTxResponse.result,
-          TakerGets: affectedOffer.TakerPays,
-          TakerPays: affectedOffer.TakerGets,
-        } as TxResult<OfferCreate>,
-      });
-
-      orderTrades.push(trade);
-
-      totalTradesPrice += parseFloat(trade.price);
-      orderFilled += parseFloat(trade.amount);
-    } else {
-      // This was our Transaction - look for Offers it modified
-
-      if (previousTx.Flags === OfferCreateFlags.tfPassive) orderTimeInForce = OrderTimeInForce.PostOnly;
-      else if (previousTx.Flags === OfferCreateFlags.tfFillOrKill) orderTimeInForce = OrderTimeInForce.FillOrKill;
-      else if (previousTx.Flags === OfferCreateFlags.tfImmediateOrCancel)
-        orderTimeInForce = OrderTimeInForce.ImmediateOrCancel;
-
-      orderBaseAmount = previousTx[getBaseAmountKey(orderSide)];
-      orderQuoteAmount = previousTx[getQuoteAmountKey(orderSide)];
-
-      let didCreateOffer = false;
-      for (const node of previousTx.meta.AffectedNodes) {
-        let affectedOffer: Offer | undefined;
-
-        if (node.hasOwnProperty('ModifiedNode')) {
-          const { LedgerEntryType, FinalFields, PreviousFields } = (node as ModifiedNode).ModifiedNode;
-          if (LedgerEntryType !== 'Offer' || !FinalFields || !PreviousFields) continue;
-
-          const updatedOrderTakerGets = subtractAmounts(
-            PreviousFields.TakerGets as Amount,
-            FinalFields.TakerGets as Amount
-          );
-          const updatedOrderTakerPays = subtractAmounts(
-            PreviousFields.TakerPays as Amount,
-            FinalFields.TakerPays as Amount
-          );
-
-          affectedOffer = {
-            ...(FinalFields as unknown as Offer),
-            TakerGets: updatedOrderTakerGets,
-            TakerPays: updatedOrderTakerPays,
-          };
-        } else if (node.hasOwnProperty('DeletedNode')) {
-          const { LedgerEntryType, FinalFields } = (node as DeletedNode).DeletedNode;
-          if (LedgerEntryType !== 'Offer') continue;
-
-          affectedOffer = FinalFields as unknown as Offer;
-        } else if (node.hasOwnProperty('CreatedNode')) {
-          const { LedgerEntryType, NewFields } = (node as CreatedNode).CreatedNode;
-          if (LedgerEntryType === 'Offer' || NewFields.Account === account || NewFields.Sequence === parseInt(id))
-            didCreateOffer = true;
-        }
-
-        if (affectedOffer) {
-          const trade = await getTrade(this, id, {
-            ...previousTxResponse,
-            result: {
-              ...previousTxResponse.result,
-              TakerGets: affectedOffer.TakerPays,
-              TakerPays: affectedOffer.TakerGets,
-            } as TxResult<OfferCreate>,
-          });
-          orderTrades.push(trade);
-          totalTradesPrice += parseFloat(trade.price);
-          orderFilled += parseFloat(trade.amount);
-        }
-      }
-      previousTxnId = undefined;
-
-      if (previousTx.meta.TransactionResult !== 'tesSUCCESS') {
-        orderStatus = OrderStatus.Rejected;
-      } else if (!didCreateOffer) {
-        if (orderTimeInForce === OrderTimeInForce.FillOrKill && orderFilled !== parseAmountValue(orderBaseAmount))
-          orderStatus = OrderStatus.Canceled;
-        else if (orderTimeInForce === OrderTimeInForce.ImmediateOrCancel && orderFilled == 0)
-          orderStatus = OrderStatus.Canceled;
-        else orderStatus = OrderStatus.Closed;
-      }
-      orderTimestamp = previousTx.date || orderTimestamp;
-    }
-  }
-
-  if (!orderBaseAmount || !orderQuoteAmount)
-    throw new BaseError('An unknown error occurred while looking up Order - no amounts found on XRPL Ledger object');
-
-  const orderBaseRate = parseFloat(await fetchTransferRate(this, orderBaseAmount));
-  const orderQuoteRate = parseFloat(await fetchTransferRate(this, orderQuoteAmount));
-
-  const orderBaseValue = parseAmountValue(orderBaseAmount);
-  const orderQuoteValue = parseAmountValue(orderQuoteAmount);
-
-  const orderPrice = orderQuoteValue / orderBaseValue;
-  const orderCost = orderFilled * orderPrice;
-
-  const orderFeeCurrency = getAmountCurrencyCode(orderSide === OrderSide.Buy ? orderQuoteAmount : orderBaseAmount);
-  const orderFeeRate = orderSide === OrderSide.Buy ? orderQuoteRate : orderBaseRate;
-  const orderFees = orderFilled * orderFeeRate;
-
-  const orderFee: Fee = {
-    currency: orderFeeCurrency,
-    cost: orderFees.toString(),
-  };
-
-  if (orderFee.cost != 0) {
-    orderFee.rate = orderFeeRate.toString();
-    orderFee.percentage = true;
   }
 
   /**
-   * Compile final Order object and return
+   * Parse the Transaction history for Trade and Order objects
    */
-  const order: Order = {
-    id,
-    clientOrderId: orderIdHash,
-    datetime: rippleTimeToISOTime(orderTimestamp),
-    timestamp: rippleTimeToUnixTime(orderTimestamp),
-    lastTradeTimestamp: rippleTimeToUnixTime(lastTradeTimestamp || 0),
-    status: orderStatus,
-    symbol: getMarketSymbol(orderBaseAmount, orderQuoteAmount),
-    type: OrderType.Limit,
-    timeInForce: orderTimeInForce,
-    side: orderSide,
-    amount: orderBaseValue.toString(),
-    price: orderPrice.toString(),
-    average: (orderTrades.length ? totalTradesPrice / orderTrades.length : 0).toString(), // as cool as dividing by zero is, we shouldn't do it
-    filled: orderFilled.toString(),
-    remaining: (orderBaseValue - orderFilled).toString(),
-    cost: orderCost.toString(),
-    trades: orderTrades,
-    fee: orderFee,
-    info: { Offer: offer },
-  };
+  const trades: Trade[] = [];
+  let order: Order | undefined;
+  let filled = 0;
+
+  transactions.sort((a, b) => a.date - b.date);
+
+  for (const transactionData of transactions) {
+    const { transaction, offers, date } = transactionData;
+
+    for (const offer of offers) {
+      const source = transaction.Account !== account ? transaction : offer;
+
+      if (!source.Sequence) continue;
+
+      const side: OrderSide = source.Flags === OfferFlags.lsfSell ? 'sell' : 'buy';
+
+      const baseAmount = source[getBaseAmountKey(side)];
+      const quoteAmount = source[getQuoteAmountKey(side)];
+
+      const baseRate = parseFloat(await fetchTransferRate(this.client, baseAmount));
+      const quoteRate = parseFloat(await fetchTransferRate(this.client, quoteAmount));
+
+      const baseCurrency = getAmountCurrencyCode(baseAmount);
+      const quoteCurrency = getAmountCurrencyCode(quoteAmount);
+
+      const baseValue =
+        baseCurrency === 'XRP' ? parseInt(dropsToXrp(parseAmountValue(baseAmount))) : parseAmountValue(baseAmount);
+      const quoteValue =
+        quoteCurrency === 'XRP' ? parseInt(dropsToXrp(parseAmountValue(quoteAmount))) : parseAmountValue(quoteAmount);
+
+      const price = quoteValue / baseValue;
+      const cost = baseValue * price;
+
+      const feeRate = side === 'buy' ? quoteRate : baseRate;
+      const feeCost = baseValue * feeRate;
+
+      filled += baseValue;
+
+      const trade: Trade = {
+        id: getOrderOrTradeId(source.Account, source.Sequence),
+        order: id,
+        datetime: rippleTimeToISOTime(date || 0),
+        timestamp: rippleTimeToUnixTime(date || 0),
+        symbol: getMarketSymbol(baseAmount, quoteAmount),
+        type: 'limit',
+        side: side,
+        amount: baseValue.toString(),
+        price: price.toString(),
+        takerOrMaker: getTakerOrMaker(side),
+        cost: cost.toString(),
+        info: { [transaction.Account !== account ? 'transaction' : 'offer']: source },
+      };
+
+      if (feeCost != 0) {
+        trade.fee = {
+          currency: getAmountCurrencyCode(side === 'buy' ? quoteAmount : baseAmount),
+          cost: feeCost.toString(),
+          rate: feeRate.toString(),
+          percentage: true,
+        };
+      }
+
+      trades.push(trade);
+    }
+
+    if (transaction.Account === account && transaction.Sequence === sequence) {
+      const source = transaction as OfferCreate;
+
+      if (!source.Sequence) return;
+
+      const side: OrderSide = source.Flags === OfferCreateFlags.tfSell ? 'sell' : 'buy';
+
+      let orderTimeInForce: OrderTimeInForce = 'GTC';
+      if (source.Flags === OfferCreateFlags.tfPassive) orderTimeInForce = 'PO';
+      else if (source.Flags === OfferCreateFlags.tfFillOrKill) orderTimeInForce = 'FOK';
+      else if (source.Flags === OfferCreateFlags.tfImmediateOrCancel) orderTimeInForce = 'IOC';
+
+      const baseAmount = source[getBaseAmountKey(side)];
+      const quoteAmount = source[getQuoteAmountKey(side)];
+
+      const baseRate = parseFloat(await fetchTransferRate(this.client, baseAmount));
+      const quoteRate = parseFloat(await fetchTransferRate(this.client, quoteAmount));
+
+      const baseCurrency = getAmountCurrencyCode(baseAmount);
+      const quoteCurrency = getAmountCurrencyCode(quoteAmount);
+
+      const baseValue =
+        baseCurrency === 'XRP' ? parseInt(dropsToXrp(parseAmountValue(baseAmount))) : parseAmountValue(baseAmount);
+      const quoteValue =
+        quoteCurrency === 'XRP' ? parseInt(dropsToXrp(parseAmountValue(quoteAmount))) : parseAmountValue(quoteAmount);
+
+      const orderPrice = quoteValue / baseValue;
+      const cost = filled * orderPrice;
+
+      const feeRate = side === 'buy' ? quoteRate : baseRate;
+      const feeCost = filled * feeRate;
+
+      order = {
+        id,
+        clientOrderId: hashOfferId(source.Account, source.Sequence),
+        datetime: rippleTimeToISOTime(date),
+        timestamp: rippleTimeToUnixTime(date),
+        lastTradeTimestamp: rippleTimeToUnixTime(transactions[0].date || 0),
+        status,
+        symbol: getMarketSymbol(baseAmount, quoteAmount),
+        type: 'limit',
+        timeInForce: orderTimeInForce,
+        side,
+        amount: baseValue.toString(),
+        price: orderPrice.toString(),
+        average: (trades.length ? filled / trades.length : 0).toString(), // as cool as dividing by zero is, we shouldn't do it
+        filled: filled.toString(),
+        remaining: (baseValue - filled).toString(),
+        cost: cost.toString(),
+        trades,
+        info: { transactionData },
+      };
+
+      if (feeCost != 0) {
+        order.fee = {
+          currency: getAmountCurrencyCode(side === 'buy' ? quoteAmount : baseAmount),
+          cost: feeCost.toString(),
+          rate: feeRate.toString(),
+          percentage: true,
+        };
+      }
+    }
+  }
 
   return order;
 }

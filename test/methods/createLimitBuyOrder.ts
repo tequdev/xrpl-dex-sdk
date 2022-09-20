@@ -1,36 +1,28 @@
 import _ from 'lodash';
 import { assert } from 'chai';
 import 'mocha';
-import { Client } from 'xrpl';
 
-import requests from '../fixtures/requests';
-import responses from '../fixtures/responses';
-
-import { createLimitBuyOrder } from '../../src/methods';
-import { Order } from '../../src/models';
-import { teardownRemoteClient } from '../setupClient';
-import networks from '../../src/networks';
+import { requests, responses } from '../fixtures';
+import { SDKContext, XrplNetwork } from '../../src/models';
+import { setupRemoteSDK, teardownRemoteSDK } from '../setupClient';
 import { assertResultMatch } from '../testUtils';
 
-const TIMEOUT = 10000;
+const TIMEOUT = 20000;
+const NETWORK = XrplNetwork.Testnet;
 
 describe('createLimitBuyOrder', function () {
   this.timeout(TIMEOUT);
 
-  beforeEach(async function (this) {
-    this.client = new Client(networks.testnet.websockets);
-    await this.client.connect();
-  });
-  afterEach(teardownRemoteClient);
+  beforeEach(_.partial(setupRemoteSDK, NETWORK));
+  afterEach(teardownRemoteSDK);
 
   it('should create a Limit Buy Order', async function () {
     const { symbol, amount, price, params } = requests.createOrder.buy;
-    const newOrder: Order = await createLimitBuyOrder.call(this.client, symbol, amount, price, params);
-
+    const newOrder = await (this.buyerSdk as SDKContext).createLimitBuyOrder(symbol, amount, price, params);
     assert(typeof newOrder !== 'undefined');
 
-    const { id, datetime, timestamp, fee, info, ...expectedResponse } = responses.createOrder.buy;
-
-    assertResultMatch(newOrder, { ...newOrder, ...expectedResponse });
+    const fetchOrderResponse = await this.buyerSdk.fetchOrder(newOrder.id);
+    const omittedFields = ['id', 'clientOrderId', 'lastTradeTimestamp', 'datetime', 'timestamp', 'fee', 'info'];
+    assertResultMatch(_.omit(fetchOrderResponse, omittedFields), _.omit(responses.createOrder.buy, omittedFields));
   });
 });

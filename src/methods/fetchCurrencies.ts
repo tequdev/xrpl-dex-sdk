@@ -1,7 +1,7 @@
 import _ from 'lodash';
-import { Client, transferRateToDecimal } from 'xrpl';
+import { transferRateToDecimal } from 'xrpl';
 import { currencies } from '../data';
-import { Currencies, FetchCurrenciesResponse } from '../models';
+import { FetchCurrenciesResponse, SDKContext, XrplNetwork } from '../models';
 
 /**
  * Retrieves a list of currencies being traded on the dEX. Returns
@@ -9,8 +9,10 @@ import { Currencies, FetchCurrenciesResponse } from '../models';
  *
  * @category Methods
  */
-async function fetchCurrencies(this: Client): Promise<FetchCurrenciesResponse> {
-  const response = currencies as Currencies;
+async function fetchCurrencies(this: SDKContext): Promise<FetchCurrenciesResponse> {
+  if (this.currencies) return this.currencies;
+
+  const response = currencies[this.params.network || XrplNetwork.Mainnet];
 
   const currencyKeys = Object.keys(response);
 
@@ -20,7 +22,7 @@ async function fetchCurrencies(this: Client): Promise<FetchCurrenciesResponse> {
     for (let i = 0, il = response[currencyKey].length; i < il; i += 1) {
       const currency = response[currencyKey][i];
 
-      const { result: accountInfoResult } = await this.request({
+      const { result: accountInfoResult } = await this.client.request({
         command: 'account_info',
         account: currency.issuer,
       });
@@ -28,7 +30,7 @@ async function fetchCurrencies(this: Client): Promise<FetchCurrenciesResponse> {
       if (accountInfoResult.account_data.TransferRate) {
         const rate = accountInfoResult.account_data.TransferRate;
         const fee = transferRateToDecimal(typeof rate === 'string' ? parseInt(rate) : rate);
-        response[currencyKey][i].fee = parseFloat(fee);
+        response[currencyKey][i].fee = fee;
       }
     }
   }

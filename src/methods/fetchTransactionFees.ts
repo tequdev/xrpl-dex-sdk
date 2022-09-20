@@ -1,6 +1,11 @@
-import { Client, FeeRequest } from 'xrpl';
-import { CurrencyCode, FetchTransactionFeesParams, FetchTransactionFeesResponse, TransactionFee } from '../models';
-import fetchCurrencies from './fetchCurrencies';
+import { FeeRequest } from 'xrpl';
+import {
+  SDKContext,
+  CurrencyCode,
+  FetchTransactionFeesParams,
+  FetchTransactionFeesResponse,
+  TransactionFee,
+} from '../models';
 
 /**
  * Returns information about fees incurred for performing transactions with a
@@ -9,15 +14,17 @@ import fetchCurrencies from './fetchCurrencies';
  * @category Methods
  */
 async function fetchTransactionFees(
-  this: Client,
+  this: SDKContext,
   /** Currency codes to get fees for */
   codes: CurrencyCode[],
   /** Parameters specific to the exchange API endpoint */
   params: FetchTransactionFeesParams = {}
 ): Promise<FetchTransactionFeesResponse | undefined> {
-  const { result: feesResult } = await this.request({ command: 'fee' } as FeeRequest);
+  const { result: feesResult } = await this.client.request({ command: 'fee' } as FeeRequest);
 
-  const currencies = await fetchCurrencies.call(this);
+  const currencies = await this.fetchCurrencies();
+
+  if (!currencies) return;
 
   const response: FetchTransactionFeesResponse = [];
 
@@ -38,14 +45,14 @@ async function fetchTransactionFees(
       // Or get fees for all issuers of this currency
       currencies[code].forEach(({ issuer, fee }) => {
         if (fee) {
-          transferRates[issuer] = fee;
+          transferRates[issuer] = fee.toString();
         }
       });
     }
 
     response.push({
       code,
-      current: parseInt(feesResult.drops.open_ledger_fee),
+      current: feesResult.drops.open_ledger_fee,
       transfer: transferRates,
       info: JSON.stringify({ feesResult, currency: currencies[code] }),
     });

@@ -1,0 +1,11 @@
+{
+  "symbol": "AKT/XRP",
+  "side": "sell",
+  "type": "limit",
+  "amount": "25",
+  "price": "2.5",
+  "params": {
+    "wallet_secret": "shCwGCyy17Ph4JdZ6jTsFssEpS6Fs",
+    "baseCurrencyIssuer": "rMZoAqwRn3BLbmFYL3exNVNVKrceYcNy6B"
+  }
+}

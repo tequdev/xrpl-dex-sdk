@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { Client, BookOffersRequest } from 'xrpl';
+import { BookOffersRequest } from 'xrpl';
 import { OfferFlags } from 'xrpl/dist/npm/models/ledger';
 import { TakerAmount } from 'xrpl/dist/npm/models/methods/bookOffers';
 import { DEFAULT_LIMIT } from '../constants';
@@ -10,6 +10,7 @@ import {
   FetchOrderBookParams,
   OrderBook,
   FetchOrderBookResponse,
+  SDKContext,
 } from '../models';
 import { parseCurrencyAmount, parseMarketSymbol } from '../utils';
 
@@ -20,7 +21,7 @@ import { parseCurrencyAmount, parseMarketSymbol } from '../utils';
  * @category Methods
  */
 async function fetchOrderBook(
-  this: Client,
+  this: SDKContext,
   /** Token pair (called Unified Market Symbol in CCXT) */
   symbol: MarketSymbol,
   /** Number of results to return */
@@ -54,7 +55,7 @@ async function fetchOrderBook(
     taker,
   };
 
-  const bookOffersResponse = await this.requestAll(bookOffersRequest);
+  const bookOffersResponse = await this.client.requestAll(bookOffersRequest);
 
   // Format XRPL response
   const orders = _.flatMap(bookOffersResponse, (offersResult) => offersResult.result.offers);

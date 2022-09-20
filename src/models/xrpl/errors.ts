@@ -4,4 +4,10 @@ export enum XrplErrorTypes {
   NoCurrentLedger = 'noCurrent',
   NoNetwork = 'noNetwork',
   TooBusy = 'tooBusy',
+  TxnNotFound = 'txnNotFound',
+}
+
+export enum XrplTransactionErrorTypes {
+  NoIssuer = 'tecNO_ISSUER',
+  UnfundedOffer = 'tecUNFUNDED_OFFER',
 }

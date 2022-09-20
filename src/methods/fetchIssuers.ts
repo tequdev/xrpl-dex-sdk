@@ -1,7 +1,6 @@
 import _ from 'lodash';
-import { Client } from 'xrpl';
 import { issuers } from '../data';
-import { Issuers, FetchIssuersResponse } from '../models';
+import { FetchIssuersResponse, SDKContext, XrplNetwork } from '../models';
 
 /**
  * Retrieves a list of trusted issuers
@@ -9,8 +8,8 @@ import { Issuers, FetchIssuersResponse } from '../models';
  *
  * @category Methods
  */
-async function fetchIssuers(this: Client): Promise<FetchIssuersResponse> {
-  return issuers as Issuers;
+async function fetchIssuers(this: SDKContext): Promise<FetchIssuersResponse> {
+  return this.issuers || issuers[this.params.network || XrplNetwork.Mainnet];
 }
 
 export default fetchIssuers;

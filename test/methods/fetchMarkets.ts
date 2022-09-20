@@ -1,22 +1,17 @@
 import _ from 'lodash';
 import 'mocha';
 
-import responses from '../fixtures/responses';
-import rippled from '../fixtures/rippled';
-
-import { fetchMarkets } from '../../src/methods';
-import { Markets } from '../../src/models';
-import { setupClient, teardownClient } from '../setupClient';
+import { responses, rippled } from '../fixtures';
+import { setupLocalSDK, teardownLocalSDK } from '../setupClient';
 import { assertResultMatch } from '../testUtils';
-import serverUrl from '../serverUrl';
 
 const TIMEOUT = 20000;
 
 describe('fetchMarkets', function () {
   this.timeout(TIMEOUT);
 
-  beforeEach(_.partial(setupClient, serverUrl));
-  afterEach(teardownClient);
+  beforeEach(setupLocalSDK);
+  afterEach(teardownLocalSDK);
 
   it('should return a list of market pairs on the exchange', async function () {
     // TODO: figure out a cleaner way to do this
@@ -24,8 +19,7 @@ describe('fetchMarkets', function () {
       this.mockRippled.addResponse('account_info', rippled.account_info.issuer);
     }
 
-    const response: Markets = await fetchMarkets.call(this.client);
-
-    assertResultMatch(response, responses.fetchMarkets);
+    const markets = await this.sellerSdk.fetchMarkets();
+    assertResultMatch(markets, responses.fetchMarkets);
   });
 });

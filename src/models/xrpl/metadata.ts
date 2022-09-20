@@ -33,5 +33,10 @@ export interface DeletedNode {
     FinalFields: {
       [field: string]: unknown;
     };
+    PreviousFields?: {
+      [field: string]: unknown;
+    };
   };
 }
+
+export type Node = CreatedNode | ModifiedNode | DeletedNode;

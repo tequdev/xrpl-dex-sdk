@@ -1,30 +1,24 @@
 import _ from 'lodash';
 import { assert } from 'chai';
 import 'mocha';
-import { Client } from 'xrpl';
 
-import requests from '../fixtures/requests';
+import { requests } from '../fixtures';
+import { OrderSide, OrderType, SDKContext } from '../../src/models';
+import { XrplNetwork } from '../../src/models';
+import { setupRemoteSDK, teardownRemoteSDK } from '../setupClient';
 
-import { cancelOrder, createOrder } from '../../src/methods';
-import { Order, OrderSide, OrderType } from '../../src/models';
-import { teardownRemoteClient } from '../setupClient';
-import networks from '../../src/networks';
-
-const TIMEOUT = 20000;
+const TIMEOUT = 25000;
+const NETWORK = XrplNetwork.Testnet;
 
 describe('cancelOrder', function () {
   this.timeout(TIMEOUT);
 
-  beforeEach(async function (this) {
-    this.client = new Client(networks.testnet.websockets);
-    await this.client.connect();
-  });
-  afterEach(teardownRemoteClient);
+  beforeEach(_.partial(setupRemoteSDK, NETWORK));
+  afterEach(teardownRemoteSDK);
 
   it('should create and then cancel an Order', async function () {
-    const { symbol, side, type, amount, price, params } = requests.createOrder.buy;
-    const newOrder: Order = await createOrder.call(
-      this.client,
+    const { symbol, side, type, amount, price, params } = requests.createOrder.smallBuyOrder2;
+    const newOrder = await (this.buyerSdk as SDKContext).createOrder(
       symbol,
       side as OrderSide,
       type as OrderType,
@@ -32,12 +26,11 @@ describe('cancelOrder', function () {
       price,
       params
     );
-
     assert(typeof newOrder !== 'undefined');
 
-    const canceledOrder = await cancelOrder.call(this.client, newOrder.id, { wallet_secret: params.wallet_secret });
-
-    assert(typeof canceledOrder !== 'undefined');
+    const canceledOrder = await this.buyerSdk.cancelOrder(newOrder.id);
     assert(canceledOrder.id === newOrder.id);
   });
+
+  it("should throw an error if an account tries to cancel another account's Order", async function () {});
 });

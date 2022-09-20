@@ -1,7 +1,6 @@
-import { BadRequest } from 'ccxt';
 import _ from 'lodash';
-import { Client, OfferCancel, Wallet } from 'xrpl';
-import { CancelOrderParams, CancelOrderResponse } from '../models';
+import { OfferCancel } from 'xrpl';
+import { AccountSequencePair, CancelOrderParams, CancelOrderResponse, SDKContext } from '../models';
 import { parseOrderId } from '../utils';
 
 /**
@@ -11,31 +10,22 @@ import { parseOrderId } from '../utils';
  * @category Methods
  */
 async function cancelOrder(
-  this: Client,
+  this: SDKContext,
   /** ID of the Order to cancel */
-  id: string,
+  id: AccountSequencePair,
   /** Exchange-specific parameters */
-  params: CancelOrderParams
+  /** eslint-disable-next-line */
+  params: CancelOrderParams = {}
 ): Promise<CancelOrderResponse | undefined> {
-  const { wallet_private_key, wallet_public_key, wallet_secret } = params;
-
-  const { sequenceNumber } = parseOrderId(id);
-
-  if (!wallet_secret && (!wallet_public_key || !wallet_private_key)) {
-    throw new BadRequest('Must provide either `wallet_secret` or `wallet_public_key` and `wallet_private_key`');
-  }
-
-  const wallet = wallet_secret
-    ? Wallet.fromSecret(wallet_secret)
-    : new Wallet(wallet_public_key as string, wallet_private_key as string);
+  const { sequence } = parseOrderId(id);
 
   const offerCancel: OfferCancel = {
     TransactionType: 'OfferCancel',
-    Account: wallet.classicAddress,
-    OfferSequence: sequenceNumber,
+    Account: this.wallet.classicAddress,
+    OfferSequence: sequence,
   };
 
-  const offerCancelResult = await this.submitAndWait(offerCancel, { autofill: true, wallet });
+  const offerCancelResult = await this.client.submitAndWait(offerCancel, { autofill: true, wallet: this.wallet });
 
   const response: CancelOrderResponse = {
     id,

@@ -1,30 +1,13 @@
 import { MarketSymbol } from '../common';
 import { Fee, Trade } from '.';
 
-export enum OrderStatus {
-  Open = 'open',
-  Closed = 'closed',
-  Canceled = 'canceled',
-  Expired = 'expired',
-  Rejected = 'rejected',
-}
+export type OrderStatus = 'open' | 'closed' | 'canceled' | 'expired' | 'rejected';
 
-export enum OrderType {
-  Limit = 'limit',
-  Market = 'market',
-}
+export type OrderType = 'limit';
 
-export enum OrderTimeInForce {
-  GoodTillCanceled = 'GTC',
-  ImmediateOrCancel = 'IOC',
-  FillOrKill = 'FOK',
-  PostOnly = 'PO',
-}
+export type OrderTimeInForce = 'GTC' | 'IOC' | 'FOK' | 'PO';
 
-export enum OrderSide {
-  Buy = 'buy',
-  Sell = 'sell',
-}
+export type OrderSide = 'buy' | 'sell';
 
 export default interface Order {
   /** The Offer's Sequence number (as a string) */
@@ -35,8 +18,8 @@ export default interface Order {
   lastTradeTimestamp: number;
   status: OrderStatus;
   symbol: MarketSymbol;
-  type: string;
-  timeInForce?: string;
+  type: OrderType;
+  timeInForce?: OrderTimeInForce;
   side: OrderSide;
   amount: string | number;
   price?: string | number; // May be empty for Market orders

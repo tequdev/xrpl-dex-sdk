@@ -1,22 +1,14 @@
-import { Order } from 'ccxt';
-import { MarketSymbol } from '../common';
+import { Order } from '../ccxt';
 
-export interface FetchOrdersParams {}
-
-/**
- * Returns an array of {@link Order} objects
- *
- * @category Requests
- */
-export interface FetchOrdersRequest {
-  /** Token pair (called Unified Market Symbol in CCXT) */
-  symbol?: MarketSymbol;
-  /** Get orders after a given timestamp */
-  since?: number;
-  /** Number of results to return */
-  limit?: number;
-  /** Parameters specific to the exchange API endpoint */
-  params: FetchOrdersParams;
+export interface FetchOrdersParams {
+  /** Max Transactions to search through looking for Order data before giving up */
+  searchLimit?: number;
+  /** Whether to return Open orders */
+  showOpen?: boolean;
+  /** Whether to return Closed orders */
+  showClosed?: boolean;
+  /** Whether to return Canceled orders */
+  showCanceled?: boolean;
 }
 
 /**

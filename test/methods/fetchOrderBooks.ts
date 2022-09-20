@@ -1,17 +1,13 @@
+import _ from 'lodash';
 import 'mocha';
 
-import requests from '../fixtures/requests';
-import responses from '../fixtures/responses';
-import rippled from '../fixtures/rippled';
-
-import { fetchOrderBooks } from '../../src/methods';
-import { FetchOrderBooksResponse } from '../../src/models';
-import { setupClient, teardownClient } from '../setupClient';
+import { requests, responses, rippled } from '../fixtures';
+import { setupLocalSDK, teardownLocalSDK } from '../setupClient';
 import { assertResultMatch } from '../testUtils';
 
 describe('fetchOrderBooks', function () {
-  beforeEach(setupClient);
-  afterEach(teardownClient);
+  beforeEach(setupLocalSDK);
+  afterEach(teardownLocalSDK);
 
   it('should return an array of OrderBook objects', async function () {
     this.mockRippled.addResponse('book_offers', rippled.book_offers.usdBtc);
@@ -19,8 +15,7 @@ describe('fetchOrderBooks', function () {
 
     const { symbols, limit, params } = requests.fetchOrderBooks;
 
-    const response: FetchOrderBooksResponse = await fetchOrderBooks.call(this.client, symbols, limit, params);
-
-    assertResultMatch(response, responses.fetchOrderBooks);
+    const orderBooks = await this.sellerSdk.fetchOrderBooks(symbols, limit, params);
+    assertResultMatch(orderBooks, responses.fetchOrderBooks);
   });
 });

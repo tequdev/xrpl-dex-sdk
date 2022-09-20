@@ -1,7 +1,6 @@
 import _ from 'lodash';
-import { Client } from 'xrpl';
 import { DEFAULT_LIMIT } from '../constants';
-import { FetchOrderBooksParams, FetchOrderBooksResponse, MarketSymbol } from '../models';
+import { SDKContext, FetchOrderBooksParams, FetchOrderBooksResponse, MarketSymbol } from '../models';
 import fetchOrderBook from './fetchOrderBook';
 
 /**
@@ -11,7 +10,7 @@ import fetchOrderBook from './fetchOrderBook';
  * @category Methods
  */
 async function fetchOrderBooks(
-  this: Client,
+  this: SDKContext,
   /** Array of token pairs (called Unified Market Symbols in CCXT) */
   symbols: MarketSymbol[],
   /** Number of results to return */

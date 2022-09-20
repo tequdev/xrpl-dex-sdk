@@ -1,7 +1,7 @@
 import _ from 'lodash';
-import { AccountInfoRequest, AccountLinesRequest, Client } from 'xrpl';
+import { AccountInfoRequest, AccountLinesRequest, dropsToXrp } from 'xrpl';
 import { DEFAULT_LIMIT } from '../constants';
-import { Balances, FetchBalanceParams, FetchBalanceResponse } from '../models';
+import { Balances, FetchBalanceParams, FetchBalanceResponse, SDKContext } from '../models';
 
 /**
  * Returns information about an account's balances, sorted by currency
@@ -10,7 +10,7 @@ import { Balances, FetchBalanceParams, FetchBalanceResponse } from '../models';
  * @category Methods
  */
 async function fetchBalance(
-  this: Client,
+  this: SDKContext,
   /* Request parameters */
   params: FetchBalanceParams
 ): Promise<FetchBalanceResponse | undefined> {
@@ -21,21 +21,27 @@ async function fetchBalance(
 
   // Get XRP balances
   if (!code || (code && code === 'XRP')) {
-    const accountInfoResponse = await this.request({
+    const { id, ...accountInfoResponse } = await this.client.request({
       command: 'account_info',
       account,
       ledger_index: 'current',
       queue: true,
     } as AccountInfoRequest);
 
-    const freeXrp = parseFloat(accountInfoResponse.result.account_data.Balance);
-    const usedXrp = 0;
-    const totalXrp = freeXrp + usedXrp;
+    const accountInfo = accountInfoResponse.result.account_data;
+    const accountObjectCount = accountInfo.OwnerCount;
+
+    const serverState = await this.fetchStatus();
+    const { reserve_base: reserveBase, reserve_inc: reserveInc } = serverState?.info.serverState.validated_ledger;
+
+    const usedXrp = reserveBase + accountObjectCount * reserveInc;
+    const freeXrp = parseFloat(accountInfo.Balance) - usedXrp;
+    const totalXrp = usedXrp + freeXrp;
 
     balances['XRP'] = {
-      free: freeXrp.toString(),
-      used: usedXrp.toString(),
-      total: totalXrp.toString(),
+      free: dropsToXrp(freeXrp),
+      used: dropsToXrp(usedXrp),
+      total: dropsToXrp(totalXrp),
     };
 
     info.accountInfo = accountInfoResponse;
@@ -45,11 +51,10 @@ async function fetchBalance(
   if (!code || (code && code !== 'XRP')) {
     const limit = DEFAULT_LIMIT;
     let marker: unknown;
-    let page = 1;
     let hasNextPage = true;
 
     while (hasNextPage) {
-      const accountTrustLinesResponse = await this.request({
+      const { id, ...accountTrustLinesResponse } = await this.client.request({
         command: 'account_lines',
         account,
         ledger_index: 'current',
@@ -62,9 +67,9 @@ async function fetchBalance(
       _.forEach(trustLines, ({ currency, balance }) => {
         if (code && code !== currency) return;
 
-        const freeBalance = parseFloat(balance);
         const usedBalance = 0;
-        const totalBalance = freeBalance + usedBalance;
+        const freeBalance = parseFloat(balance) - usedBalance;
+        const totalBalance = usedBalance + freeBalance;
 
         balances[currency] = {
           free: freeBalance.toString(),
@@ -73,16 +78,9 @@ async function fetchBalance(
         };
       });
 
-      if (!info.accountLines) info.accountLines = {};
-
-      const pageStart = (page - 1) * limit;
-      const pageEnd = page * limit;
-
-      info.accountLines[`${pageStart}-${trustLines.length < limit ? pageStart + trustLines.length : pageEnd}`] =
-        accountTrustLinesResponse;
+      info.accountLines = accountTrustLinesResponse;
 
       marker = accountTrustLinesResponse.result.marker;
-      page += 1;
       if (!marker) hasNextPage = false;
     }
   }

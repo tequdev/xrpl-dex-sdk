@@ -1,4 +1,5 @@
-import accountInfo from './accountInfo.json';
+import * as accountInfo from './accountInfo';
+import accountInfoNormal from './accountInfo.json';
 import accountInfoIssuer from './accountInfoIssuer.json';
 import accountInfoMaker from './accountInfoMaker.json';
 import accountLines from './accountLines.json';
@@ -14,9 +15,11 @@ import normalLedger from './ledger.json';
 import normalLedgerData from './ledgerData.json';
 import serverInfo from './serverInfo.json';
 import normalServerState from './serverState.json';
+import submit from './submit';
 
 const account_info = {
-  normal: accountInfo,
+  new: accountInfo,
+  normal: accountInfoNormal,
   issuer: accountInfoIssuer,
   maker: accountInfoMaker,
 };
@@ -73,6 +76,7 @@ const rippled = {
   offer_create,
   server_info,
   server_state,
+  submit,
 };
 
 export default rippled;

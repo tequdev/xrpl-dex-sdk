@@ -1,5 +1,5 @@
-import { Client } from 'xrpl';
-import { ExchangeStatusType, FetchStatusResponse } from '../models';
+import { rippleTimeToUnixTime } from 'xrpl';
+import { SDKContext, ExchangeStatusType, FetchStatusResponse } from '../models';
 
 /**
  * Returns information regarding {@link ExchangeStatus} from either the info
@@ -8,12 +8,12 @@ import { ExchangeStatusType, FetchStatusResponse } from '../models';
  *
  * @category Methods
  */
-async function fetchStatus(this: Client): Promise<FetchStatusResponse> {
-  const serverState = (
-    await this.request({
-      command: 'server_state',
-    })
-  ).result.state;
+async function fetchStatus(this: SDKContext): Promise<FetchStatusResponse> {
+  const serverStateResponse = await this.client.request({
+    command: 'server_state',
+  });
+
+  const serverState = serverStateResponse.result.state;
 
   let status: ExchangeStatusType = 'ok';
 
@@ -21,9 +21,10 @@ async function fetchStatus(this: Client): Promise<FetchStatusResponse> {
 
   const response: FetchStatusResponse = {
     status,
-    updated: Date.parse(serverState.time),
+    updated: rippleTimeToUnixTime(parseInt(serverState.time)),
     eta: '',
     url: '',
+    info: { serverState },
   };
 
   return response;

@@ -1,7 +1,7 @@
 import _ from 'lodash';
-import { Client, transferRateToDecimal } from 'xrpl';
+import { transferRateToDecimal } from 'xrpl';
 import { markets } from '../data';
-import { Markets, FetchMarketResponse, MarketSymbol } from '../models';
+import { FetchMarketResponse, MarketSymbol, SDKContext, XrplNetwork } from '../models';
 
 /**
  * Retrieves info about a single market being traded on the dEX.
@@ -9,15 +9,17 @@ import { Markets, FetchMarketResponse, MarketSymbol } from '../models';
  *
  * @category Methods
  */
-async function fetchMarket(this: Client, symbol: MarketSymbol): Promise<FetchMarketResponse | undefined> {
-  const market = (markets as Markets)[symbol];
+async function fetchMarket(this: SDKContext, symbol: MarketSymbol): Promise<FetchMarketResponse | undefined> {
+  if (this.markets && this.markets[symbol]) return this.markets[symbol];
+
+  const market = markets[this.params.network || XrplNetwork.Mainnet][symbol];
 
   if (!market) return;
 
   const response = market;
 
   if (market.baseIssuer) {
-    const { result: baseIssuerResult } = await this.request({
+    const { result: baseIssuerResult } = await this.client.request({
       command: 'account_info',
       account: market.baseIssuer,
     });
@@ -25,12 +27,12 @@ async function fetchMarket(this: Client, symbol: MarketSymbol): Promise<FetchMar
     if (baseIssuerResult.account_data.TransferRate) {
       const baseRate = baseIssuerResult.account_data.TransferRate || 0;
       const baseFee = transferRateToDecimal(typeof baseRate === 'string' ? parseInt(baseRate) : baseRate);
-      response.baseFee = parseFloat(baseFee);
+      response.baseFee = baseFee;
     }
   }
 
   if (market.quoteIssuer) {
-    const { result: quoteIssuerResult } = await this.request({
+    const { result: quoteIssuerResult } = await this.client.request({
       command: 'account_info',
       account: market.quoteIssuer,
     });
@@ -38,7 +40,7 @@ async function fetchMarket(this: Client, symbol: MarketSymbol): Promise<FetchMar
     if (quoteIssuerResult.account_data.TransferRate) {
       const quoteRate = quoteIssuerResult.account_data.TransferRate || 0;
       const quoteFee = transferRateToDecimal(typeof quoteRate === 'string' ? parseInt(quoteRate) : quoteRate);
-      response.quoteFee = parseFloat(quoteFee);
+      response.quoteFee = quoteFee;
     }
   }
 

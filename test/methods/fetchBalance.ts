@@ -1,26 +1,22 @@
 import _ from 'lodash';
 import 'mocha';
 
-import requests from '../fixtures/requests';
-import responses from '../fixtures/responses';
-import rippled from '../fixtures/rippled';
-
-import { fetchBalance } from '../../src/methods';
-import { FetchBalanceResponse } from '../../src/models';
-import { setupClient, teardownClient } from '../setupClient';
+import { requests, responses, rippled } from '../fixtures';
+import { setupLocalSDK, teardownLocalSDK } from '../setupClient';
 import { assertResultMatch } from '../testUtils';
 
 describe('fetchBalance', function () {
-  beforeEach(setupClient);
-  afterEach(teardownClient);
+  beforeEach(setupLocalSDK);
+  afterEach(teardownLocalSDK);
 
   it('should return currency balances for a given account', async function () {
     this.mockRippled.addResponse('account_info', rippled.account_info.maker);
     this.mockRippled.addResponse('account_lines', rippled.account_lines.maker);
+    this.mockRippled.addResponse('server_state', rippled.server_state.normal);
 
     const { params } = requests.fetchBalance;
 
-    const balances: FetchBalanceResponse | undefined = await fetchBalance.call(this.client, params);
+    const balances = await this.sellerSdk.fetchBalance(params);
 
     assertResultMatch(balances, responses.fetchBalance);
   });

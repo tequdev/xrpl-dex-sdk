@@ -1,4 +1,7 @@
-export const DEFAULT_LIMIT = process.env.RIPPLE_DEFAULT_LIMIT ? parseInt(process.env.RIPPLE_DEFAULT_LIMIT) : 20;
+export const DEFAULT_LIMIT = process.env.XRPL_DEFAULT_LIMIT ? parseInt(process.env.XRPL_DEFAULT_LIMIT) : 20;
+export const DEFAULT_SEARCH_LIMIT = process.env.XRPL_DEFAULT_SEARCH_LIMIT
+  ? parseInt(process.env.XRPL_DEFAULT_SEARCH_LIMIT)
+  : 100;
 
 export const FEE_CURRENCY = 'XRP';
 

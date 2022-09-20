@@ -1,16 +1,13 @@
 import _ from 'lodash';
 import 'mocha';
 
-import responses from '../fixtures/responses';
-import rippled from '../fixtures/rippled';
-
-import { fetchTradingFees } from '../../src/methods';
-import { setupClient, teardownClient } from '../setupClient';
+import { responses, rippled } from '../fixtures';
+import { setupLocalSDK, teardownLocalSDK } from '../setupClient';
 import { assertResultMatch } from '../testUtils';
 
 describe('fetchTradingFees', function () {
-  beforeEach(setupClient);
-  afterEach(teardownClient);
+  beforeEach(setupLocalSDK);
+  afterEach(teardownLocalSDK);
 
   it('should return the trading fees for all markets', async function () {
     this.mockRippled.addResponse('fee', rippled.fee.normal);
@@ -20,8 +17,7 @@ describe('fetchTradingFees', function () {
       this.mockRippled.addResponse('account_info', rippled.account_info.issuer);
     }
 
-    const response = await fetchTradingFees.call(this.client);
-
-    assertResultMatch(response, responses.fetchTradingFees);
+    const tradingFees = await this.sellerSdk.fetchTradingFees();
+    assertResultMatch(tradingFees, responses.fetchTradingFees);
   });
 });

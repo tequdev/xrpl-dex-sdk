@@ -1,0 +1,43 @@
+{
+  "id": "rpkeJcxB2y5BeAFyycuWwdTTcR3og2a3SR:30419065",
+  "clientOrderId": "02BB10D0216890C239F964C7CF7FDA6DDC15A24A49A1656EE00EE3B1E2C12973",
+  "datetime": "2022-09-19T23:58:00.000Z",
+  "timestamp": 1663631880000,
+  "lastTradeTimestamp": 1663631880000,
+  "status": "open",
+  "symbol": "AKT/XRP",
+  "type": "limit",
+  "timeInForce": "GTC",
+  "side": "sell",
+  "amount": "10",
+  "price": "2",
+  "average": "0",
+  "filled": "0",
+  "remaining": "10",
+  "cost": "0",
+  "trades": [],
+  "info": {
+    "transactionData": {
+      "transaction": {
+        "Account": "rpkeJcxB2y5BeAFyycuWwdTTcR3og2a3SR",
+        "Fee": "12",
+        "Flags": 524288,
+        "LastLedgerSequence": 31319341,
+        "Sequence": 30419065,
+        "SigningPubKey": "02155F290580BC63BD445368B7B2101C0A8997FA0E18D591C181AC4C6342499AF3",
+        "TakerGets": { "currency": "AKT", "issuer": "rMZoAqwRn3BLbmFYL3exNVNVKrceYcNy6B", "value": "10" },
+        "TakerPays": "20000000",
+        "TransactionType": "OfferCreate",
+        "TxnSignature": "3045022100E4CBB806EDE526409EBF8E126E602B69403AECD0DEA6CF8845924A4C88BEC9D0022068BC2CEB1B1E2172CB199C1D6B325378F82342AABBF8376AF5F4262A7B19498C",
+        "date": 716947080,
+        "hash": "BCB94683F75468AC1278C596E601BB38BEFDB9D211A5B72F36AB99B506EF22D0",
+        "inLedger": 31319322,
+        "ledger_index": 31319322,
+        "validated": true
+      },
+      "metadata": { "AffectedNodes": [], "TransactionIndex": 7, "TransactionResult": "tesSUCCESS" },
+      "offers": [],
+      "date": 716947080
+    }
+  }
+}
