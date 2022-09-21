@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import 'mocha';
 
-import { requests, responses } from '../fixtures';
+import { addresses, requests, responses } from '../fixtures';
 import { XrplNetwork } from '../../src/models';
 import { assertResultMatch } from '../testUtils';
 import { setupRemoteSDK, teardownRemoteSDK } from '../setupClient';
@@ -11,7 +11,7 @@ const NETWORK = XrplNetwork.Testnet;
 describe('fetchOrder', function () {
   this.timeout(25000);
 
-  beforeEach(_.partial(setupRemoteSDK, NETWORK));
+  beforeEach(_.partial(setupRemoteSDK, NETWORK, addresses.AKT_BUYER_SECRET));
   afterEach(teardownRemoteSDK);
 
   /**
@@ -19,7 +19,7 @@ describe('fetchOrder', function () {
    */
 
   it('should return an open Buy Order', async function () {
-    const fetchOrderResponse = await this.buyerSdk.fetchOrder(requests.fetchOrder.testnet.tstBuy);
+    const fetchOrderResponse = await this.sdk.fetchOrder(requests.fetchOrder.testnet.tstBuy);
     const omittedFields = ['id', 'clientOrderId', 'lastTradeTimestamp', 'datetime', 'timestamp', 'fee', 'info'];
     assertResultMatch(_.omit(fetchOrderResponse, omittedFields), _.omit(responses.fetchOrder.tstBuy, omittedFields));
   });

@@ -25,3 +25,4 @@ export * from './fetchTransactionFees';
 export * from './loadCurrencies';
 export * from './loadIssuers';
 export * from './loadMarkets';
+export * from './watchTicker';

@@ -25,6 +25,7 @@ import fetchTransactionFees from './fetchTransactionFees';
 import loadCurrencies from './loadCurrencies';
 import loadIssuers from './loadIssuers';
 import loadMarkets from './loadMarkets';
+import watchTicker from './watchTicker';
 
 const methods: Record<string, any> = {
   cancelOrder,
@@ -54,6 +55,7 @@ const methods: Record<string, any> = {
   loadCurrencies,
   loadIssuers,
   loadMarkets,
+  watchTicker,
 };
 
 export default methods;

@@ -26,7 +26,7 @@ describe('createOrder', function () {
     assertResultMatch(_.omit(fetchOrderResponse, omittedFields), _.omit(responses.createOrder.buy, omittedFields));
   });
 
-  it.only('should create a Sell Order', async function () {
+  it('should create a Sell Order', async function () {
     const { symbol, side, type, amount, price, params } = requests.createOrder.smallSellOrder;
     const newOrder = await this.sdk.createOrder(symbol, side as OrderSide, type as OrderType, amount, price, params);
     assert(typeof newOrder !== 'undefined');
