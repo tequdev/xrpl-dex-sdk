@@ -9,12 +9,6 @@ import { AccountAddress, BaseParams } from '../common';
  * @category Parameters
  */
 export interface CreateOrderParams extends BaseParams {
-  /** Secret from which to derive the Ripple wallet making the order */
-  wallet_secret?: string;
-  /** The public key of the Ripple wallet making the order. */
-  wallet_public_key?: string;
-  /** The private key of the Ripple wallet making the order. */
-  wallet_private_key?: string;
   /** Base currency issuer (if other than XRP) */
   baseCurrencyIssuer?: AccountAddress;
   /** Quote currency issuer (if other than XRP) */

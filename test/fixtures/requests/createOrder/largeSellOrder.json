@@ -5,7 +5,6 @@
   "amount": "100",
   "price": "2",
   "params": {
-    "wallet_secret": "shCwGCyy17Ph4JdZ6jTsFssEpS6Fs",
     "baseCurrencyIssuer": "rMZoAqwRn3BLbmFYL3exNVNVKrceYcNy6B"
   }
 }

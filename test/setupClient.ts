@@ -1,8 +1,9 @@
 /* eslint-disable no-param-reassign -- Necessary for test setup */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types -- Necessary for test setup */
-import { Client, BroadcastClient } from 'xrpl';
+import { Client, BroadcastClient, Wallet } from 'xrpl';
+import fundWallet from 'xrpl/dist/npm/Wallet/fundWallet';
 import SDK from '../src';
-import { XrplNetwork } from '../src/models';
+import { SDKParams, XrplNetwork } from '../src/models';
 
 import createMockRippled from './createMockRippled';
 import { addresses } from './fixtures';
@@ -110,7 +111,32 @@ export async function setupRemoteClient(this: Mocha.Context, server = serverUrl)
 /**
  * SDK with remote client
  */
-export async function setupRemoteSDK(this: Mocha.Context, network: XrplNetwork): Promise<void> {
+export async function setupRemoteSDK(this: Mocha.Context, network: XrplNetwork, walletSecret?: string): Promise<void> {
+  const sdkParams: SDKParams = { network };
+
+  let newWallet: Wallet | undefined;
+  if (walletSecret) {
+    sdkParams.walletSecret = walletSecret;
+  } else {
+    newWallet = Wallet.generate();
+    sdkParams.walletPrivateKey = newWallet.privateKey;
+    sdkParams.walletPublicKey = newWallet.publicKey;
+  }
+
+  this.sdk = new SDK(sdkParams);
+  await this.sdk.connect();
+
+  if (newWallet) {
+    const { balance } = await fundWallet.call(this.sdk.client, newWallet);
+    console.log(
+      'Generated wallet:\n  Address: %s\n  Public key: %s\n  Secret: %s\n  Balance: %s',
+      newWallet.classicAddress,
+      newWallet.publicKey,
+      newWallet.seed,
+      balance
+    );
+  }
+
   this.sellerSdk = new SDK({ walletSecret: addresses.AKT_SELLER_SECRET, network });
   await this.sellerSdk.connect();
   this.buyerSdk = new SDK({ walletSecret: addresses.AKT_BUYER_SECRET, network });
@@ -118,6 +144,7 @@ export async function setupRemoteSDK(this: Mocha.Context, network: XrplNetwork):
 }
 
 export async function teardownRemoteSDK(this: Mocha.Context): Promise<void> {
+  await this.sdk.disconnect();
   await this.sellerSdk.disconnect();
   await this.buyerSdk.disconnect();
 }

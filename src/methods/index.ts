@@ -16,6 +16,8 @@ import fetchOrderBook from './fetchOrderBook';
 import fetchOrderBooks from './fetchOrderBooks';
 import fetchOrders from './fetchOrders';
 import fetchStatus from './fetchStatus';
+import fetchTicker from './fetchTicker';
+import fetchTickers from './fetchTickers';
 import fetchTradingFee from './fetchTradingFee';
 import fetchTradingFees from './fetchTradingFees';
 import fetchTransactionFee from './fetchTransactionFee';
@@ -23,6 +25,7 @@ import fetchTransactionFees from './fetchTransactionFees';
 import loadCurrencies from './loadCurrencies';
 import loadIssuers from './loadIssuers';
 import loadMarkets from './loadMarkets';
+import watchTicker from './watchTicker';
 
 const methods: Record<string, any> = {
   cancelOrder,
@@ -43,6 +46,8 @@ const methods: Record<string, any> = {
   fetchOrderBooks,
   fetchOrders,
   fetchStatus,
+  fetchTicker,
+  fetchTickers,
   fetchTradingFee,
   fetchTradingFees,
   fetchTransactionFee,
@@ -50,6 +55,7 @@ const methods: Record<string, any> = {
   loadCurrencies,
   loadIssuers,
   loadMarkets,
+  watchTicker,
 };
 
 export default methods;
