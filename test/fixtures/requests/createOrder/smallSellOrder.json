@@ -1,11 +1,10 @@
 {
-  "symbol": "AKT/XRP",
+  "symbol": "XRP/TST",
   "side": "sell",
   "type": "limit",
-  "amount": "10",
-  "price": "2",
+  "amount": "20",
+  "price": "1",
   "params": {
-    "wallet_secret": "shCwGCyy17Ph4JdZ6jTsFssEpS6Fs",
-    "baseCurrencyIssuer": "rMZoAqwRn3BLbmFYL3exNVNVKrceYcNy6B"
+    "quoteCurrencyIssuer": "rP9jPyP5kyvFRb6ZiRghAGw5u8SGAmU4bd"
   }
 }

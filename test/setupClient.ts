@@ -1,6 +1,7 @@
 /* eslint-disable no-param-reassign -- Necessary for test setup */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types -- Necessary for test setup */
-import { Client, BroadcastClient } from 'xrpl';
+import { Client, BroadcastClient, Wallet } from 'xrpl';
+import fundWallet from 'xrpl/dist/npm/Wallet/fundWallet';
 import SDK from '../src';
 import { XrplNetwork } from '../src/models';
 
@@ -111,6 +112,18 @@ export async function setupRemoteClient(this: Mocha.Context, server = serverUrl)
  * SDK with remote client
  */
 export async function setupRemoteSDK(this: Mocha.Context, network: XrplNetwork): Promise<void> {
+  const wallet = Wallet.generate();
+  this.sdk = new SDK({ walletPrivateKey: wallet.privateKey, walletPublicKey: wallet.publicKey, network });
+  await this.sdk.connect();
+  const { balance } = await fundWallet.call(this.sdk.client, wallet);
+  console.log(
+    'Generated wallet:\n  Address: %s\n  Public key: %s\n  Secret: %s\n  Balance: %s',
+    wallet.classicAddress,
+    wallet.publicKey,
+    wallet.seed,
+    balance
+  );
+
   this.sellerSdk = new SDK({ walletSecret: addresses.AKT_SELLER_SECRET, network });
   await this.sellerSdk.connect();
   this.buyerSdk = new SDK({ walletSecret: addresses.AKT_BUYER_SECRET, network });
@@ -118,6 +131,7 @@ export async function setupRemoteSDK(this: Mocha.Context, network: XrplNetwork):
 }
 
 export async function teardownRemoteSDK(this: Mocha.Context): Promise<void> {
+  await this.sdk.disconnect();
   await this.sellerSdk.disconnect();
   await this.buyerSdk.disconnect();
 }

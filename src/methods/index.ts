@@ -16,6 +16,8 @@ import fetchOrderBook from './fetchOrderBook';
 import fetchOrderBooks from './fetchOrderBooks';
 import fetchOrders from './fetchOrders';
 import fetchStatus from './fetchStatus';
+import fetchTicker from './fetchTicker';
+import fetchTickers from './fetchTickers';
 import fetchTradingFee from './fetchTradingFee';
 import fetchTradingFees from './fetchTradingFees';
 import fetchTransactionFee from './fetchTransactionFee';
@@ -43,6 +45,8 @@ const methods: Record<string, any> = {
   fetchOrderBooks,
   fetchOrders,
   fetchStatus,
+  fetchTicker,
+  fetchTickers,
   fetchTradingFee,
   fetchTradingFees,
   fetchTransactionFee,

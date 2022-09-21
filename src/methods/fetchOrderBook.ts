@@ -75,7 +75,6 @@ async function fetchOrderBook(
 
   const lastOffers = bookOffersResponse[bookOffersResponse.length - 1].result.offers;
 
-  // TODO: confirm this is usable as a nonce
   const nonce = lastOffers[lastOffers.length - 1].Sequence;
 
   const response: OrderBook = {

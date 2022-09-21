@@ -32,6 +32,10 @@ import {
   FetchOrdersParams,
   FetchOrdersResponse,
   FetchStatusResponse,
+  FetchTickerParams,
+  FetchTickerResponse,
+  FetchTickersParams,
+  FetchTickersResponse,
   FetchTradingFeeResponse,
   FetchTradingFeesResponse,
   FetchTransactionFeeParams,
@@ -128,11 +132,13 @@ export interface SDKContext {
     limit?: number,
     params?: FetchOrdersParams
   ): Promise<FetchOrdersResponse>;
-  fetchStatus(): Promise<FetchStatusResponse | undefined>;
   fetchIssuers(): Promise<FetchIssuersResponse | undefined>;
   fetchMarket(): Promise<FetchMarketResponse | undefined>;
   fetchMarkets(): Promise<FetchMarketsResponse | undefined>;
   fetchFees(): Promise<FetchFeesResponse | undefined>;
+  fetchStatus(): Promise<FetchStatusResponse | undefined>;
+  fetchTicker(symbol: MarketSymbol, params: FetchTickerParams): Promise<FetchTickerResponse | undefined>;
+  fetchTickers(symbols: MarketSymbol[], params: FetchTickersParams): Promise<FetchTickersResponse | undefined>;
   fetchTradingFee(symbol: MarketSymbol): Promise<FetchTradingFeeResponse | undefined>;
   fetchTradingFees(): Promise<FetchTradingFeesResponse | undefined>;
   fetchTransactionFee(

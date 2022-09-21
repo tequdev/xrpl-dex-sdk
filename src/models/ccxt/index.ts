@@ -8,6 +8,7 @@ import Transaction, { TransactionType, TransactionStatus } from './Transaction';
 
 export * from './Balances';
 export * from './Fees';
+export * from './Ticker';
 
 export {
   Currencies,

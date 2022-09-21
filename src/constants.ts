@@ -2,6 +2,9 @@ export const DEFAULT_LIMIT = process.env.XRPL_DEFAULT_LIMIT ? parseInt(process.e
 export const DEFAULT_SEARCH_LIMIT = process.env.XRPL_DEFAULT_SEARCH_LIMIT
   ? parseInt(process.env.XRPL_DEFAULT_SEARCH_LIMIT)
   : 100;
+export const DEFAULT_TICKER_SEARCH_LIMIT = process.env.XRPL_DEFAULT_TICKER_SEARCH_LIMIT
+  ? parseInt(process.env.XRPL_DEFAULT_TICKER_SEARCH_LIMIT)
+  : 50;
 
 export const FEE_CURRENCY = 'XRP';
 

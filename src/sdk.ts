@@ -25,14 +25,16 @@ export class SDK implements SDKContext {
   /** Order Book */
   fetchOrderBook = methods.fetchOrderBook.bind(this);
   fetchOrderBooks = methods.fetchOrderBooks.bind(this);
+  fetchTicker = methods.fetchTicker.bind(this);
+  fetchTickers = methods.fetchTickers.bind(this);
 
   /** Metadata */
   fetchBalance = methods.fetchBalance.bind(this);
-  fetchStatus = methods.fetchStatus.bind(this);
   fetchCurrencies = methods.fetchCurrencies.bind(this);
   fetchIssuers = methods.fetchIssuers.bind(this);
   fetchMarket = methods.fetchMarket.bind(this);
   fetchMarkets = methods.fetchMarkets.bind(this);
+  fetchStatus = methods.fetchStatus.bind(this);
   loadCurrencies = methods.loadCurrencies.bind(this);
   loadIssuers = methods.loadIssuers.bind(this);
   loadMarkets = methods.loadMarkets.bind(this);
