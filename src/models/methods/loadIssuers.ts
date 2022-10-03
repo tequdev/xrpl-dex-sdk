@@ -5,4 +5,4 @@ import { Issuers } from '../xrpl';
  *
  * @category Responses
  */
-export type LoadIssuersResponse = Issuers;
+export type LoadIssuersResponse = Issuers | undefined;

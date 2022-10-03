@@ -1,13 +1,12 @@
 import _ from 'lodash';
 import 'mocha';
-import { SDKContext } from '../../src/models';
 
-import { responses, rippled } from '../fixtures';
+import { addresses, responses, rippled } from '../fixtures';
 import { setupLocalSDK, teardownLocalSDK } from '../setupClient';
 import { assertResultMatch } from '../testUtils';
 
 describe('fetchFees', function () {
-  beforeEach(setupLocalSDK);
+  beforeEach(_.partial(setupLocalSDK, { walletSecret: addresses.AKT_SELLER_SECRET }));
   afterEach(teardownLocalSDK);
 
   it('should return the fee schedule for transactions and trading', async function () {
@@ -18,7 +17,7 @@ describe('fetchFees', function () {
       this.mockRippled.addResponse('account_info', rippled.account_info.issuer);
     }
 
-    const fees = await (this.sellerSdk as SDKContext).fetchFees();
+    const fees = await this.sdk.fetchFees();
     assertResultMatch(fees?.trading, responses.fetchFees.trading);
     assertResultMatch(fees?.transactions, responses.fetchFees.transactions);
   });

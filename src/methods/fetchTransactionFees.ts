@@ -1,11 +1,4 @@
-import { FeeRequest } from 'xrpl';
-import {
-  SDKContext,
-  CurrencyCode,
-  FetchTransactionFeesParams,
-  FetchTransactionFeesResponse,
-  TransactionFee,
-} from '../models';
+import { SDKContext, CurrencyCode, FetchTransactionFeesParams, FetchTransactionFeesResponse } from '../models';
 
 /**
  * Returns information about fees incurred for performing transactions with a
@@ -19,44 +12,14 @@ async function fetchTransactionFees(
   codes: CurrencyCode[],
   /** Parameters specific to the exchange API endpoint */
   params: FetchTransactionFeesParams = {}
-): Promise<FetchTransactionFeesResponse | undefined> {
-  const { result: feesResult } = await this.client.request({ command: 'fee' } as FeeRequest);
-
-  const currencies = await this.fetchCurrencies();
-
-  if (!currencies) return;
-
+): Promise<FetchTransactionFeesResponse> {
   const response: FetchTransactionFeesResponse = [];
 
-  codes.forEach((code) => {
-    if (!currencies[code]) return;
-
-    const transferRates: TransactionFee['transfer'] = {};
-
-    // Look up a specific issuer's currency...
-    if (params.issuers && params.issuers[code]) {
-      const issuerCurrency = currencies[code].find(
-        (currency) => params.issuers && params.issuers[code] === currency.issuer
-      );
-      if (issuerCurrency && issuerCurrency.fee) {
-        transferRates[issuerCurrency.issuer] = issuerCurrency.fee;
-      }
-    } else {
-      // Or get fees for all issuers of this currency
-      currencies[code].forEach(({ issuer, fee }) => {
-        if (fee) {
-          transferRates[issuer] = fee.toString();
-        }
-      });
-    }
-
-    response.push({
-      code,
-      current: feesResult.drops.open_ledger_fee,
-      transfer: transferRates,
-      info: JSON.stringify({ feesResult, currency: currencies[code] }),
-    });
-  });
+  for (let c = 0, cl = codes.length; c < cl; c += 1) {
+    const fees = await this.fetchTransactionFee(codes[c]);
+    if (!fees) continue;
+    response.push(fees);
+  }
 
   return response;
 }

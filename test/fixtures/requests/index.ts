@@ -6,6 +6,7 @@ import fetchBalance from './fetchBalance.json';
 import fetchOrder from './fetchOrder';
 import fetchOrderBook from './fetchOrderBook.json';
 import fetchOrderBooks from './fetchOrderBooks.json';
+import * as v2 from './v2';
 
 const requests = {
   cancelOrder,
@@ -18,6 +19,7 @@ const requests = {
   fetchOrder,
   fetchOrderBook,
   fetchOrderBooks,
+  v2,
 };
 
 export default requests;

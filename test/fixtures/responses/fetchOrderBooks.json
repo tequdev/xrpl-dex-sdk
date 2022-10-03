@@ -1,20 +1,18 @@
 {
-  "USD/BTC": {
-    "symbol": "USD/BTC",
-    "nonce": 110103,
+  "USD+rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B/BTC+rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B": {
+    "symbol": "USD+rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B/BTC+rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B",
     "bids": [
-      ["326.5003614141928", "0.2849323720855092"],
-      ["330.6364334177034", "0.00302447007930511"]
+      ["0.0030627837459923", "93.030522464522"],
+      ["0.00302447007930511", "1"]
     ],
-    "asks": [["331.1338298016111", "0.3"]]
+    "asks": [["331.133829801611", "0.3"]]
   },
-  "BTC/USD": {
-    "symbol": "BTC/USD",
-    "nonce": 110103,
+  "BTC+rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B/USD+rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B": {
+    "symbol": "BTC+rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B/USD+rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B",
     "bids": [
-      ["326.5003614141928", "0.2849323720855092"],
-      ["330.6364334177034", "0.00302447007930511"]
+      ["0.0030627837459923", "93.030522464522"],
+      ["0.00302447007930511", "1"]
     ],
-    "asks": [["331.1338298016111", "0.3"]]
+    "asks": [["331.133829801611", "0.3"]]
   }
 }

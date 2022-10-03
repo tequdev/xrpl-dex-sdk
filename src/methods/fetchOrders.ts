@@ -4,6 +4,12 @@ import { DEFAULT_LIMIT, DEFAULT_SEARCH_LIMIT } from '../constants';
 import { FetchOrdersParams, FetchOrdersResponse, MarketSymbol, UnixTimestamp, SDKContext, Order } from '../models';
 import { getBaseAmountKey, getMarketSymbol, getOrderOrTradeId, getQuoteAmountKey } from '../utils';
 
+/**
+ * Retrieves order book data for mulitple market pairs. Returns a
+ * {@link FetchOrdersResponse}.
+ *
+ * @category Methods
+ */
 async function fetchOrders(
   this: SDKContext,
   /** Filter Orders by market symbol */

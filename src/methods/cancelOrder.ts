@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { OfferCancel } from 'xrpl';
-import { AccountSequencePair, CancelOrderParams, CancelOrderResponse, SDKContext } from '../models';
+import { OrderId, CancelOrderResponse, SDKContext } from '../models';
 import { parseOrderId } from '../utils';
 
 /**
@@ -12,11 +12,8 @@ import { parseOrderId } from '../utils';
 async function cancelOrder(
   this: SDKContext,
   /** ID of the Order to cancel */
-  id: AccountSequencePair,
-  /** Exchange-specific parameters */
-  /** eslint-disable-next-line */
-  params: CancelOrderParams = {}
-): Promise<CancelOrderResponse | undefined> {
+  id: OrderId
+): Promise<CancelOrderResponse> {
   const { sequence } = parseOrderId(id);
 
   const offerCancel: OfferCancel = {

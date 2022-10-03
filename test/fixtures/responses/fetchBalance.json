@@ -1,10 +1,11 @@
 {
   "balances": {
-    "XRP": { "free": "985.999992", "used": "14", "total": "999.999992" },
-    "AKT": { "free": "89.825", "used": "0", "total": "89.825" }
+    "XRP": { "free": "975.999992", "used": "24", "total": "999.999992" },
+    "AKT+rMZoAqwRn3BLbmFYL3exNVNVKrceYcNy6B": { "free": "89.825", "used": "0", "total": "89.825" }
   },
   "info": {
     "accountInfo": {
+      "id": "rpkeJcxB2y5BeAFyycuWwdTTcR3og2a3SR",
       "result": {
         "account_data": {
           "Account": "rpkeJcxB2y5BeAFyycuWwdTTcR3og2a3SR",
@@ -25,6 +26,7 @@
       "type": "response"
     },
     "accountLines": {
+      "id": "rpkeJcxB2y5BeAFyycuWwdTTcR3og2a3SR",
       "result": {
         "account": "rpkeJcxB2y5BeAFyycuWwdTTcR3og2a3SR",
         "ledger_current_index": 30554719,
@@ -44,6 +46,14 @@
         "validated": false
       },
       "type": "response"
+    },
+    "validatedLedger": {
+      "base_fee": 10,
+      "close_time": 716932570,
+      "hash": "C3A93D409BCC8FFF7256FABFF461051BA243A6110B3170DDBBDB39C3425D5BD7",
+      "reserve_base": 10000000,
+      "reserve_inc": 2000000,
+      "seq": 31314711
     }
   }
 }

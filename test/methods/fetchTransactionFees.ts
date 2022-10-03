@@ -1,12 +1,12 @@
 import _ from 'lodash';
 import 'mocha';
 
-import { responses, rippled } from '../fixtures';
+import { addresses, responses, rippled } from '../fixtures';
 import { setupLocalSDK, teardownLocalSDK } from '../setupClient';
 import { assertResultMatch } from '../testUtils';
 
 describe('fetchTransactionFees', function () {
-  beforeEach(setupLocalSDK);
+  beforeEach(_.partial(setupLocalSDK, { walletSecret: addresses.AKT_SELLER_SECRET }));
   afterEach(teardownLocalSDK);
 
   it('should return the transaction fees for multiple currencies', async function () {
@@ -17,7 +17,10 @@ describe('fetchTransactionFees', function () {
       this.mockRippled.addResponse('account_info', rippled.account_info.issuer);
     }
 
-    const transactionFees = await this.sellerSdk.fetchTransactionFees(['USD', 'GBP']);
+    const transactionFees = await this.sdk.fetchTransactionFees([
+      'USD+rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq',
+      'GBP+rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B',
+    ]);
     assertResultMatch(transactionFees, responses.fetchTransactionFees);
   });
 });

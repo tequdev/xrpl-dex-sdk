@@ -5,4 +5,4 @@ import { Markets } from '../ccxt';
  *
  * @category Responses
  */
-export type FetchMarketsResponse = Markets;
+export type FetchMarketsResponse = Markets | undefined;

@@ -4,14 +4,19 @@ import BigNumber from 'bignumber.js';
  * Aliases
  */
 export type AccountAddress = string;
-export type Sequence = string;
+export type IssuerAddress = string;
+export type Sequence = string | number;
+
+/** OrderIds use the format "[AccountAddress]:[Sequence]" */
 export type AccountSequencePair = string;
+
+/** Market symbols use the format "[CurrencyCode]+[IssuerAddress]" */
+export type CurrencyIssuerPair = string;
 
 export type RippleUrl = string;
 
-// Tokens
-export type CurrencyCode = string;
-export type MarketSymbol = string;
+export type CurrencyCode = `${string}+${IssuerAddress}` | string;
+export type MarketSymbol = `${CurrencyCode | string}/${CurrencyCode | string}`;
 
 /**
  * Datetime
@@ -23,8 +28,7 @@ export type XrplTimestamp = number; // ms since Ripple epoch
  * Numbers
  */
 export type BigNumberish = BigNumber | number | string;
-
-export type PercentDecimal = number | string;
+export type PercentDecimal = string;
 
 // 1 Drop = 0.000001 XRP
 // 1000000 Drops = 1
@@ -64,5 +68,5 @@ export interface BaseParams {
  * Responses
  */
 export interface BaseResponse {
-  info: any;
+  info: Record<string, any>;
 }

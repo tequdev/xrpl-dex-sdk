@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import 'mocha';
 
-import { responses, rippled } from '../fixtures';
+import { addresses, responses, rippled } from '../fixtures';
 import { setupLocalSDK, teardownLocalSDK } from '../setupClient';
 import { assertResultMatch } from '../testUtils';
 
@@ -10,7 +10,7 @@ const TIMEOUT = 20000;
 describe('fetchMarkets', function () {
   this.timeout(TIMEOUT);
 
-  beforeEach(setupLocalSDK);
+  beforeEach(_.partial(setupLocalSDK, { walletSecret: addresses.AKT_SELLER_SECRET }));
   afterEach(teardownLocalSDK);
 
   it('should return a list of market pairs on the exchange', async function () {
@@ -19,7 +19,7 @@ describe('fetchMarkets', function () {
       this.mockRippled.addResponse('account_info', rippled.account_info.issuer);
     }
 
-    const markets = await this.sellerSdk.fetchMarkets();
+    const markets = await this.sdk.fetchMarkets();
     assertResultMatch(markets, responses.fetchMarkets);
   });
 });

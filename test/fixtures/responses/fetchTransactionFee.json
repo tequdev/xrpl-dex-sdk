@@ -1,9 +1,28 @@
 {
-  "code": "USD",
+  "code": "USD+rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq",
   "current": "10",
-  "transfer": {
-    "rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq": "0.003",
-    "rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B": "0.003"
-  },
-  "info": "{\"feesResult\":{\"current_ledger_size\":\"93\",\"current_queue_size\":\"0\",\"drops\":{\"base_fee\":\"10\",\"median_fee\":\"5000\",\"minimum_fee\":\"10\",\"open_ledger_fee\":\"10\"},\"expected_ledger_size\":\"288\",\"ledger_current_index\":73501472,\"levels\":{\"median_level\":\"128000\",\"minimum_level\":\"256\",\"open_ledger_level\":\"256\",\"reference_level\":\"256\"},\"max_queue_size\":\"5760\"},\"currency\":[{\"code\":\"USD\",\"issuer\":\"rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq\",\"name\":\"USD\",\"logo\":\"https://storage.googleapis.com/cfex-prod-uploads/uploads/90/d1a6c64dd038e8b5325442fa4471d9485a3d9052d0908c4630bf9b557d1de920.png\",\"issuerName\":\"GateHub\",\"fee\":\"0.003\"},{\"code\":\"USD\",\"issuer\":\"rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B\",\"name\":\"USD\",\"logo\":\"https://storage.googleapis.com/cfex-prod-uploads/uploads/79/d1a6c64dd038e8b5325442fa4471d9485a3d9052d0908c4630bf9b557d1de920.png\",\"issuerName\":\"Bitstamp\",\"fee\":\"0.003\"}]}"
+  "transfer": "0.003",
+  "info": {
+    "feesResult": {
+      "current_ledger_size": "93",
+      "current_queue_size": "0",
+      "drops": { "base_fee": "10", "median_fee": "5000", "minimum_fee": "10", "open_ledger_fee": "10" },
+      "expected_ledger_size": "288",
+      "ledger_current_index": 73501472,
+      "levels": {
+        "median_level": "128000",
+        "minimum_level": "256",
+        "open_ledger_level": "256",
+        "reference_level": "256"
+      },
+      "max_queue_size": "5760"
+    },
+    "currency": {
+      "code": "USD+rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq",
+      "name": "USD",
+      "logo": "https://storage.googleapis.com/cfex-prod-uploads/uploads/90/d1a6c64dd038e8b5325442fa4471d9485a3d9052d0908c4630bf9b557d1de920.png",
+      "issuerName": "GateHub",
+      "fee": "0.003"
+    }
+  }
 }

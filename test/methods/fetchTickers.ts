@@ -12,13 +12,17 @@ const NETWORK = XrplNetwork.Testnet;
 describe('fetchTickers', function () {
   this.timeout(TIMEOUT);
 
-  beforeEach(_.partial(setupRemoteSDK, NETWORK, addresses.AKT_SELLER_SECRET));
+  beforeEach(function (done) {
+    setupRemoteSDK.call(this, NETWORK, addresses.AKT_SELLER_SECRET, done);
+  });
+
   afterEach(teardownRemoteSDK);
 
   it('should return Ticker data for the given symbols', async function () {
-    const tickers = await this.sdk.fetchTickers(['TST/XRP', 'XRP/TST'], {
-      issuers: { TST: 'rP9jPyP5kyvFRb6ZiRghAGw5u8SGAmU4bd' },
-    });
+    const tickers = await this.sdk.fetchTickers([
+      'TST+rP9jPyP5kyvFRb6ZiRghAGw5u8SGAmU4bd/XRP',
+      'XRP/TST+rP9jPyP5kyvFRb6ZiRghAGw5u8SGAmU4bd',
+    ]);
     assert(tickers.length === 2);
   });
 });

@@ -16,6 +16,4 @@ export interface FetchOrderBooksParams {
  *
  * @category Responses
  */
-export interface FetchOrderBooksResponse {
-  [symbol: MarketSymbol]: OrderBook;
-}
+export type FetchOrderBooksResponse = Record<MarketSymbol, OrderBook> | undefined;

@@ -1,12 +1,12 @@
 import _ from 'lodash';
 import 'mocha';
 
-import { responses, rippled } from '../fixtures';
+import { addresses, responses, rippled } from '../fixtures';
 import { setupLocalSDK, teardownLocalSDK } from '../setupClient';
 import { assertResultMatch } from '../testUtils';
 
 describe('fetchCurrencies', function () {
-  beforeEach(setupLocalSDK);
+  beforeEach(_.partial(setupLocalSDK, { walletSecret: addresses.AKT_SELLER_SECRET }));
   afterEach(teardownLocalSDK);
 
   it('should return a list of active currencies on the exchange', async function () {
@@ -15,7 +15,7 @@ describe('fetchCurrencies', function () {
       this.mockRippled.addResponse('account_info', rippled.account_info.issuer);
     }
 
-    const currencies = await this.sellerSdk.fetchCurrencies();
+    const currencies = await this.sdk.fetchCurrencies();
     assertResultMatch(currencies, responses.fetchCurrencies);
   });
 });

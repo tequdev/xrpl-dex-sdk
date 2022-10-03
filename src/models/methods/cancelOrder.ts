@@ -1,22 +1,8 @@
-import { BaseParams, Sequence } from '../common';
-
-/**
- * Request parameters for a cancelOrder call
- *
- * @category Parameters
- */
-export interface CancelOrderParams extends BaseParams {
-  /** The public key of the Ripple wallet that placed the Order. */
-  wallet_public_key?: string;
-  /** The private key of the Ripple wallet that placed the Order. */
-  wallet_private_key?: string;
-  /** Secret from which to derive the Ripple wallet that placed the Order */
-  wallet_secret?: string;
-}
+import { Sequence } from '../common';
 
 /**
  * Expected response from a cancelOrder call
  *
  * @category Responses
  */
-export type CancelOrderResponse = { id: Sequence; info: any };
+export type CancelOrderResponse = { id: Sequence; info: Record<string, any> } | undefined;

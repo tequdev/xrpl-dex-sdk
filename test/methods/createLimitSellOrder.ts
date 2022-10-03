@@ -13,15 +13,18 @@ const NETWORK = XrplNetwork.Testnet;
 describe('createLimitSellOrder', function () {
   this.timeout(TIMEOUT);
 
-  before(_.partial(setupRemoteSDK, NETWORK));
-  after(teardownRemoteSDK);
+  beforeEach(function (done) {
+    setupRemoteSDK.call(this, NETWORK, undefined, done);
+  });
+
+  afterEach(teardownRemoteSDK);
 
   it('should create a Limit Sell Order', async function () {
     const { symbol, amount, price, params } = requests.createOrder.smallSellOrder;
-    const newOrder = await this.sdk.createLimitSellOrder(symbol, amount, price, params);
-    assert(typeof newOrder !== 'undefined');
+    const newOrderId = await this.sdk.createLimitSellOrder(symbol, amount, price, params);
+    assert(typeof newOrderId !== 'undefined');
 
-    const fetchOrderResponse = await this.sdk.fetchOrder(newOrder.id);
+    const fetchOrderResponse = await this.sdk.fetchOrder(newOrderId);
     const omittedFields = ['id', 'clientOrderId', 'lastTradeTimestamp', 'datetime', 'timestamp', 'fee', 'info'];
     assertResultMatch(
       _.omit(fetchOrderResponse, omittedFields),

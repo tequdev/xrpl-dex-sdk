@@ -1,6 +1,5 @@
 import _ from 'lodash';
 import { LoadIssuersResponse, SDKContext } from '../models';
-import fetchIssuers from './fetchIssuers';
 
 /**
  * Retrieves and caches a list of issuers being traded on the dEX.
@@ -8,9 +7,9 @@ import fetchIssuers from './fetchIssuers';
  *
  * @category Methods
  */
-async function loadIssuers(this: SDKContext, reload = false): Promise<LoadIssuersResponse | undefined> {
+async function loadIssuers(this: SDKContext, reload = false): Promise<LoadIssuersResponse> {
   if (!this.issuers || reload) {
-    const issuers = await fetchIssuers.call(this);
+    const issuers = await this.fetchIssuers();
     this.issuers = issuers;
   }
   return this.issuers;

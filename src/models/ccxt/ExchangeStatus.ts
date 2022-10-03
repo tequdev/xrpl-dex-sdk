@@ -1,3 +1,7 @@
+import { Readable } from 'stream';
+
+export type ExchangeStatusStream = Readable;
+
 export type ExchangeStatusType = 'ok' | 'shutdown' | 'error' | 'maintenance';
 
 export default interface ExchangeStatus {
@@ -9,4 +13,5 @@ export default interface ExchangeStatus {
   eta?: string | number;
   /** A link to a GitHub issue or to an exchange post on the subject */
   url?: string;
+  info: Record<string, any>;
 }

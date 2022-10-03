@@ -1,4 +1,4 @@
-import { AccountAddress, CurrencyCode, Drops, MarketSymbol, PercentDecimal } from '../common';
+import { CurrencyCode, Drops, MarketSymbol, PercentDecimal } from '../common';
 
 /**
  * The "fee" property on Order objects
@@ -25,7 +25,8 @@ export interface TransactionFee {
   /** The current cost in drops of XRP to send a transaction */
   current: Drops;
   /** The transfer fee (if any) for the given issuers */
-  transfer: { [issuer: AccountAddress]: PercentDecimal };
+  transfer: PercentDecimal;
+  info: Record<string, any>;
 }
 
 /**
@@ -40,10 +41,7 @@ export interface TradingFee {
   quote: PercentDecimal;
   /** Whether the fees are a percentage or flat rate */
   percentage: true;
-  /** Issuer for the base token */
-  baseIssuer?: AccountAddress;
-  /** Issuer for the quote token */
-  quoteIssuer?: AccountAddress;
+  info: Record<string, any>;
 }
 
 /**

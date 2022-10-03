@@ -1,4 +1,4 @@
-import { rippleTimeToUnixTime } from 'xrpl';
+import { ServerStateRequest } from 'xrpl';
 import { SDKContext, ExchangeStatusType, FetchStatusResponse } from '../models';
 
 /**
@@ -11,7 +11,8 @@ import { SDKContext, ExchangeStatusType, FetchStatusResponse } from '../models';
 async function fetchStatus(this: SDKContext): Promise<FetchStatusResponse> {
   const serverStateResponse = await this.client.request({
     command: 'server_state',
-  });
+    ledger_index: 'current',
+  } as ServerStateRequest);
 
   const serverState = serverStateResponse.result.state;
 
@@ -21,7 +22,7 @@ async function fetchStatus(this: SDKContext): Promise<FetchStatusResponse> {
 
   const response: FetchStatusResponse = {
     status,
-    updated: rippleTimeToUnixTime(parseInt(serverState.time)),
+    updated: new Date(serverState.time).getTime(),
     eta: '',
     url: '',
     info: { serverState },

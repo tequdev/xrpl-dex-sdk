@@ -1,14 +1,8 @@
 {
-  "symbols": ["USD/BTC", "BTC/USD"],
+  "symbols": [
+    "USD+rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B/BTC+rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B",
+    "BTC+rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B/USD+rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B"
+  ],
   "limit": 3,
-  "params": {
-    "USD/BTC": {
-      "baseCurrencyIssuer": "rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B",
-      "quoteCurrencyIssuer": "rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B"
-    },
-    "BTC/USD": {
-      "baseCurrencyIssuer": "rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B",
-      "quoteCurrencyIssuer": "rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B"
-    }
-  }
+  "params": {}
 }

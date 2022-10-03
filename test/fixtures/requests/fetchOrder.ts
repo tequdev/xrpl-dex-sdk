@@ -1,38 +1,35 @@
 import { XrplNetwork } from '../../../src/models';
 
 export const createLargeSell = {
-  symbol: 'AKT/XRP',
+  symbol: 'AKT+rMH4UxPrbuMa1spCBR98hLLyNJp4d8p4tM/XRP',
   side: 'sell',
   type: 'limit',
   amount: '10',
   price: '2',
   params: {
     wallet_secret: 'shCwGCyy17Ph4JdZ6jTsFssEpS6Fs',
-    baseCurrencyIssuer: 'rMH4UxPrbuMa1spCBR98hLLyNJp4d8p4tM',
   },
 };
 
 export const createMediumBuy_1 = {
-  symbol: 'AKT/XRP',
+  symbol: 'AKT+rMH4UxPrbuMa1spCBR98hLLyNJp4d8p4tM/XRP',
   side: 'buy',
   type: 'limit',
   amount: '6.5',
   price: '1.5',
   params: {
     wallet_secret: 'ssMuo4PJwGNkkqmTA5sWhvsUYKWNL',
-    baseCurrencyIssuer: 'rMH4UxPrbuMa1spCBR98hLLyNJp4d8p4tM',
   },
 };
 
 export const createMediumBuy_2 = {
-  symbol: 'AKT/XRP',
+  symbol: 'AKT+rMH4UxPrbuMa1spCBR98hLLyNJp4d8p4tM/XRP',
   side: 'buy',
   type: 'limit',
   amount: '5',
   price: '2.1',
   params: {
     wallet_secret: 'ssMuo4PJwGNkkqmTA5sWhvsUYKWNL',
-    baseCurrencyIssuer: 'rMH4UxPrbuMa1spCBR98hLLyNJp4d8p4tM',
   },
 };
 

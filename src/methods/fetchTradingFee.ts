@@ -10,26 +10,21 @@ async function fetchTradingFee(
   this: SDKContext,
   /** Unified Market Symbol to look up */
   symbol: MarketSymbol
-): Promise<FetchTradingFeeResponse | undefined> {
-  const markets = await this.fetchMarkets();
+): Promise<FetchTradingFeeResponse> {
+  const market = await this.fetchMarket(symbol);
 
   // TODO: put proper error handling here
-  if (!markets || !markets[symbol]) return;
+  if (!market) return;
 
-  const { baseFee, baseIssuer, quoteFee, quoteIssuer } = markets[symbol];
+  const { baseFee, quoteFee } = market;
 
-  const response: FetchTradingFeeResponse = {
+  return {
     symbol,
-    base: baseFee?.toString() || '0',
-    quote: quoteFee?.toString() || '0',
+    base: baseFee || '0',
+    quote: quoteFee || '0',
     percentage: true,
-    info: JSON.stringify({ market: markets[symbol] }),
+    info: { market },
   };
-
-  if (baseIssuer) response.baseIssuer = baseIssuer;
-  if (quoteIssuer) response.quoteIssuer = quoteIssuer;
-
-  return response;
 }
 
 export default fetchTradingFee;

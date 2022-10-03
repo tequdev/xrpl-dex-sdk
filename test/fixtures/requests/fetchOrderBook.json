@@ -1,8 +1,5 @@
 {
-  "symbol": "USD/BTC",
+  "symbol": "USD+rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B/BTC+rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B",
   "limit": 3,
-  "params": {
-    "baseCurrencyIssuer": "rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B",
-    "quoteCurrencyIssuer": "rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B"
-  }
+  "params": {}
 }

@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import { transferRateToDecimal } from 'xrpl';
 import { markets } from '../data';
 import { FetchMarketsResponse, SDKContext, XrplNetwork } from '../models';
 
@@ -14,38 +13,9 @@ async function fetchMarkets(this: SDKContext): Promise<FetchMarketsResponse> {
 
   const response = markets[this.params.network || XrplNetwork.Mainnet];
 
-  const marketKeys = Object.keys(response);
-
-  for (let c = 0, cl = marketKeys.length; c < cl; c += 1) {
-    const marketKey = marketKeys[c];
-
-    const market = response[marketKey];
-
-    if (market.baseIssuer) {
-      const { result: baseIssuerResult } = await this.client.request({
-        command: 'account_info',
-        account: market.baseIssuer,
-      });
-
-      if (baseIssuerResult.account_data.TransferRate) {
-        const baseRate = baseIssuerResult.account_data.TransferRate;
-        const baseFee = transferRateToDecimal(typeof baseRate === 'string' ? parseInt(baseRate) : baseRate);
-        response[marketKey].baseFee = baseFee;
-      }
-    }
-
-    if (market.quoteIssuer) {
-      const { result: quoteIssuerResult } = await this.client.request({
-        command: 'account_info',
-        account: market.quoteIssuer,
-      });
-
-      if (quoteIssuerResult.account_data.TransferRate) {
-        const quoteRate = quoteIssuerResult.account_data.TransferRate;
-        const quoteFee = transferRateToDecimal(typeof quoteRate === 'string' ? parseInt(quoteRate) : quoteRate);
-        response[marketKey].quoteFee = quoteFee;
-      }
-    }
+  for (const market of Object.values(response)) {
+    const marketData = await this.fetchMarket(market.symbol);
+    if (marketData) response[market.symbol] = marketData;
   }
 
   return response;

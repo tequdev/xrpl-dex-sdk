@@ -5,4 +5,4 @@ import { Currencies } from '../ccxt';
  *
  * @category Responses
  */
-export type LoadCurrenciesResponse = Currencies;
+export type LoadCurrenciesResponse = Currencies | undefined;

@@ -1,8 +1,8 @@
-import { Client, ClientOptions, Wallet } from 'xrpl';
-import { Currencies, Markets, OrderSide, OrderType } from './ccxt';
-import { AccountSequencePair, CurrencyCode, MarketSymbol, UnixTimestamp, XrplNetwork } from './common';
+import { Readable } from 'stream';
+import { BroadcastClient, Client, ClientOptions, Wallet } from 'xrpl';
+import { Currencies, Markets, OrderId, OrderSide, OrderType } from './ccxt';
+import { CurrencyCode, MarketSymbol, UnixTimestamp, XrplNetwork } from './common';
 import {
-  CancelOrderParams,
   CancelOrderResponse,
   CreateLimitBuyOrderParams,
   CreateLimitBuyOrderResponse,
@@ -19,8 +19,12 @@ import {
   FetchCurrenciesResponse,
   FetchFeesResponse,
   FetchIssuersResponse,
+  FetchL2OrderBookParams,
+  FetchL2OrderBookResponse,
   FetchMarketResponse,
   FetchMarketsResponse,
+  FetchMyTradesParams,
+  FetchMyTradesResponse,
   FetchOpenOrdersParams,
   FetchOpenOrdersResponse,
   FetchOrderBookParams,
@@ -36,6 +40,8 @@ import {
   FetchTickerResponse,
   FetchTickersParams,
   FetchTickersResponse,
+  FetchTradesParams,
+  FetchTradesResponse,
   FetchTradingFeeResponse,
   FetchTradingFeesResponse,
   FetchTransactionFeeParams,
@@ -45,6 +51,13 @@ import {
   LoadCurrenciesResponse,
   LoadIssuersResponse,
   LoadMarketsResponse,
+  WatchBalanceParams,
+  WatchOrderBookResponse,
+  WatchOrdersParams,
+  WatchOrdersResponse,
+  WatchTickerParams,
+  WatchTickersParams,
+  WatchTradesResponse,
 } from './methods';
 import { Issuers } from './xrpl';
 
@@ -67,26 +80,29 @@ export interface SDKParams {
 
 export interface SDKContext {
   params: SDKParams;
-  client: Client;
+  broadcastClient: BroadcastClient;
+  client: Client | BroadcastClient;
   wallet: Wallet;
   markets?: Markets;
   currencies?: Currencies;
   issuers?: Issuers;
-  connect(): void;
-  disconnect(): void;
-  cancelOrder(id: AccountSequencePair, params: CancelOrderParams): Promise<CancelOrderResponse | undefined>;
+  connect(): Promise<void>;
+  disconnect(): Promise<void>;
+  removeListener(eventName: string, listener: any): void;
+  removeAllListeners(): void;
+  cancelOrder(id: OrderId): Promise<CancelOrderResponse>;
   createLimitBuyOrder(
     symbol: MarketSymbol,
     amount: string,
     price: string,
     params: CreateLimitBuyOrderParams
-  ): Promise<CreateLimitBuyOrderResponse | undefined>;
+  ): Promise<CreateLimitBuyOrderResponse>;
   createLimitSellOrder(
     symbol: MarketSymbol,
     amount: string,
     price: string,
     params: CreateLimitSellOrderParams
-  ): Promise<CreateLimitSellOrderResponse | undefined>;
+  ): Promise<CreateLimitSellOrderResponse>;
   createOrder(
     symbol: MarketSymbol,
     side: OrderSide,
@@ -94,8 +110,8 @@ export interface SDKContext {
     amount: string,
     price: string,
     params: CreateOrderParams
-  ): Promise<CreateOrderResponse | undefined>;
-  fetchBalance(params: FetchBalanceParams): Promise<FetchBalanceResponse | undefined>;
+  ): Promise<CreateOrderResponse>;
+  fetchBalance(params: FetchBalanceParams): Promise<FetchBalanceResponse>;
   fetchCanceledOrders(
     symbol?: MarketSymbol,
     since?: UnixTimestamp,
@@ -108,49 +124,70 @@ export interface SDKContext {
     limit?: number,
     params?: FetchClosedOrdersParams
   ): Promise<FetchClosedOrdersResponse>;
-  fetchCurrencies(): Promise<FetchCurrenciesResponse | undefined>;
+  fetchCurrencies(): Promise<FetchCurrenciesResponse>;
   fetchOpenOrders(
     symbol?: MarketSymbol,
     since?: UnixTimestamp,
     limit?: number,
     params?: FetchOpenOrdersParams
   ): Promise<FetchOpenOrdersResponse>;
-  fetchOrder(id: AccountSequencePair, symbol?: MarketSymbol, params?: FetchOrderParams): Promise<FetchOrderResponse>;
-  fetchOrderBook(
-    symbol: MarketSymbol,
-    limit: number,
-    params: FetchOrderBookParams
-  ): Promise<FetchOrderBookResponse | undefined>;
+  fetchOrder(id: OrderId, symbol?: MarketSymbol, params?: FetchOrderParams): Promise<FetchOrderResponse>;
+  fetchOrderBook(symbol: MarketSymbol, limit?: number, params?: FetchOrderBookParams): Promise<FetchOrderBookResponse>;
   fetchOrderBooks(
     symbols: MarketSymbol[],
     limit: number,
     params: FetchOrderBooksParams
-  ): Promise<FetchOrderBooksResponse | undefined>;
+  ): Promise<FetchOrderBooksResponse>;
   fetchOrders(
     symbol?: MarketSymbol,
     since?: UnixTimestamp,
     limit?: number,
     params?: FetchOrdersParams
   ): Promise<FetchOrdersResponse>;
-  fetchIssuers(): Promise<FetchIssuersResponse | undefined>;
-  fetchMarket(): Promise<FetchMarketResponse | undefined>;
-  fetchMarkets(): Promise<FetchMarketsResponse | undefined>;
-  fetchFees(): Promise<FetchFeesResponse | undefined>;
-  fetchStatus(): Promise<FetchStatusResponse | undefined>;
-  fetchTicker(symbol: MarketSymbol, params: FetchTickerParams): Promise<FetchTickerResponse | undefined>;
-  fetchTickers(symbols: MarketSymbol[], params: FetchTickersParams): Promise<FetchTickersResponse | undefined>;
-  fetchTradingFee(symbol: MarketSymbol): Promise<FetchTradingFeeResponse | undefined>;
-  fetchTradingFees(): Promise<FetchTradingFeesResponse | undefined>;
-  fetchTransactionFee(
-    code: CurrencyCode,
-    params: FetchTransactionFeeParams
-  ): Promise<FetchTransactionFeeResponse | undefined>;
+  fetchIssuers(): Promise<FetchIssuersResponse>;
+  fetchL2OrderBook(
+    symbol: MarketSymbol,
+    limit?: number,
+    params?: FetchL2OrderBookParams
+  ): Promise<FetchL2OrderBookResponse>;
+  fetchMarket(symbol: MarketSymbol): Promise<FetchMarketResponse>;
+  fetchMarkets(): Promise<FetchMarketsResponse>;
+  fetchMyTrades(
+    symbol: MarketSymbol,
+    since?: UnixTimestamp,
+    limit?: number,
+    params?: FetchMyTradesParams
+  ): Promise<FetchMyTradesResponse>;
+  fetchFees(): Promise<FetchFeesResponse>;
+  fetchStatus(): Promise<FetchStatusResponse>;
+  fetchTicker(symbol: MarketSymbol, params: FetchTickerParams): Promise<FetchTickerResponse>;
+  fetchTickers(symbols: MarketSymbol[], params: FetchTickersParams): Promise<FetchTickersResponse>;
+  fetchTrades(
+    symbol: MarketSymbol,
+    since?: UnixTimestamp,
+    limit?: number,
+    params?: FetchTradesParams
+  ): Promise<FetchTradesResponse>;
+  fetchTradingFee(symbol: MarketSymbol): Promise<FetchTradingFeeResponse>;
+  fetchTradingFees(): Promise<FetchTradingFeesResponse>;
+  fetchTransactionFee(code: CurrencyCode, params?: FetchTransactionFeeParams): Promise<FetchTransactionFeeResponse>;
   fetchTransactionFees(
     codes: CurrencyCode[],
     params: FetchTransactionFeesParams
-  ): Promise<FetchTransactionFeesResponse | undefined>;
-  loadCurrencies(reload?: boolean): Promise<LoadCurrenciesResponse | undefined>;
-  loadIssuers(reload?: boolean): Promise<LoadIssuersResponse | undefined>;
-  loadMarkets(reload?: boolean): Promise<LoadMarketsResponse | undefined>;
-  [key: string]: any;
+  ): Promise<FetchTransactionFeesResponse>;
+  loadCurrencies(reload?: boolean): Promise<LoadCurrenciesResponse>;
+  loadIssuers(reload?: boolean): Promise<LoadIssuersResponse>;
+  loadMarkets(reload?: boolean): Promise<LoadMarketsResponse>;
+  watchBalance(params: WatchBalanceParams): Promise<Readable>;
+  watchOrderBook(symbol: MarketSymbol, limit?: number): Promise<WatchOrderBookResponse>;
+  watchOrders(
+    symbol?: MarketSymbol,
+    since?: UnixTimestamp,
+    limit?: number,
+    params?: WatchOrdersParams
+  ): Promise<WatchOrdersResponse>;
+  watchStatus(): Promise<Readable>;
+  watchTicker(symbol: MarketSymbol, params: WatchTickerParams): Promise<Readable>;
+  watchTickers(symbols: MarketSymbol[], params: WatchTickersParams): Promise<Readable>;
+  watchTrades(symbol: MarketSymbol): Promise<WatchTradesResponse>;
 }

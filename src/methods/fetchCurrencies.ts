@@ -2,6 +2,7 @@ import _ from 'lodash';
 import { transferRateToDecimal } from 'xrpl';
 import { currencies } from '../data';
 import { FetchCurrenciesResponse, SDKContext, XrplNetwork } from '../models';
+import { parseCurrencyCode } from '../utils';
 
 /**
  * Retrieves a list of currencies being traded on the dEX. Returns
@@ -14,23 +15,19 @@ async function fetchCurrencies(this: SDKContext): Promise<FetchCurrenciesRespons
 
   const response = currencies[this.params.network || XrplNetwork.Mainnet];
 
-  const currencyKeys = Object.keys(response);
+  for (const currencyCode in response) {
+    const { issuer } = parseCurrencyCode(currencyCode);
 
-  for (let c = 0, cl = currencyKeys.length; c < cl; c += 1) {
-    const currencyKey = currencyKeys[c];
-
-    for (let i = 0, il = response[currencyKey].length; i < il; i += 1) {
-      const currency = response[currencyKey][i];
-
+    if (issuer) {
       const { result: accountInfoResult } = await this.client.request({
         command: 'account_info',
-        account: currency.issuer,
+        account: issuer,
       });
 
       if (accountInfoResult.account_data.TransferRate) {
         const rate = accountInfoResult.account_data.TransferRate;
-        const fee = transferRateToDecimal(typeof rate === 'string' ? parseInt(rate) : rate);
-        response[currencyKey][i].fee = fee;
+        const fee = transferRateToDecimal(rate);
+        response[currencyCode].fee = fee;
       }
     }
   }

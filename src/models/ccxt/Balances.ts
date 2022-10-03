@@ -1,4 +1,7 @@
+import { Readable } from 'stream';
 import { CurrencyCode } from '../common';
+
+export type BalanceStream = Readable;
 
 export interface Balance {
   // Money, available for trading, by currency (as float string)

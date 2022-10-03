@@ -1,10 +1,8 @@
 {
-  "symbol": "AKT/XRP",
+  "symbol": "AKT+rMZoAqwRn3BLbmFYL3exNVNVKrceYcNy6B/XRP",
   "side": "buy",
   "type": "limit",
   "amount": "80",
   "price": "2",
-  "params": {
-    "baseCurrencyIssuer": "rMZoAqwRn3BLbmFYL3exNVNVKrceYcNy6B"
-  }
+  "params": {}
 }

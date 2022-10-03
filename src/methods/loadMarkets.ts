@@ -1,6 +1,5 @@
 import _ from 'lodash';
 import { LoadMarketsResponse, SDKContext } from '../models';
-import fetchMarkets from './fetchMarkets';
 
 /**
  * Retrieves and caches a list of markets being traded on the dEX.
@@ -8,9 +7,9 @@ import fetchMarkets from './fetchMarkets';
  *
  * @category Methods
  */
-async function loadMarkets(this: SDKContext, reload = false): Promise<LoadMarketsResponse | undefined> {
+async function loadMarkets(this: SDKContext, reload = false): Promise<LoadMarketsResponse> {
   if (!this.markets || reload) {
-    const markets = await fetchMarkets.call(this);
+    const markets = await this.fetchMarkets();
     this.markets = markets;
   }
   return this.markets;

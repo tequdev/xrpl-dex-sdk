@@ -1,4 +1,7 @@
+import { Readable } from 'stream';
 import { MarketSymbol, PercentDecimal, UnixTimestamp } from '../common';
+
+export type TickerStream = Readable;
 
 export interface Ticker {
   // symbol of the market ('BTC/USD', 'ETH/BTC', ...)
@@ -40,5 +43,5 @@ export interface Ticker {
   // volume of quote currency traded for last 24 hours
   quoteVolume: string;
   // the original non-modified unparsed reply from exchange API
-  info: any;
+  info: Record<string, any>;
 }

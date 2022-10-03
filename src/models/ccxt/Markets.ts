@@ -1,4 +1,4 @@
-import { AccountAddress, CurrencyCode, MarketSymbol, PercentDecimal } from '../common';
+import { CurrencyCode, MarketSymbol, PercentDecimal } from '../common';
 
 export interface Market {
   /** String literal for referencing within an exchange */
@@ -7,12 +7,8 @@ export interface Market {
   symbol: MarketSymbol;
   /** Base token */
   base: CurrencyCode;
-  /** Issuers are optional when currency is XRP (which has no issuer) */
-  baseIssuer?: AccountAddress;
   /** Quote token */
   quote: CurrencyCode;
-  /** Issuers are optional when currency is XRP (which has no issuer) */
-  quoteIssuer?: AccountAddress;
   /** Base token transfer fee */
   baseFee?: PercentDecimal;
   /** Quote token transfer fee */

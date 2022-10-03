@@ -1,8 +1,15 @@
 {
-  "symbol": "XRP/USD",
+  "symbol": "XRP/USD+rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq",
   "base": "0",
   "quote": "0.003",
   "percentage": true,
-  "quoteIssuer": "rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq",
-  "info": "{\"market\":{\"id\":\"XRP/USD\",\"symbol\":\"XRP/USD\",\"base\":\"XRP\",\"quote\":\"USD\",\"quoteIssuer\":\"rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq\",\"quoteFee\":\"0.003\"}}"
+  "info": {
+    "market": {
+      "base": "XRP",
+      "id": "XRP/USD+rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq",
+      "quote": "USD+rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq",
+      "quoteFee": "0.003",
+      "symbol": "XRP/USD+rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq"
+    }
+  }
 }

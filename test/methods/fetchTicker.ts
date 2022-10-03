@@ -9,11 +9,14 @@ import { setupRemoteSDK, teardownRemoteSDK } from '../setupClient';
 const NETWORK = XrplNetwork.Testnet;
 
 describe('fetchTicker', function () {
-  beforeEach(_.partial(setupRemoteSDK, NETWORK, addresses.AKT_SELLER_SECRET));
+  beforeEach(function (done) {
+    setupRemoteSDK.call(this, NETWORK, addresses.AKT_SELLER_SECRET, done);
+  });
+
   afterEach(teardownRemoteSDK);
 
   it('should return Ticker data for the given symbol', async function () {
-    const ticker = await this.sdk.fetchTicker('TST/XRP', { baseIssuer: 'rP9jPyP5kyvFRb6ZiRghAGw5u8SGAmU4bd' });
+    const ticker = await this.sdk.fetchTicker('TST+rP9jPyP5kyvFRb6ZiRghAGw5u8SGAmU4bd/XRP');
     assert(typeof ticker !== 'undefined');
   });
 });

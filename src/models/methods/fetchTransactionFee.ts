@@ -1,14 +1,11 @@
 import { TransactionFee, TransactionType } from '../ccxt';
-import { AccountAddress, BaseParams, BaseResponse } from '../common';
 
 /**
  * Request parameters for a fetchTransactionFee call
  *
  * @category Parameters
  */
-export interface FetchTransactionFeeParams extends BaseParams {
-  /** Look up transaction fees for a specfic issuer */
-  issuer?: AccountAddress;
+export interface FetchTransactionFeeParams {
   /** Transaction type */
   type?: TransactionType;
 }
@@ -18,4 +15,4 @@ export interface FetchTransactionFeeParams extends BaseParams {
  *
  * @category Responses
  */
-export type FetchTransactionFeeResponse = BaseResponse & TransactionFee;
+export type FetchTransactionFeeResponse = TransactionFee | undefined;

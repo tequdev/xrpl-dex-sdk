@@ -1,28 +1,33 @@
 import _ from 'lodash';
 import 'mocha';
 
-import { addresses, requests, responses } from '../fixtures';
-import { XrplNetwork } from '../../src/models';
+import { setupLocalSDK, teardownLocalSDK } from '../setupClient';
+import { OrderId } from '../../src/models';
 import { assertResultMatch } from '../testUtils';
-import { setupRemoteSDK, teardownRemoteSDK } from '../setupClient';
+import { addresses, requests, responses, rippled } from '../fixtures';
 
-const NETWORK = XrplNetwork.Testnet;
+const TIMEOUT = 20000;
 
 describe('fetchOrder', function () {
-  this.timeout(25000);
+  this.timeout(TIMEOUT);
 
-  beforeEach(_.partial(setupRemoteSDK, NETWORK, addresses.AKT_BUYER_SECRET));
-  afterEach(teardownRemoteSDK);
+  beforeEach(_.partial(setupLocalSDK, { walletSecret: addresses.AKT_SELLER_SECRET }));
+  afterEach(teardownLocalSDK);
 
   /**
    * Buy Orders
    */
-
   it('should return an open Buy Order', async function () {
-    const fetchOrderResponse = await this.sdk.fetchOrder(requests.fetchOrder.testnet.tstBuy);
-    const omittedFields = ['id', 'clientOrderId', 'lastTradeTimestamp', 'datetime', 'timestamp', 'fee', 'info'];
-    assertResultMatch(_.omit(fetchOrderResponse, omittedFields), _.omit(responses.fetchOrder.tstBuy, omittedFields));
+    const orderId = requests.v2.orders.USD.buy.open as OrderId;
+    this.mockRippled.addResponse('ledger_entry', rippled.v2.ledgerEntry.offers.open[orderId]);
+    this.mockRippled.addResponse('tx', rippled.v2.tx.orderId.OfferCreate[orderId]);
+    this.mockRippled.addResponse('account_info', rippled.v2.accountInfo.issuers.USD);
+
+    const fetchOrderResponse = await this.sdk.fetchOrder(orderId);
+    assertResultMatch(fetchOrderResponse, responses.v2.orders.USD.buy.open);
   });
+
+  // it('should return a closed Buy Order', async function () {});
 
   // it('should return a partially filled Buy Order with multiple Trades', async function () {});
 

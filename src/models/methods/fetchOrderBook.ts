@@ -1,23 +1,18 @@
 import { LedgerIndex } from 'xrpl/dist/npm/models/common';
 import { OrderBook } from '../ccxt';
-import { AccountAddress, BaseParams } from '../common';
 
 /**
  * Request parameters for a fetchOrderBook call
  *
  * @category Parameters
  */
-export interface FetchOrderBookParams extends BaseParams {
-  /** Issuer for the currency being received by the order creator (if other than XRP) */
-  taker_pays_issuer?: AccountAddress;
-  /** Issuer for the currency being paid by the order creator (if other than XRP) */
-  taker_gets_issuer?: AccountAddress;
-  /** Filter order book by taker address */
-  taker?: AccountAddress;
+export interface FetchOrderBookParams {
+  /** Max Orders to search through while gathering Order Book data */
+  searchLimit?: number;
   /** Get order book from the given ledger */
-  ledger_index?: LedgerIndex;
+  ledgerIndex?: LedgerIndex;
   /** Get order book from the provided hash */
-  ledger_hash?: string;
+  ledgerHash?: string;
 }
 
 /**
@@ -25,4 +20,4 @@ export interface FetchOrderBookParams extends BaseParams {
  *
  * @category Responses
  */
-export type FetchOrderBookResponse = OrderBook;
+export type FetchOrderBookResponse = OrderBook | undefined;

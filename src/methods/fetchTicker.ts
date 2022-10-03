@@ -4,11 +4,7 @@ import { BookOffer, BookOffersRequest } from 'xrpl';
 import { parseAmountValue } from 'xrpl/dist/npm/models/transactions/common';
 import { DEFAULT_TICKER_SEARCH_LIMIT } from '../constants';
 import { MarketSymbol, FetchTickerParams, Ticker, FetchTickerResponse, SDKContext } from '../models';
-import {
-  BN,
-  // getBaseAmountKey, getOrderSideFromOffer, getQuoteAmountKey,
-  parseMarketSymbol,
-} from '../utils';
+import { BN, getTakerAmount, parseMarketSymbol } from '../utils';
 
 /**
  * Retrieves order book data for a single market pair. Returns an
@@ -22,7 +18,7 @@ async function fetchTicker(
   symbol: MarketSymbol,
   /** Parameters specific to the exchange API endpoint */
   params: FetchTickerParams = {}
-): Promise<FetchTickerResponse | undefined> {
+): Promise<FetchTickerResponse> {
   const [base, quote] = parseMarketSymbol(symbol);
 
   const limit = params.searchLimit || DEFAULT_TICKER_SEARCH_LIMIT;
@@ -44,8 +40,8 @@ async function fetchTicker(
   const timestamp = Date.now();
   const datetime = new Date(timestamp).toISOString();
 
-  const baseAmount = { currency: base, issuer: params.baseIssuer };
-  const quoteAmount = { currency: quote, issuer: params.quoteIssuer };
+  const baseAmount = getTakerAmount(base);
+  const quoteAmount = getTakerAmount(quote);
 
   const bookOffersBaseRequest = { command: 'book_offers', limit: limit + 1 };
 
@@ -95,7 +91,7 @@ async function fetchTicker(
     baseVolume = baseVolume.plus(baseValue);
     quoteVolume = quoteVolume.plus(quoteValue);
 
-    vwapPrice = vwapPrice.plus(price.multipliedBy(baseValue));
+    vwapPrice = vwapPrice.plus(price.times(baseValue));
     vwapQuantity = vwapQuantity.plus(baseValue);
   }
 
@@ -104,7 +100,7 @@ async function fetchTicker(
   // absolute change in price
   const change = close.minus(open);
   // relative change in price
-  const percentage = change.dividedBy(open).multipliedBy(100);
+  const percentage = change.dividedBy(open).times(100);
   // average price
   const average = close.plus(open).dividedBy(2);
 
@@ -128,7 +124,7 @@ async function fetchTicker(
     average: average.toString(),
     baseVolume: baseVolume.toString(),
     quoteVolume: quoteVolume.toString(),
-    info: { bids: bidsResponse, asks: asksResponse },
+    info: { bids: bidsResponse.result, asks: asksResponse.result },
   };
 
   return ticker;

@@ -6,8 +6,9 @@ import { assert } from 'chai';
 import _ from 'lodash';
 
 import addresses from './fixtures/addresses.json';
-import { AccountInfoRequest, Client, decode, Payment, Transaction, Wallet } from 'xrpl';
+import { AccountInfoRequest, Client, decode, Payment, SubscribeRequest, Transaction, Wallet } from 'xrpl';
 import { hashSignedTx } from 'xrpl/dist/npm/utils/hashes';
+import { StreamType } from 'xrpl/dist/npm/models/common';
 
 /**
  * Setup to run tests on both classic addresses and X-addresses.
@@ -108,6 +109,37 @@ export async function ledgerAccept(client: Client): Promise<void> {
   await client.connection.request(request);
 }
 
+// Note: This test use '.then' to avoid awaits in order to use 'done' style tests.
+export async function createTxHandlerTest(
+  client: Client,
+  wallet: Wallet,
+  done: Mocha.Done,
+  subscriptionStream: StreamType
+): Promise<void> {
+  const txStream = 'transaction';
+
+  client.on(txStream, (tx) => {
+    assert.equal(tx.type, txStream);
+    subscribeDone(client, done);
+  });
+
+  const request: SubscribeRequest = {
+    command: 'subscribe',
+    streams: [subscriptionStream],
+    accounts: [wallet.classicAddress],
+  };
+
+  client.request(request).then((response) => {
+    assert.equal(response.type, 'response');
+    assert.deepEqual(response.result, {});
+  });
+}
+
+/**
+ * Remove client listeners
+ * @param client
+ * @param done
+ */
 export function subscribeDone(client: Client, done: Mocha.Done): void {
   client.removeAllListeners();
   done();

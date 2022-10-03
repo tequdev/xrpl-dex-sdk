@@ -39,4 +39,20 @@ export interface DeletedNode {
   };
 }
 
+export interface AffectedNode {
+  LedgerEntryType: string;
+  LedgerIndex: string;
+  NewFields?: {
+    [field: string]: unknown;
+  };
+  FinalFields?: {
+    [field: string]: unknown;
+  };
+  PreviousFields?: {
+    [field: string]: unknown;
+  };
+  PreviousTxnID?: string;
+  PreviouTxnLgrSeq?: number;
+}
+
 export type Node = CreatedNode | ModifiedNode | DeletedNode;

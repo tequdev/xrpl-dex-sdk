@@ -5,4 +5,4 @@ import { FeeSchedule } from '../ccxt';
  *
  * @category Responses
  */
-export type FetchFeesResponse = FeeSchedule;
+export type FetchFeesResponse = FeeSchedule | undefined;

@@ -1,10 +1,8 @@
 {
-  "symbol": "TST/XRP",
+  "symbol": "TST+rP9jPyP5kyvFRb6ZiRghAGw5u8SGAmU4bd/XRP",
   "side": "sell",
   "type": "limit",
   "amount": "10",
   "price": "100",
-  "params": {
-    "baseCurrencyIssuer": "rMH4UxPrbuMa1spCBR98hLLyNJp4d8p4tM"
-  }
+  "params": {}
 }

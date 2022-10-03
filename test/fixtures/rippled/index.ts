@@ -16,6 +16,7 @@ import normalLedgerData from './ledgerData.json';
 import serverInfo from './serverInfo.json';
 import normalServerState from './serverState.json';
 import submit from './submit';
+import * as v2 from './v2';
 
 const account_info = {
   new: accountInfo,
@@ -77,6 +78,7 @@ const rippled = {
   server_info,
   server_state,
   submit,
+  v2,
 };
 
 export default rippled;
