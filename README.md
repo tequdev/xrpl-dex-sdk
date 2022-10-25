@@ -57,7 +57,7 @@ Currency codes, market symbols, and Order/Trade IDs are strings that follow the 
 | Type             | Format                           | Example                                       |
 | ---------------- | -------------------------------- | --------------------------------------------- |
 | CurrencyCode     | `[Currency]+[IssuerAddress]`     | `USD+rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq`      |
-| MarketSymbol     | `[BaseCurrency]/[QuoteCurrency]` | `USD+rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq/XRP`  |
+| MarketSymbol     | `[BaseCurrency]/[QuoteCurrency]` | `XRP/USD+rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq`  |
 | OrderId, TradeId | `[AccountAddress]/[Sequence]`    | `rpkeJcxB2y5BeAFyycuWwdTTcR3og2a3SR:30419065` |
 
 ### Examples
@@ -121,16 +121,17 @@ It produces the following output:
 
 ## Methods
 
-See the full SDK documentation here, or run `yarn docs` to generate the documentation locally.
+See the full SDK documentation [here](https://github.com/AktaryTech/xrpl-dex-sdk/tree/main/docs), or run `yarn docs` to generate the documentation locally.
 
 ## Further Reading
 
 ### CCXT (CryptoCurrency eXchange Trading Library)
 
-- General Documentation - https://docs.ccxt.com/en/latest/index.html
-- Unified API - https://docs.ccxt.com/en/latest/manual.html#unified-api
+- [General Documentation](https://docs.ccxt.com/en/latest/index.html)
+- [Unified API](https://docs.ccxt.com/en/latest/manual.html#unified-api)
 
 ### XRPL Ledger
 
-- General Documentation
-- Decentralized Exchange
+- [General Documentation](https://xrpl.org/concepts.html)
+- [Decentralized Exchange](https://xrpl.org/decentralized-exchange.html)
+- [dEX Tutorial](https://xrpl.org/trade-in-the-decentralized-exchange.html)
