@@ -1,7 +1,7 @@
 import { TradeStream } from '../ccxt';
 
 /**
- * Expected response from a {@link WatchTradesRequest}.
+ * Expected response from a {@link SDK.watchTrades} call.
  *
  * @category Responses
  */

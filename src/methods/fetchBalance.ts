@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto';
 import _ from 'lodash';
 import { AccountInfoRequest, AccountLinesRequest, dropsToXrp } from 'xrpl';
 import { DEFAULT_LIMIT } from '../constants';
@@ -5,10 +6,15 @@ import { Balances, FetchBalanceParams, FetchBalanceResponse, SDKContext } from '
 import { BN, getCurrencyCode } from '../utils';
 
 /**
- * Returns information about an account's balances, sorted by currency
- * and funds availability. Returns a {@link FetchBalanceResponse}.
+ * Fetches information about an account's balances, sorted by currency and funds availability.
+ * Returns a {@link FetchBalanceResponse}.
  *
  * @category Methods
+ *
+ * @link https://docs.ccxt.com/en/latest/manual.html?#account-balance
+ *
+ * @param params - (Optional) A {@link FetchBalanceParams} object
+ * @returns A {@link FetchBalanceResponse} object
  */
 async function fetchBalance(
   this: SDKContext,
@@ -24,7 +30,7 @@ async function fetchBalance(
   // Get XRP balances
   if (!code || (code && code === 'XRP')) {
     const accountInfoResponse = await this.client.request({
-      id: account,
+      id: randomUUID(),
       command: 'account_info',
       account,
       ledger_index: 'current',
@@ -63,7 +69,7 @@ async function fetchBalance(
 
     while (hasNextPage) {
       const accountTrustLinesResponse = await this.client.request({
-        id: account,
+        id: randomUUID(),
         command: 'account_lines',
         account,
         ledger_index: 'current',

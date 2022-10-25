@@ -2,11 +2,12 @@ import { ServerStateRequest } from 'xrpl';
 import { SDKContext, ExchangeStatusType, FetchStatusResponse } from '../models';
 
 /**
- * Returns information regarding {@link ExchangeStatus} from either the info
- * hardcoded in the exchange instance or the API, if available. Returns an
- * {@link FetchStatusResponse}.
+ * Fetches information regarding {@link ExchangeStatus} from either the info hardcoded in
+ * the exchange instance or the API, if available. Returns a {@link FetchStatusResponse}.
  *
  * @category Methods
+ *
+ * @returns A {@link FetchStatusResponse} object
  */
 async function fetchStatus(this: SDKContext): Promise<FetchStatusResponse> {
   const serverStateResponse = await this.client.request({

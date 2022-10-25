@@ -3,6 +3,5 @@
   "side": "sell",
   "type": "limit",
   "amount": "20",
-  "price": "1",
-  "params": {}
+  "price": "1.5"
 }

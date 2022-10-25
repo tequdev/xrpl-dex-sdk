@@ -1,26 +1,41 @@
 import _ from 'lodash';
-import { CreateLimitBuyOrderParams, CreateLimitBuyOrderResponse, MarketSymbol, SDKContext } from '../models';
+import {
+  ArgumentsRequired,
+  CreateLimitBuyOrderParams,
+  CreateLimitBuyOrderResponse,
+  MarketSymbol,
+  SDKContext,
+} from '../models';
+import { validateMarketSymbol } from '../utils';
 
 /**
- * Creates a new Order on the Ripple dEX. Returns an {@link CreateLimitBuyOrderResponse}
- * with the newly created Order object.
+ * Places a Limit Buy {@link Order} on the Ripple dEX. Returns a {@link CreateLimitBuyOrderResponse}
+ * with the newly created Order's ID.
  *
  * @category Methods
+ *
+ * @link https://docs.ccxt.com/en/latest/manual.html?#placing-orders
+ *
+ * @param symbol - {@link MarketSymbol} for new Order
+ * @param amount - How much currency you want to trade (in units of base currency)
+ * @param price - Price at which the order is to be fullfilled (in units of quote currency)
+ * @param params - (Optional) A {@link CreateLimitBuyOrderParams} object
+ * @returns A {@link CreateLimitBuyOrderResponse} object
  */
 async function createLimitBuyOrder(
   this: SDKContext,
-  /** Token pair (called Unified Market Symbol in CCXT) */
   symbol: MarketSymbol,
-  /** How much currency you want to trade (usually, but not always) in units of the base currency) */
   amount: string,
-  /** The price at which the order is to be fullfilled in units of the quote currency (ignored in market orders) */
   price: string,
-  /** Parameters specific to the exchange API endpoint */
-  params: CreateLimitBuyOrderParams
+  params: CreateLimitBuyOrderParams = {}
 ): Promise<CreateLimitBuyOrderResponse> {
-  const newOrderId = await this.createOrder(symbol, 'buy', 'limit', amount, price, params);
+  if (!symbol || !amount || !price || !params)
+    throw new ArgumentsRequired('Missing required arguments for createLimitBuyOrder call');
+  validateMarketSymbol(symbol);
 
-  return newOrderId;
+  const newOrder = await this.createOrder(symbol, 'buy', 'limit', amount, price, params);
+
+  return newOrder;
 }
 
 export default createLimitBuyOrder;

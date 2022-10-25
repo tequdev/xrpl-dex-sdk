@@ -1,7 +1,7 @@
 import { TickerStream } from '../ccxt';
 
 /**
- * Request parameters for a watchTicker call
+ * Request parameters for a {@link SDK.watchTicker} call.
  *
  * @category Parameters
  */
@@ -11,7 +11,7 @@ export interface WatchTickerParams {
 }
 
 /**
- * Expected response from a watchTicker call
+ * Expected response from a {@link SDK.watchTicker} call.
  *
  * @category Responses
  */

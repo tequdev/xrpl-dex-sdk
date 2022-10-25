@@ -1,6 +1,6 @@
+import { randomUUID } from 'crypto';
 import _ from 'lodash';
-import { BookOffersRequest, dropsToXrp } from 'xrpl';
-import { parseAmountValue } from 'xrpl/dist/npm/models/transactions/common';
+import { BookOffersRequest } from 'xrpl';
 import { CURRENCY_PRECISION, DEFAULT_LIMIT, DEFAULT_SEARCH_LIMIT } from '../constants';
 import {
   OrderBookAsk,
@@ -10,33 +10,33 @@ import {
   SDKContext,
   OrderBookBid,
   OrderBook,
+  ArgumentsRequired,
 } from '../models';
-import {
-  BN,
-  getBaseAmountKey,
-  getOrderSideFromOffer,
-  getQuoteAmountKey,
-  getTakerAmount,
-  parseMarketSymbol,
-} from '../utils';
+import { getSharedOrderData, getTakerAmount, parseMarketSymbol, validateMarketSymbol } from '../utils';
 
 /**
- * Retrieves order book data for a single market pair. Returns an
- * {@link FetchOrderBookResponse}.
+ * Retrieves order book data for a single {@link Market} pair. Returns a {@link FetchOrderBookResponse}.
  *
  * @category Methods
+ *
+ * @link https://docs.ccxt.com/en/latest/manual.html?#order-book
+ *
+ * @param symbol - {@link MarketSymbol} to get order book for
+ * @param limit - (Optional) Total number of entries to return (default is 20)
+ * @param params - (Optional) A {@link FetchOrderBookParams} object
+ * @returns A {@link FetchOrderBookResponse} object
  */
 async function fetchOrderBook(
   this: SDKContext,
-  /** Token pair (called Unified Market Symbol in CCXT) */
   symbol: MarketSymbol,
-  /** Number of results to return */
   limit: number = DEFAULT_LIMIT,
-  /** Parameters specific to the exchange API endpoint */
   params: FetchOrderBookParams = {
     searchLimit: DEFAULT_SEARCH_LIMIT,
   }
 ): Promise<FetchOrderBookResponse> {
+  if (!symbol) throw new ArgumentsRequired('Missing required arguments for fetchOrderBook call');
+  validateMarketSymbol(symbol);
+
   const { searchLimit } = params;
 
   const [baseCurrency, quoteCurrency] = parseMarketSymbol(symbol);
@@ -45,7 +45,7 @@ async function fetchOrderBook(
   const quoteAmount = getTakerAmount(quoteCurrency);
 
   const orderBookRequest: BookOffersRequest = {
-    id: symbol,
+    id: randomUUID(),
     command: 'book_offers',
     taker_pays: baseAmount,
     taker_gets: quoteAmount,
@@ -63,18 +63,11 @@ async function fetchOrderBook(
   const asks: OrderBookAsk[] = [];
 
   for (const offer of offers) {
-    const side = getOrderSideFromOffer(offer);
-    const baseAmount = offer[getBaseAmountKey(side)];
-    const baseValue = BN(
-      typeof baseAmount === 'string' ? dropsToXrp(parseAmountValue(baseAmount)) : parseAmountValue(baseAmount)
-    );
-    const quoteAmount = offer[getQuoteAmountKey(side)];
-    const quoteValue = BN(
-      typeof quoteAmount === 'string' ? dropsToXrp(parseAmountValue(quoteAmount)) : parseAmountValue(quoteAmount)
-    );
+    const sharedData = await getSharedOrderData.call(this, offer);
 
-    const amount = baseValue;
-    const price = quoteValue.dividedBy(amount);
+    if (!sharedData) continue;
+
+    const { side, price, amount } = sharedData;
 
     const orderBookEntry = [
       (+price.toPrecision(CURRENCY_PRECISION)).toString(),

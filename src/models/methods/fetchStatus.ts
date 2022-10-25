@@ -1,7 +1,7 @@
 import { ExchangeStatus } from '../ccxt';
 
 /**
- * Expected response from a fetchStatus call
+ * Expected response from a {@link SDK.fetchStatus} call.
  *
  * @category Responses
  */

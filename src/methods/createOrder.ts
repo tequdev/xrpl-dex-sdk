@@ -1,32 +1,56 @@
-import { BadResponse } from 'ccxt';
 import _ from 'lodash';
 import { OfferCreate, setTransactionFlagsToNumber } from 'xrpl';
 import { CURRENCY_PRECISION } from '../constants';
-import { CreateOrderParams, CreateOrderResponse, MarketSymbol, OrderSide, OrderType, SDKContext } from '../models';
-import { BN, getAmount, getBaseAmountKey, getOrderOrTradeId, handleTxErrors, parseMarketSymbol } from '../utils';
+import {
+  ArgumentsRequired,
+  CreateOrderParams,
+  CreateOrderResponse,
+  ExchangeError,
+  MarketSymbol,
+  OrderSide,
+  OrderType,
+  SDKContext,
+} from '../models';
+import {
+  BN,
+  getAmount,
+  getBaseAmountKey,
+  getOrderId,
+  handleTxErrors,
+  parseMarketSymbol,
+  validateMarketSymbol,
+} from '../utils';
 
 /**
- * Creates a new Order on the Ripple dEX. Returns an {@link CreateOrderResponse}
- * with the newly created Order object.
+ * Places an {@link Order} on the Ripple dEX. Returns a {@link CreateOrderResponse} with the
+ * newly created Order's ID.
  *
  * @category Methods
+ *
+ * @link https://docs.ccxt.com/en/latest/manual.html?#placing-orders
+ *
+ * @param symbol - {@link MarketSymbol} for new Order
+ * @param side - Order direction (buy or sell)
+ * @param type - Order type (only limit is supported)
+ * @param amount - How much currency you want to trade (in units of base currency)
+ * @param price - Price at which the order is to be fullfilled (in units of quote currency)
+ * @param params - (Optional) a {@link CreateOrderParams} object
+ * @returns A {@link CreateOrderResponse} object
  */
 async function createOrder(
   this: SDKContext,
-  /** Token pair (called Unified Market Symbol in CCXT) */
   symbol: MarketSymbol,
-  /** Order direction (buy or sell) */
   side: OrderSide,
-  /** Order type (limit only) */
   /* eslint-disable-next-line */
   type: OrderType,
-  /** How much currency you want to trade (usually, but not always) in units of the base currency) */
   amount: string,
-  /** The price at which the order is to be fullfilled in units of the quote currency (ignored in market orders) */
   price: string,
-  /** Parameters specific to the exchange API endpoint */
   params: CreateOrderParams = {}
 ): Promise<CreateOrderResponse> {
+  if (!symbol || !side || !amount || !price || !params)
+    throw new ArgumentsRequired('Missing required arguments for createOrder call');
+  validateMarketSymbol(symbol);
+
   const [baseCurrency, quoteCurrency] = parseMarketSymbol(symbol);
 
   const baseAmount = getAmount(baseCurrency, +BN(amount).toPrecision(CURRENCY_PRECISION));
@@ -39,7 +63,7 @@ async function createOrder(
     Account: this.wallet.classicAddress,
     Flags: {
       ...params.flags,
-      tfSell: side === 'sell' ? true : false,
+      tfSell: side === 'sell',
     },
     TakerGets: baseAmountKey === 'TakerGets' ? baseAmount : quoteAmount,
     TakerPays: baseAmountKey === 'TakerPays' ? baseAmount : quoteAmount,
@@ -60,12 +84,17 @@ async function createOrder(
   const offerCreateTx = offerCreateTxResponse.result;
 
   if (!offerCreateTx.meta || typeof offerCreateTx.meta !== 'object' || !offerCreateTx.Sequence) {
-    throw new BadResponse(`Bad data for OrderCreate Transaction with hash ${offerCreateTx.hash}`);
+    throw new ExchangeError(`Bad data for OrderCreate Transaction with hash ${offerCreateTx.hash}`);
   }
 
-  const orderId = getOrderOrTradeId(offerCreateTx.Account, offerCreateTx.Sequence);
+  const orderId = getOrderId(offerCreateTx.Account, offerCreateTx.Sequence);
 
-  return orderId;
+  return {
+    id: orderId,
+    info: {
+      OfferCreate: offerCreateTxResponse,
+    },
+  };
 }
 
 export default createOrder;

@@ -3,7 +3,7 @@ import { OrderBook } from '../ccxt';
 import { AccountAddress } from '../common';
 
 /**
- * Request parameters for a fetchL2OrderBook call
+ * Request parameters for a {@link SDK.fetchL2OrderBook} call.
  *
  * @category Parameters
  */
@@ -11,13 +11,13 @@ export interface FetchL2OrderBookParams {
   /** Filter order book by taker address */
   taker?: AccountAddress;
   /** Get order book from the given ledger */
-  ledger_index?: LedgerIndex;
+  ledgerIndex?: LedgerIndex;
   /** Get order book from the provided hash */
-  ledger_hash?: string;
+  ledgerHash?: string;
 }
 
 /**
- * Expected response from a fetchL2OrderBook call
+ * Expected response from a {@link SDK.fetchL2OrderBook} call.
  *
  * @category Responses
  */

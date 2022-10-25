@@ -1,3 +1,8 @@
+/**
+ * CCXT Order Book Types
+ *
+ * @link https://docs.ccxt.com/en/latest/manual.html?#order-book
+ */
 import { Readable } from 'stream';
 import { BigNumberish, MarketSymbol } from '../common';
 
@@ -9,7 +14,13 @@ export type OrderBookBid = PriceAmountTuple;
 export type OrderBookAsk = PriceAmountTuple;
 
 export type OrderBookLevel = 'L1' | 'L2' | 'L3';
-export default interface OrderBook {
+
+/**
+ * OrderBook
+ *
+ * @link https://docs.ccxt.com/en/latest/manual.html?#order-book-structure
+ */
+export interface OrderBook {
   symbol: MarketSymbol;
   timestamp?: number;
   datetime?: string;

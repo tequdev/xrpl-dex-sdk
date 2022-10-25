@@ -1,7 +1,7 @@
 import { Ticker } from '../ccxt';
 
 /**
- * Request parameters for a fetchTicker call
+ * Request parameters for a {@link SDK.fetchTicker} call.
  *
  * @category Parameters
  */
@@ -11,7 +11,7 @@ export interface FetchTickerParams {
 }
 
 /**
- * Expected response from a fetchTicker call
+ * Expected response from a {@link SDK.fetchTicker} call.
  *
  * @category Responses
  */

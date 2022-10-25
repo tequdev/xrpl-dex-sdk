@@ -14,6 +14,8 @@ describe('fetchOrderBook', function () {
   afterEach(teardownLocalSDK);
 
   it('should return an OrderBook object', async function () {
+    this.mockRippled.addResponse('account_info', rippled.account_info.issuer);
+    this.mockRippled.addResponse('account_info', rippled.account_info.issuer);
     this.mockRippled.addResponse('book_offers', rippled.book_offers.usdBtc);
 
     const { symbol, limit, params } = requests.fetchOrderBook;

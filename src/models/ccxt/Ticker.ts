@@ -1,8 +1,18 @@
+/**
+ * CCXT Price Ticker
+ *
+ * @link https://docs.ccxt.com/en/latest/manual.html?#price-tickers
+ */
 import { Readable } from 'stream';
 import { MarketSymbol, PercentDecimal, UnixTimestamp } from '../common';
 
 export type TickerStream = Readable;
 
+/**
+ * Ticker
+ *
+ * @link https://docs.ccxt.com/en/latest/manual.html?#ticker-structure
+ */
 export interface Ticker {
   // symbol of the market ('BTC/USD', 'ETH/BTC', ...)
   symbol: MarketSymbol;

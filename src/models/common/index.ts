@@ -5,18 +5,11 @@ import BigNumber from 'bignumber.js';
  */
 export type AccountAddress = string;
 export type IssuerAddress = string;
-export type Sequence = string | number;
-
-/** OrderIds use the format "[AccountAddress]:[Sequence]" */
-export type AccountSequencePair = string;
-
-/** Market symbols use the format "[CurrencyCode]+[IssuerAddress]" */
-export type CurrencyIssuerPair = string;
-
+export type Sequence = number;
 export type RippleUrl = string;
-
 export type CurrencyCode = `${string}+${IssuerAddress}` | string;
 export type MarketSymbol = `${CurrencyCode | string}/${CurrencyCode | string}`;
+export type ResponseInfo = Record<string, any>;
 
 /**
  * Datetime
@@ -31,7 +24,7 @@ export type BigNumberish = BigNumber | number | string;
 export type PercentDecimal = string;
 
 // 1 Drop = 0.000001 XRP
-// 1000000 Drops = 1
+// 1000000 Drops = 1 XRP
 export type Drops = BigNumberish;
 
 /**
@@ -45,28 +38,4 @@ export enum XrplNetwork {
   Devnet = 'devnet',
   NFTDevnet = 'nft_devnet',
   Local = 'local',
-}
-
-/**
- * Parameters
- */
-export interface PaginationParams {
-  /** Limit the number of transactions to retrieve. */
-  limit?: number;
-  /** Value from a previous paginated response. Resume retrieving data where that response left off. */
-  marker?: unknown;
-}
-
-/**
- * Requests
- */
-export interface BaseParams {
-  network?: XrplNetwork;
-}
-
-/**
- * Responses
- */
-export interface BaseResponse {
-  info: Record<string, any>;
 }

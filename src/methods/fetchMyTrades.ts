@@ -1,8 +1,6 @@
-import { BadRequest } from 'ccxt';
 import _ from 'lodash';
-import { dropsToXrp, OfferCreateFlags, rippleTimeToISOTime, rippleTimeToUnixTime } from 'xrpl';
-import { Offer } from 'xrpl/dist/npm/models/ledger';
-import { parseAmountValue } from 'xrpl/dist/npm/models/transactions/common';
+import { rippleTimeToUnixTime } from 'xrpl';
+import { Amount } from 'xrpl/dist/npm/models/common';
 import { DEFAULT_LIMIT, DEFAULT_SEARCH_LIMIT } from '../constants';
 import {
   FetchMyTradesParams,
@@ -11,43 +9,34 @@ import {
   UnixTimestamp,
   SDKContext,
   Trade,
-  AffectedNode,
+  ArgumentsRequired,
+  AccountAddress,
+  Sequence,
 } from '../models';
-import {
-  BN,
-  fetchAccountTxns,
-  fetchTransferRate,
-  getAmountCurrencyCode,
-  getBaseAmountKey,
-  getMarketSymbol,
-  getOrderOrTradeId,
-  getQuoteAmountKey,
-  getTakerOrMaker,
-} from '../utils';
+import { fetchAccountTxns, getMarketSymbol, getOfferFromNode, getTradeFromData, validateMarketSymbol } from '../utils';
 
 /**
- * Fetch Trades for a given market symbol. Returns a {@link FetchMyTradesResponse}.
+ * Fetch the SDK user's {@link Trades} for a given market symbol. Returns a {@link FetchMyTradesResponse}.
  *
  * @category Methods
+ *
+ * @param symbol - {@link MarketSymbol} to filter Trades by
+ * @param since - (Optional) Only return Trades since this date
+ * @param limit - (Optional) Total number of Trades to return (default is 20)
+ * @param params - (Optional) A {@link FetchMyTradesParams} object
+ * @returns A {@link FetchMyTradesResponse} object
  */
 async function fetchMyTrades(
   this: SDKContext,
-  /** Filter Trades by market symbol */
   symbol: MarketSymbol,
-  /** Only return Trades since this date */
   since?: UnixTimestamp,
-  /** Total number of Trades to return */
   limit: number = DEFAULT_LIMIT,
-  /** eslint-disable-next-line */
-  params: FetchMyTradesParams = {}
+  params: FetchMyTradesParams = {
+    searchLimit: DEFAULT_SEARCH_LIMIT,
+  }
 ): Promise<FetchMyTradesResponse> {
-  if (!symbol) throw new BadRequest('Must provide a market symbol');
-
-  const searchLimit = params.searchLimit || DEFAULT_SEARCH_LIMIT;
-  const sellBaseField = getBaseAmountKey('sell');
-  const sellQuoteField = getQuoteAmountKey('sell');
-  const buyBaseField = getBaseAmountKey('buy');
-  const buyQuoteField = getQuoteAmountKey('buy');
+  if (!symbol) throw new ArgumentsRequired('Missing required arguments for fetchMyTrades call');
+  validateMarketSymbol(symbol);
 
   const trades: Trade[] = [];
 
@@ -59,6 +48,7 @@ async function fetchMyTrades(
   while (hasNextPage) {
     const accountTxResponse = await fetchAccountTxns(this.client, this.wallet.classicAddress, requestLimit, marker);
     if (!accountTxResponse) break;
+
     marker = accountTxResponse.result.marker;
 
     const transactions = accountTxResponse.result.transactions;
@@ -66,90 +56,49 @@ async function fetchMyTrades(
     if (!transactions) continue;
 
     for (const transaction of transactions) {
+      txCount += 1;
+      if (trades.length >= limit || txCount >= params.searchLimit) break;
+
       if (
         !transaction.tx?.Sequence ||
         typeof transaction.meta !== 'object' ||
         transaction.tx.TransactionType !== 'OfferCreate' ||
-        !transaction.tx.date
+        !transaction.tx.date ||
+        getMarketSymbol(transaction.tx) !== symbol
       )
         continue;
 
       /** Filter by date if `since` is defined */
       if (since && rippleTimeToUnixTime(transaction.tx.date) < since) {
+        hasNextPage = false;
         continue;
       }
 
-      const side =
-        typeof transaction.tx.Flags === 'number' && !(transaction.tx.Flags & OfferCreateFlags.tfSell) ? 'buy' : 'sell';
-
-      const marketSymbol = getMarketSymbol(
-        transaction.tx[side === 'buy' ? buyBaseField : sellBaseField],
-        transaction.tx[side === 'buy' ? buyQuoteField : sellQuoteField]
-      );
-
-      if (marketSymbol !== symbol) continue;
-
       for (const affectedNode of transaction.meta.AffectedNodes) {
-        const { LedgerEntryType, FinalFields } = Object.values(affectedNode)[0] as AffectedNode;
+        const offer = getOfferFromNode(affectedNode);
 
-        if (LedgerEntryType !== 'Offer' || !FinalFields) continue;
+        if (!offer) continue;
 
-        const offer = FinalFields as unknown as Offer;
-        const orderId = getOrderOrTradeId(offer.Account, offer.Sequence);
+        const trade = await getTradeFromData.call(
+          this,
+          {
+            date: transaction.tx.date,
+            Flags: offer.Flags as number,
+            OrderAccount: offer.Account as AccountAddress,
+            OrderSequence: offer.Sequence as Sequence,
+            Account: transaction.tx.Account,
+            Sequence: transaction.tx.Sequence,
+            TakerPays: offer.TakerPays as Amount,
+            TakerGets: offer.TakerGets as Amount,
+          },
+          { transaction }
+        );
 
-        const baseAmount = offer[getBaseAmountKey(side)];
-        const quoteAmount = offer[getQuoteAmountKey(side)];
-
-        const baseRate = await fetchTransferRate(this.client, baseAmount);
-        const quoteRate = await fetchTransferRate(this.client, quoteAmount);
-
-        const baseCurrency = getAmountCurrencyCode(baseAmount);
-        const quoteCurrency = getAmountCurrencyCode(quoteAmount);
-
-        const baseValue =
-          baseCurrency === 'XRP' ? BN(dropsToXrp(parseAmountValue(baseAmount))) : BN(parseAmountValue(baseAmount));
-        const quoteValue =
-          quoteCurrency === 'XRP' ? BN(dropsToXrp(parseAmountValue(quoteAmount))) : BN(parseAmountValue(quoteAmount));
-
-        const amount = baseValue;
-        const price = quoteValue.dividedBy(baseValue);
-        const cost = amount.times(price);
-
-        const feeRate = side === 'buy' ? quoteRate : baseRate;
-        const feeCost = (side === 'buy' ? quoteValue : baseValue).times(feeRate);
-
-        const trade: Trade = {
-          id: getOrderOrTradeId(transaction.tx.Account, transaction.tx.Sequence),
-          order: orderId,
-          datetime: rippleTimeToISOTime(transaction.tx.date || 0),
-          timestamp: rippleTimeToUnixTime(transaction.tx.date || 0),
-          symbol,
-          type: 'limit',
-          side,
-          amount: amount.toString(),
-          price: price.toString(),
-          takerOrMaker: getTakerOrMaker(side),
-          cost: cost.toString(),
-          info: { transaction },
-        };
-
-        if (feeCost.isGreaterThan(0)) {
-          trade.fee = {
-            currency: side === 'buy' ? quoteCurrency : baseCurrency,
-            cost: feeCost.toString(),
-            rate: feeRate.toString(),
-            percentage: true,
-          };
-        }
-
-        trades.push(trade);
-        if (trades.length >= limit) break;
+        if (trade) trades.push(trade);
       }
-      txCount += 1;
-      if (txCount >= searchLimit) break;
     }
 
-    hasNextPage = trades.length < limit && txCount < searchLimit;
+    hasNextPage = trades.length < limit && txCount < params.searchLimit;
   }
 
   // Sort oldest-to-newest

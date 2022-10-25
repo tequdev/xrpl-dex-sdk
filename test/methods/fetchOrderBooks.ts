@@ -10,6 +10,7 @@ describe('fetchOrderBooks', function () {
   afterEach(teardownLocalSDK);
 
   it('should return an array of OrderBook objects', async function () {
+    this.mockRippled.addResponse('account_info', rippled.account_info.issuer);
     this.mockRippled.addResponse('book_offers', rippled.book_offers.usdBtc);
     this.mockRippled.addResponse('book_offers', rippled.book_offers.btcUsd);
 

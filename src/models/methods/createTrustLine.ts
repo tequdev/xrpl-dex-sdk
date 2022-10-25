@@ -1,7 +1,7 @@
 import { CurrencyCode } from '../common';
 
 /**
- * Expected response from a createTrustLine call
+ * Expected response from a {@link SDK.createTrustLine} call.
  *
  * @category Responses
  */

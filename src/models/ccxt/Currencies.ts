@@ -1,5 +1,15 @@
+/**
+ * CCXT Currencies
+ *
+ * @link https://docs.ccxt.com/en/latest/manual.html?#markets
+ */
 import { CurrencyCode, PercentDecimal } from '../common';
 
+/**
+ * Currency
+ *
+ * @link https://docs.ccxt.com/en/latest/manual.html?#currency-structure
+ */
 export interface Currency {
   code: CurrencyCode;
   fee?: PercentDecimal;
@@ -9,6 +19,4 @@ export interface Currency {
   precision?: number;
 }
 
-type Currencies = Record<CurrencyCode, Currency>;
-
-export default Currencies;
+export type Currencies = Record<CurrencyCode, Currency>;

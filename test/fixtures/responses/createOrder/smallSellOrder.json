@@ -10,34 +10,10 @@
   "timeInForce": "GTC",
   "side": "sell",
   "amount": "20",
-  "price": "1",
+  "price": "1.5",
   "average": "0",
   "filled": "0",
   "remaining": "20",
   "cost": "0",
-  "trades": [],
-  "info": {
-    "transactionData": {
-      "transaction": {
-        "Account": "rpkeJcxB2y5BeAFyycuWwdTTcR3og2a3SR",
-        "Fee": "12",
-        "Flags": 524288,
-        "LastLedgerSequence": 31319341,
-        "Sequence": 30419065,
-        "SigningPubKey": "02155F290580BC63BD445368B7B2101C0A8997FA0E18D591C181AC4C6342499AF3",
-        "TakerGets": { "currency": "TST", "issuer": "rP9jPyP5kyvFRb6ZiRghAGw5u8SGAmU4bd", "value": "10" },
-        "TakerPays": "20000000",
-        "TransactionType": "OfferCreate",
-        "TxnSignature": "3045022100E4CBB806EDE526409EBF8E126E602B69403AECD0DEA6CF8845924A4C88BEC9D0022068BC2CEB1B1E2172CB199C1D6B325378F82342AABBF8376AF5F4262A7B19498C",
-        "date": 716947080,
-        "hash": "BCB94683F75468AC1278C596E601BB38BEFDB9D211A5B72F36AB99B506EF22D0",
-        "inLedger": 31319322,
-        "ledger_index": 31319322,
-        "validated": true
-      },
-      "metadata": { "AffectedNodes": [], "TransactionIndex": 7, "TransactionResult": "tesSUCCESS" },
-      "offers": [],
-      "date": 716947080
-    }
-  }
+  "trades": []
 }

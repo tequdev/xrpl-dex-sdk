@@ -1,21 +1,60 @@
+/**
+ * CCXT Trades
+ *
+ * @link https://docs.ccxt.com/en/latest/manual.html?#public-trades
+ * @link https://docs.ccxt.com/en/latest/manual.html?#my-trades
+ * @link https://docs.ccxt.com/en/latest/manual.html?#how-orders-are-related-to-trades
+ */
 import { Readable } from 'stream';
-import { MarketSymbol } from '../common';
+import { Amount } from 'xrpl/dist/npm/models/common';
+import { AccountAddress, MarketSymbol, XrplTimestamp } from '../common';
 import { Fee } from './Fees';
 
 export type TradeStream = Readable;
 
+/**
+ * Trade
+ *
+ * @link https://docs.ccxt.com/en/latest/manual.html?#trade-structure
+ */
 export interface Trade {
-  id: string; // string trade id
-  order?: string; // string order id or undefined/None/null
-  datetime: string; // ISO8601 datetime with milliseconds;
-  timestamp: number; // Unix timestamp in milliseconds
-  symbol: MarketSymbol; // symbol in CCXT format
-  type?: string; // order type, 'market', 'limit', ... or undefined/None/null
-  side: 'buy' | 'sell'; // direction of the trade, 'buy' or 'sell'
-  amount: string; // amount of base currency
-  price: string; // float price in quote currency
-  takerOrMaker: 'taker' | 'maker'; // string, 'taker' or 'maker'
-  cost: string; // total cost (including fees), `price * amount`
+  // trade id
+  id: string;
+  // order id or undefined/None/null
+  order?: string;
+  // ISO8601 datetime with milliseconds;
+  datetime: string;
+  // Unix timestamp in milliseconds
+  timestamp: number;
+  // symbol in CCXT format
+  symbol: MarketSymbol;
+  // order type, 'market', 'limit', ... or undefined/None/null
+  type?: string;
+  // direction of the trade, 'buy' or 'sell'
+  side: 'buy' | 'sell';
+  // amount of base currency
+  amount: string;
+  // float price in quote currency
+  price: string;
+  // 'taker' or 'maker'
+  takerOrMaker: 'taker' | 'maker';
+  // total cost (excluding fees), `price * amount`
+  cost: string;
   fee?: Fee;
-  info: Record<string, any>; // the original decoded JSON as is
+  // the original decoded JSON as is
+  info: Record<string, any>;
+}
+
+/**
+ * Data used to assemble Trade objects.
+ */
+export interface TradeSourceData {
+  date: XrplTimestamp;
+  Flags: number;
+  Account: AccountAddress;
+  Sequence: number;
+  OrderAccount: AccountAddress;
+  OrderSequence: number;
+  TakerPays: Amount;
+  TakerGets: Amount;
 }

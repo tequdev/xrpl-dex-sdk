@@ -10,7 +10,7 @@ import SDK from '../../src';
 const TIMEOUT = 20000;
 const NETWORK = XrplNetwork.Testnet;
 
-describe('watchTrades', function () {
+describe.skip('watchTrades', function () {
   this.timeout(TIMEOUT);
 
   beforeEach(function (done) {

@@ -1,7 +1,7 @@
 import { Issuers } from '../xrpl';
 
 /**
- * Expected response from a fetchIssuers call
+ * Expected response from a {@link SDK.fetchIssuers} call.
  *
  * @category Responses
  */

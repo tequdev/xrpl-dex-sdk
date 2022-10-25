@@ -9,9 +9,7 @@ export interface Issuer {
   website: string;
   addresses: AccountAddress[];
   currencies: CurrencyCode[];
-  transferRate?: BigNumber;
+  transferRates?: Record<AccountAddress, BigNumber>;
 }
 
-type Issuers = Record<string, Issuer>;
-
-export default Issuers;
+export type Issuers = Record<string, Issuer>;

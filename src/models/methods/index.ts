@@ -26,6 +26,7 @@ export * from './fetchTradingFee';
 export * from './fetchTradingFees';
 export * from './fetchTransactionFee';
 export * from './fetchTransactionFees';
+export * from './fetchTransferRate';
 export * from './loadCurrencies';
 export * from './loadIssuers';
 export * from './loadMarkets';

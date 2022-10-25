@@ -30,23 +30,6 @@ export interface TxResponse extends BaseTxResponse {
   searched_all?: boolean;
 }
 
-export interface UnifiedTransaction {
-  hash: string;
-  ledger_index: number;
-  meta?: TransactionMetadata | string;
-  validated?: boolean;
-  date: number;
-  tx: Transaction;
-  tx_blob?: string;
-  searched_all?: boolean;
-}
-
-// export interface ResponseOnlyTxInfo {
-//   date?: number;
-//   hash?: string;
-//   ledger_index?: number;
-// }
-
 export type LedgerTransaction<T> = T & {
   metaData?: TransactionMetadata | undefined;
 };
@@ -59,14 +42,7 @@ export interface AccountTransaction {
   validated: boolean;
 }
 
-export interface AccountTxResult<Transaction> {
-  validated: boolean;
-  meta: string | TransactionMetadata;
-  tx?: Transaction & ResponseOnlyTxInfo;
-}
-
 export type TxResult<T> = TxResponse['result'] & T;
-export type TxBaseResponse<T> = T;
 
 export type TransactionData<T> = {
   transaction: T;

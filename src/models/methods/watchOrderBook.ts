@@ -1,7 +1,7 @@
 import { OrderBookStream } from '../ccxt/OrderBook';
 
 /**
- * Expected response from a watchOrderBook call
+ * Expected response from a {@link SDK.watchOrderBook} call.
  *
  * @category Responses
  */

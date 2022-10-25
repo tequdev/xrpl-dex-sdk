@@ -1,16 +1,25 @@
-import { SDKContext, FetchTradingFeeResponse, MarketSymbol } from '../models';
+import { SDKContext, FetchTradingFeeResponse, MarketSymbol, ArgumentsRequired } from '../models';
+import { validateMarketSymbol } from '../utils';
 
 /**
- * Returns information about the fees incurred while trading on given market.
- * Returns a {@link FetchTradingFeeResponse}.
+ * Fetches information about the fees incurred while trading on given {@link Market}. Returns a
+ * {@link FetchTradingFeeResponse}.
  *
  * @category Methods
+ *
+ * @link https://docs.ccxt.com/en/latest/manual.html?#fees
+ *
+ * @param symbol - (Optional) {@link MarketSymbol} to get trading fees for
+ * @returns A {@link FetchTradingFeeResponse} object
  */
 async function fetchTradingFee(
   this: SDKContext,
   /** Unified Market Symbol to look up */
   symbol: MarketSymbol
 ): Promise<FetchTradingFeeResponse> {
+  if (!symbol) throw new ArgumentsRequired('Missing required arguments for fetchTradingFee call');
+  validateMarketSymbol(symbol);
+
   const market = await this.fetchMarket(symbol);
 
   // TODO: put proper error handling here

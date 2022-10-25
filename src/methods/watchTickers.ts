@@ -1,22 +1,33 @@
 import _ from 'lodash';
 import { Readable } from 'stream';
-import { OfferCreateFlags, SubscribeRequest, TransactionStream } from 'xrpl';
-import { MarketSymbol, WatchTickersParams, SDKContext, WatchTickersResponse, Ticker } from '../models';
-import { getBaseAmountKey, getMarketSymbol, getQuoteAmountKey } from '../utils';
+import { SubscribeRequest, TransactionStream } from 'xrpl';
+import {
+  MarketSymbol,
+  WatchTickersParams,
+  SDKContext,
+  WatchTickersResponse,
+  Ticker,
+  ArgumentsRequired,
+} from '../models';
+import { getMarketSymbol, validateMarketSymbol } from '../utils';
 
 /**
- * Retrieves order book data for a single market pair. Returns an
- * {@link WatchTickerResponse}.
+ * Listens for new {@link Ticker} data for multiple {@link Market} pairs. Returns a Promise
+ * resolving to a {@link WatchTickersResponse}.
  *
  * @category Methods
+ *
+ * @param symbols - Array of {@link MarketSymbols} to get price ticker data for
+ * @param params - (Optional) A {@link WatchTickerParams} object
+ * @returns A Promise resolving to a {@link WatchTickersResponse} object
  */
 async function watchTickers(
   this: SDKContext,
-  /** Array of token pairs (called Unified Market Symbols in CCXT) */
   symbols: MarketSymbol[],
-  /** Parameters specific to the exchange API endpoint */
   params: WatchTickersParams
 ): Promise<WatchTickersResponse> {
+  if (!symbols) throw new ArgumentsRequired('Missing required arguments for watchTickers call');
+
   const tickersStream = new Readable({ read: () => this });
 
   const tickers: Record<MarketSymbol, Ticker> = {};
@@ -29,13 +40,8 @@ async function watchTickers(
   this.client.on('transaction', async (tx: TransactionStream) => {
     if (!tx.validated || tx.transaction.TransactionType !== 'OfferCreate') return;
 
-    const txSide =
-      tx.transaction.Flags && (tx.transaction.Flags as number & OfferCreateFlags.tfSell) === OfferCreateFlags.tfSell
-        ? 'sell'
-        : 'buy';
-    const baseAmount = tx.transaction[getBaseAmountKey(txSide)];
-    const quoteAmount = tx.transaction[getQuoteAmountKey(txSide)];
-    const symbol = getMarketSymbol(baseAmount, quoteAmount);
+    const symbol = getMarketSymbol(tx.transaction);
+    validateMarketSymbol(symbol);
 
     if (!symbols.includes(symbol)) return;
 

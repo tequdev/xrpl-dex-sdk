@@ -1,5 +1,10 @@
 import { Order } from '../ccxt';
 
+/**
+ * Request parameters for a {@link SDK.fetchOrders} call.
+ *
+ * @category Parameters
+ */
 export interface FetchOrdersParams {
   /** Max Transactions to search through looking for Order data before giving up */
   searchLimit?: number;
@@ -12,7 +17,7 @@ export interface FetchOrdersParams {
 }
 
 /**
- * Expected response from a {@link FetchOrdersRequest}.
+ * Expected response from a {@link SDK.fetchOrders} call.
  *
  * @category Responses
  */

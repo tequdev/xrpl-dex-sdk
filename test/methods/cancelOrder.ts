@@ -3,7 +3,7 @@ import { assert } from 'chai';
 import 'mocha';
 
 import { requests } from '../fixtures';
-import { OrderSide, OrderType } from '../../src/models';
+import { FetchOrderResponse } from '../../src/models';
 import { XrplNetwork } from '../../src/models';
 import { setupRemoteSDK, teardownRemoteSDK } from '../setupClient';
 
@@ -21,12 +21,15 @@ describe('cancelOrder', function () {
 
   it('should create and then cancel an Order', async function () {
     const { symbol, side, type, amount, price, params } = requests.createOrder.smallBuyOrder2;
-    const newOrderId = await this.sdk.createOrder(symbol, side as OrderSide, type as OrderType, amount, price, params);
-    assert(typeof newOrderId !== 'undefined');
+    const newOrder = await this.sdk.createOrder(symbol, side, type, amount, price, params);
+    assert(typeof newOrder !== 'undefined');
 
-    const canceledOrder = await this.sdk.cancelOrder(newOrderId);
-    assert(canceledOrder.id === newOrderId);
+    const cancelOrderResponse = await this.sdk.cancelOrder(newOrder.id);
+    assert(cancelOrderResponse.id === newOrder.id);
+
+    const canceledOrder: FetchOrderResponse = await this.sdk.fetchOrder(newOrder.id);
+    assert(canceledOrder?.status === 'canceled');
   });
 
-  it("should throw an error if an account tries to cancel another account's Order", async function () {});
+  // it("should throw an error if an account tries to cancel another account's Order", async function () {});
 });

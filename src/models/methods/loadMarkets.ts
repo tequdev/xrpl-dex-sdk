@@ -1,7 +1,7 @@
 import { Markets } from '../ccxt';
 
 /**
- * Expected response from a loadMarkets call
+ * Expected response from a {@link SDK.loadMarkets} call.
  *
  * @category Responses
  */

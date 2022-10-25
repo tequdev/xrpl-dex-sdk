@@ -13,7 +13,8 @@
     "test:watch": "TS_NODE_PROJECT=./tsconfig.json mocha --config=test/.mocharc.json --watch --reporter dot",
     "format": "prettier --write '{src,test}/**/*.ts",
     "lint": "eslint . --ext .ts --max-warnings 0",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "docs:build": "typedoc src/index.ts"
   },
   "devDependencies": {
     "@commitlint/config-conventional": "^17.0.3",
@@ -40,12 +41,13 @@
     "nyc": "^15.1.0",
     "prettier": "^2.7.1",
     "ts-node": "^10.9.1",
+    "typedoc": "^0.23.18",
     "typescript": "^4.7.4"
   },
   "dependencies": {
     "@commitlint/cli": "^17.0.3",
     "bignumber.js": "^9.0.2",
-    "ccxt": "^1.91.6",
+    "ccxt": "^2.0.19",
     "debug": "^4.3.4",
     "lodash": "^4.17.21",
     "ws": "^8.8.1",

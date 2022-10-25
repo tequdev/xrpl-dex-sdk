@@ -1,7 +1,8 @@
+import BigNumber from 'bignumber.js';
 import { Readable } from 'stream';
 import { BroadcastClient, Client, ClientOptions, Wallet } from 'xrpl';
 import { Currencies, Markets, OrderId, OrderSide, OrderType } from './ccxt';
-import { CurrencyCode, MarketSymbol, UnixTimestamp, XrplNetwork } from './common';
+import { CurrencyCode, IssuerAddress, MarketSymbol, UnixTimestamp, XrplNetwork } from './common';
 import {
   CancelOrderResponse,
   CreateLimitBuyOrderParams,
@@ -44,9 +45,7 @@ import {
   FetchTradesResponse,
   FetchTradingFeeResponse,
   FetchTradingFeesResponse,
-  FetchTransactionFeeParams,
   FetchTransactionFeeResponse,
-  FetchTransactionFeesParams,
   FetchTransactionFeesResponse,
   LoadCurrenciesResponse,
   LoadIssuersResponse,
@@ -59,7 +58,7 @@ import {
   WatchTickersParams,
   WatchTradesResponse,
 } from './methods';
-import { Issuers } from './xrpl';
+import { Issuers, TransferRates } from './xrpl';
 
 export interface SDKParams {
   /** Name of XRPL network to connect to */
@@ -86,6 +85,7 @@ export interface SDKContext {
   markets?: Markets;
   currencies?: Currencies;
   issuers?: Issuers;
+  transferRates?: TransferRates;
   connect(): Promise<void>;
   disconnect(): Promise<void>;
   removeListener(eventName: string, listener: any): void;
@@ -150,6 +150,15 @@ export interface SDKContext {
     limit?: number,
     params?: FetchL2OrderBookParams
   ): Promise<FetchL2OrderBookResponse>;
+  /**
+   * Retrieves info about a single {@link Market} being traded on the dEX. Returns a {@link FetchMarketResponse}.
+   *
+   * @category Methods
+   *
+   * @param symbol - {@link MarketSymbol} to get information for
+   * @returns A Promise resolving to a {@link FetchMarketResponse} object
+   */
+
   fetchMarket(symbol: MarketSymbol): Promise<FetchMarketResponse>;
   fetchMarkets(): Promise<FetchMarketsResponse>;
   fetchMyTrades(
@@ -170,22 +179,15 @@ export interface SDKContext {
   ): Promise<FetchTradesResponse>;
   fetchTradingFee(symbol: MarketSymbol): Promise<FetchTradingFeeResponse>;
   fetchTradingFees(): Promise<FetchTradingFeesResponse>;
-  fetchTransactionFee(code: CurrencyCode, params?: FetchTransactionFeeParams): Promise<FetchTransactionFeeResponse>;
-  fetchTransactionFees(
-    codes: CurrencyCode[],
-    params: FetchTransactionFeesParams
-  ): Promise<FetchTransactionFeesResponse>;
+  fetchTransactionFee(code: CurrencyCode): Promise<FetchTransactionFeeResponse>;
+  fetchTransactionFees(codes: CurrencyCode[]): Promise<FetchTransactionFeesResponse>;
+  fetchTransferRate(issuer: IssuerAddress): Promise<BigNumber>;
   loadCurrencies(reload?: boolean): Promise<LoadCurrenciesResponse>;
   loadIssuers(reload?: boolean): Promise<LoadIssuersResponse>;
   loadMarkets(reload?: boolean): Promise<LoadMarketsResponse>;
   watchBalance(params: WatchBalanceParams): Promise<Readable>;
   watchOrderBook(symbol: MarketSymbol, limit?: number): Promise<WatchOrderBookResponse>;
-  watchOrders(
-    symbol?: MarketSymbol,
-    since?: UnixTimestamp,
-    limit?: number,
-    params?: WatchOrdersParams
-  ): Promise<WatchOrdersResponse>;
+  watchOrders(symbol?: MarketSymbol, params?: WatchOrdersParams): Promise<WatchOrdersResponse>;
   watchStatus(): Promise<Readable>;
   watchTicker(symbol: MarketSymbol, params: WatchTickerParams): Promise<Readable>;
   watchTickers(symbols: MarketSymbol[], params: WatchTickersParams): Promise<Readable>;

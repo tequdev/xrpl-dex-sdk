@@ -2,7 +2,7 @@ import { LedgerIndex } from 'xrpl/dist/npm/models/common';
 import { OrderBook } from '../ccxt';
 
 /**
- * Request parameters for a fetchOrderBook call
+ * Request parameters for a {@link SDK.fetchOrderBook} call.
  *
  * @category Parameters
  */
@@ -16,7 +16,7 @@ export interface FetchOrderBookParams {
 }
 
 /**
- * Expected response from a fetchOrderBook call
+ * Expected response from a {@link SDK.fetchOrderBook} call.
  *
  * @category Responses
  */

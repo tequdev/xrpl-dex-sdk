@@ -1,7 +1,7 @@
 import { ExchangeStatusStream } from '../ccxt/ExchangeStatus';
 
 /**
- * Expected response from a watchStatus call
+ * Expected response from a {@link SDK.watchStatus} call.
  *
  * @category Responses
  */

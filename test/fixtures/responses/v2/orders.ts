@@ -136,7 +136,6 @@ const orders: {
         clientOrderId: '718202414B46578D525C14A6F769E3E92A04DC374659A8515CC2E926377D9785',
         datetime: '2022-09-27T20:00:20.000Z',
         timestamp: 1664308820000,
-        lastTradeTimestamp: 1664308820000,
         status: 'open',
         symbol: 'XRP/USD+rVnYNK9yuxBz4uP8zC8LEFokM2nqH3poc',
         type: 'limit',

@@ -2,9 +2,14 @@ import { AccountAddress, CurrencyCode } from '../../../../src/models';
 
 export interface AccountInfoMocks {
   users: {
+    rLZGBrdXNvS1RPjjJB7Z4FeA4w5Hggtt7t: any;
+    rn5umFvUWKXqwrGJSRcV24wz9zZFiG7rsQ: any;
     [account: AccountAddress]: any;
   };
   issuers: {
+    TST: any;
+    USD: any;
+    'USD+rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq': any;
     [currency: CurrencyCode]: any;
   };
 }
@@ -97,6 +102,30 @@ const accountInfo: AccountInfoMocks = {
         },
         ledger_hash: 'A80B83D002FF66EEA7FA00631251DC499529373C50898FC2F01756BEFBF1E760',
         ledger_index: 31535105,
+        validated: true,
+      },
+      status: 'success',
+      type: 'response',
+    },
+    'USD+rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq': {
+      id: 2,
+      result: {
+        account_data: {
+          Account: 'rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq',
+          Balance: '7445437083159',
+          Flags: 8519680,
+          LedgerEntryType: 'AccountRoot',
+          MessageKey: '02000000000000000000000000F32FC9DDE9280E99125B555FE79571ADF3A8E162',
+          OwnerCount: 14,
+          PreviousTxnID: 'BB2CEB4239B0A6402AA28446161C9EE0AA5DFCF0333F8CC146B05D04715BA472',
+          PreviousTxnLgrSeq: 75199915,
+          RegularKey: 'rregCwVvZRdQPdNKXD5bpFq3esu9hreK3',
+          Sequence: 2870,
+          TransferRate: 1002000000,
+          index: 'BF1F2A23D614916E3C6ED2DCC389468CFA09045BEDB54C71A05C5E94EA6C6CFE',
+        },
+        ledger_hash: '3AE6053EDB094C8BC57932AD143D4AA61114B63139901F5276585009259F5F4A',
+        ledger_index: 75201007,
         validated: true,
       },
       status: 'success',

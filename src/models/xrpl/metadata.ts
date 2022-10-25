@@ -1,6 +1,6 @@
 /**
- * These types are not exported by the XRPL.js library,
- * causing typing issues when using its `Node` type
+ * These types are not directly exported by the XRPL.js library,
+ * causing typing issues when using its `Node` type.
  */
 
 export interface CreatedNode {
@@ -39,7 +39,10 @@ export interface DeletedNode {
   };
 }
 
+export type AffectedNodeType = 'CreatedNode' | 'ModifiedNode' | 'DeletedNode';
+
 export interface AffectedNode {
+  type: AffectedNodeType;
   LedgerEntryType: string;
   LedgerIndex: string;
   NewFields?: {

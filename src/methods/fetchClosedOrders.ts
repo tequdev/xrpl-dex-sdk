@@ -1,18 +1,31 @@
 import _ from 'lodash';
 import { DEFAULT_LIMIT } from '../constants';
 import { FetchClosedOrdersParams, FetchClosedOrdersResponse, MarketSymbol, UnixTimestamp, SDKContext } from '../models';
+import { validateMarketSymbol } from '../utils';
 
+/**
+ * Fetches a list of closed {@link Orders} from the dEX. Returns a {@link FetchClosedOrdersResponse}
+ * with any retrieved Orders.
+ *
+ * @category Methods
+ *
+ * @link https://docs.ccxt.com/en/latest/manual.html?#querying-orders
+ *
+ * @param symbol - (Optional) {@link MarketSymbol} to filter Orders by
+ * @param since - (Optional) Only return Orders since this date
+ * @param limit - (Optional) Total number of Orders to return (default is 20)
+ * @param params - (Optional) A {@link FetchClosedOrdersResponse}
+ * @returns A {@link FetchClosedOrdersResponse} object
+ */
 async function fetchClosedOrders(
   this: SDKContext,
-  /** Filter Orders by market symbol */
   symbol?: MarketSymbol,
-  /** Only return Orders since this date */
   since?: UnixTimestamp,
-  /** Total number of Orders to return */
   limit: number = DEFAULT_LIMIT,
-  /** eslint-disable-next-line */
   params: FetchClosedOrdersParams = {}
 ): Promise<FetchClosedOrdersResponse> {
+  if (symbol) validateMarketSymbol(symbol);
+
   const { searchLimit } = params;
 
   const orders =

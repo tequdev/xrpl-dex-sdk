@@ -1,7 +1,7 @@
 import { FeeSchedule } from '../ccxt';
 
 /**
- * Expected response from a fetchFees call
+ * Expected response from a {@link SDK.fetchFees} call.
  *
  * @category Responses
  */

@@ -2,7 +2,7 @@ import { Balances } from '../ccxt';
 import { CurrencyCode } from '../common';
 
 /**
- * Request parameters for a fetchBalance call
+ * Request parameters for a {@link SDK.fetchBalance} call.
  *
  * @category Parameters
  */
@@ -12,7 +12,7 @@ export interface FetchBalanceParams {
 }
 
 /**
- * Expected response from a fetchBalance call
+ * Expected response from a {@link SDK.fetchBalance} call.
  *
  * @category Responses
  */

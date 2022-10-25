@@ -10,7 +10,7 @@ import { setupRemoteSDK, teardownRemoteSDK } from '../setupClient';
 const TIMEOUT = 10000;
 const NETWORK = XrplNetwork.Mainnet;
 
-describe('watchStatus', function () {
+describe.skip('watchStatus', function () {
   this.timeout(TIMEOUT);
 
   beforeEach(function (done) {

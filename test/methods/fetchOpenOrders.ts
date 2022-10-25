@@ -1,28 +1,31 @@
 import _ from 'lodash';
 import 'mocha';
 
-import { XrplNetwork } from '../../src/models';
-import { setupRemoteSDK, teardownRemoteSDK } from '../setupClient';
 import { assert } from 'chai';
-import { addresses } from '../fixtures';
+import { addresses, fetchOrders } from '../fixtures';
+import { setupLocalSDK, teardownLocalSDK } from '../setupClient';
 
 const TIMEOUT = 25000;
-const NETWORK = XrplNetwork.Testnet;
 
 describe('fetchOpenOrders', function () {
   this.timeout(TIMEOUT);
 
-  beforeEach(function (done) {
-    setupRemoteSDK.call(this, NETWORK, undefined, done, addresses.seller.public, addresses.seller.private);
-  });
+  beforeEach(_.partial(setupLocalSDK, { walletSecret: addresses.AKT_SELLER_SECRET }));
+  afterEach(teardownLocalSDK);
 
-  afterEach(teardownRemoteSDK);
+  it('should retrieve a list of Orders', async function () {
+    this.mockRippled.addResponse('ledger', fetchOrders.mocks.ledger);
+    this.mockRippled.addResponse('ledger_entry', fetchOrders.mocks.ledger_entry);
+    this.mockRippled.addResponse('account_tx', fetchOrders.mocks.account_tx);
+    this.mockRippled.addResponse('account_info', fetchOrders.mocks.account_info);
 
-  it('should retrieve a list of Open Orders', async function () {
-    const orders = await this.sdk.fetchOpenOrders(undefined, undefined, 1);
-    assert(orders.length === 1);
-    for (const order of orders) {
-      assert(order.status === 'open');
-    }
+    const orders = await this.sdk.fetchOrders(
+      '585245626F6F6B00000000000000000000000000+rMgfWUcBd45TXyszMb5LnopD5SDnAmDZsR/XRP',
+      undefined,
+      2
+    );
+
+    assert(orders.length === 2);
+    assert(JSON.stringify(orders) === JSON.stringify(fetchOrders.expectedResponse));
   });
 });

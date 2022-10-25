@@ -16,6 +16,6 @@ describe('fetchBalance', function () {
 
     const balances = await this.sdk.fetchBalance();
 
-    assertResultMatch(balances, responses.fetchBalance);
+    assertResultMatch(_.omit(balances, ['info']), _.omit(responses.fetchBalance, ['info']));
   });
 });

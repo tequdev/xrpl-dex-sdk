@@ -1,5 +1,10 @@
 import { OrderStream } from '../ccxt';
 
+/**
+ * Request parameters for a {@link SDK.watchOrders} call.
+ *
+ * @category Parameters
+ */
 export interface WatchOrdersParams {
   /** Max Transactions to search through looking for Order data before giving up */
   searchLimit?: number;
@@ -12,7 +17,7 @@ export interface WatchOrdersParams {
 }
 
 /**
- * Expected response from a {@link WatchOrdersRequest}.
+ * Expected response from a {@link SDK.watchOrders} call.
  *
  * @category Responses
  */

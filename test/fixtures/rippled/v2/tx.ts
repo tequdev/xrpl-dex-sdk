@@ -1,5 +1,5 @@
 import { AccountAddress } from '../../../../src/models';
-import { getOrderOrTradeId } from '../../../../src/utils';
+import { getOrderId } from '../../../../src/utils';
 
 export interface TxMocks {
   orderId: {
@@ -645,7 +645,7 @@ const txMocks: TxMocks = {
 
 for (const tx of offerCreate) {
   if (!txMocks.orderId.OfferCreate) txMocks.orderId.OfferCreate = {};
-  txMocks.orderId.OfferCreate[getOrderOrTradeId(tx.result.Account, tx.result.Sequence)] = tx;
+  txMocks.orderId.OfferCreate[getOrderId(tx.result.Account, tx.result.Sequence)] = tx;
   txMocks.hash[tx.result.hash] = tx;
 }
 

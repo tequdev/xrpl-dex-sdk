@@ -1,7 +1,7 @@
 import { Currencies } from '../ccxt';
 
 /**
- * Expected response from a fetchCurrencies call
+ * Expected response from a {@link SDK.fetchCurrencies} call.
  *
  * @category Responses
  */

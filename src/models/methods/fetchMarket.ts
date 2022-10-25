@@ -1,7 +1,7 @@
 import { Market } from '../ccxt';
 
 /**
- * Expected response from a fetchMarket call
+ * Expected response from a {@link SDK.fetchMarket} call.
  *
  * @category Responses
  */

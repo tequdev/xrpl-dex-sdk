@@ -1,21 +1,27 @@
 import _ from 'lodash';
 import { Readable } from 'stream';
 import { SubscribeRequest, TransactionStream } from 'xrpl';
-import { MarketSymbol, WatchTickerParams, SDKContext, Ticker, WatchTickerResponse } from '../models';
+import { MarketSymbol, WatchTickerParams, SDKContext, Ticker, WatchTickerResponse, ArgumentsRequired } from '../models';
+import { validateMarketSymbol } from '../utils';
 
 /**
- * Retrieves order book data for a single market pair. Returns an
- * {@link WatchTickerResponse}.
+ * Listens for new {@link Ticker} data for a single {@link Market} pair. Returns a Promise
+ * resolving to a {@link WatchTickerResponse}.
  *
  * @category Methods
+ *
+ * @param symbol - {@link MarketSymbol} to get price ticker data for
+ * @param params - (Optional) A {@link WatchTickerParams} object
+ * @returns A Promise resolving to a {@link WatchTickerResponse} object
  */
 async function watchTicker(
   this: SDKContext,
-  /** Token pair (called Unified Market Symbol in CCXT) */
   symbol: MarketSymbol,
-  /** Parameters specific to the exchange API endpoint */
   params: WatchTickerParams
 ): Promise<WatchTickerResponse> {
+  if (!symbol) throw new ArgumentsRequired('Missing required arguments for watchTicker call');
+  validateMarketSymbol(symbol);
+
   const tickerStream = new Readable({ read: () => this });
 
   let ticker: Ticker | undefined;
