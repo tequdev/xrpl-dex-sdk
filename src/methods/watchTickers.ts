@@ -1,43 +1,37 @@
 import _ from 'lodash';
 import { Readable } from 'stream';
 import { SubscribeRequest, TransactionStream } from 'xrpl';
-import {
-  MarketSymbol,
-  WatchTickersParams,
-  SDKContext,
-  WatchTickersResponse,
-  Ticker,
-  ArgumentsRequired,
-} from '../models';
+import SDK from '../sdk';
+import { MarketSymbol, WatchTickersParams, WatchTickersResponse, Ticker, ArgumentsRequired } from '../models';
 import { getMarketSymbol, validateMarketSymbol } from '../utils';
 
 /**
- * Listens for new {@link Ticker} data for multiple {@link Market} pairs. Returns a Promise
- * resolving to a {@link WatchTickersResponse}.
+ * Listens for new {@link models.Ticker} data for multiple {@link models.Market} pairs. Returns a Promise
+ * resolving to a {@link models.WatchTickersResponse}.
  *
  * @category Methods
  *
- * @param symbols - Array of {@link MarketSymbols} to get price ticker data for
- * @param params - (Optional) A {@link WatchTickerParams} object
- * @returns A Promise resolving to a {@link WatchTickersResponse} object
+ * @param symbols - Array of {@link models.MarketSymbol}s to get price ticker data for
+ * @param params - (Optional) A {@link models.WatchTickerParams} object
+ * @returns {@link models.WatchTickersResponse}
  */
 async function watchTickers(
-  this: SDKContext,
+  sdk: SDK,
   symbols: MarketSymbol[],
-  params: WatchTickersParams
+  params: WatchTickersParams = {}
 ): Promise<WatchTickersResponse> {
   if (!symbols) throw new ArgumentsRequired('Missing required arguments for watchTickers call');
 
-  const tickersStream = new Readable({ read: () => this });
+  const tickersStream = new Readable({ read: () => sdk });
 
   const tickers: Record<MarketSymbol, Ticker> = {};
 
-  await this.client.request({
+  await sdk.client.request({
     command: 'subscribe',
     streams: ['transactions'],
   } as SubscribeRequest);
 
-  this.client.on('transaction', async (tx: TransactionStream) => {
+  sdk.client.on('transaction', async (tx: TransactionStream) => {
     if (!tx.validated || tx.transaction.TransactionType !== 'OfferCreate') return;
 
     const symbol = getMarketSymbol(tx.transaction);
@@ -45,7 +39,7 @@ async function watchTickers(
 
     if (!symbols.includes(symbol)) return;
 
-    const newTicker = await this.fetchTicker(symbol, params);
+    const newTicker = await sdk.fetchTicker(symbol, params);
 
     const omittedFields = ['datetime', 'timestamp', 'info'];
 
@@ -63,7 +57,7 @@ async function watchTickers(
       }
     }
 
-    // TODO: calculate this transaction's impact on the ticker and add it to the existing value
+    // TODO: calculate sdk transaction's impact on the ticker and add it to the existing value
 
     if (tickers[symbol]) tickersStream.emit('update', tickers[symbol]);
   });

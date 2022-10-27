@@ -6,10 +6,13 @@
 import { Readable } from 'stream';
 import { CurrencyCode } from '../common';
 
-export type BalanceStream = Readable;
+/**
+ * @category Streams
+ */
+ export type BalanceStream = Readable;
 
 /**
- * Balance
+ * @category CCXT
  *
  * @link https://docs.ccxt.com/en/latest/manual.html?#balance-structure
  */
@@ -22,7 +25,7 @@ export interface Balance {
   total: string;
 }
 
-export interface Balances {
-  // Balances sorted by currency, then availability
-  [code: CurrencyCode]: Balance;
-}
+/**
+ * @category CCXT
+ */
+export type Balances = Record<CurrencyCode, Balance>;

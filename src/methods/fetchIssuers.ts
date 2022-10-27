@@ -1,18 +1,19 @@
 import _ from 'lodash';
 import { issuers as issuersData } from '../data';
-import { BadRequest, FetchIssuersResponse, SDKContext, XrplNetwork } from '../models';
+import { BadRequest, FetchIssuersResponse, XrplNetwork } from '../models';
+import SDK from '../sdk';
 
 /**
- * Retrieves a list of trusted {@link Issuers}. Returns a {@link FetchIssuersResponse}.
+ * Retrieves a list of trusted {@link models.Issuers}. Returns a {@link models.FetchIssuersResponse}.
  *
  * @category Methods
  *
- * @returns a {@link FetchIssuersResponse} object
+ * @returns {@link models.FetchIssuersResponse}
  */
-async function fetchIssuers(this: SDKContext): Promise<FetchIssuersResponse> {
-  const issuers = issuersData[this.params.network || XrplNetwork.Mainnet];
+async function fetchIssuers(sdk: SDK): Promise<FetchIssuersResponse> {
+  const issuers = issuersData[sdk.params.network || XrplNetwork.Mainnet];
 
-  if (!issuers) throw new BadRequest(`No Issuers data found for network "${this.params.network}"`);
+  if (!issuers) throw new BadRequest(`No Issuers data found for network "${sdk.params.network}"`);
 
   return issuers;
 }

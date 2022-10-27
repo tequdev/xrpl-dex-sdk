@@ -5,4 +5,4 @@ import { Currencies } from '../ccxt';
  *
  * @category Responses
  */
-export type FetchCurrenciesResponse = Currencies;
+export interface FetchCurrenciesResponse extends Currencies {}

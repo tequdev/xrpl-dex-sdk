@@ -1,16 +1,13 @@
-/**
- * CCXT Errors
- *
- * @link https://docs.ccxt.com/en/latest/manual.html#error-handling
- */
-export class BaseError extends Error {
+class BaseError extends Error {
   constructor(message: string) {
     super(message);
   }
 }
 
 /**
- * Exchange Errors
+ * Errors related to interacting with the exchange's API.
+ *
+ * @category Errors
  *
  * @link https://docs.ccxt.com/en/latest/manual.html?#exchangeerror
  */
@@ -29,9 +26,12 @@ export class InvalidOrder extends ExchangeError {}
 export class OrderNotFound extends InvalidOrder {}
 export class CancelPending extends InvalidOrder {}
 export class NotSupported extends ExchangeError {}
+export class MarketNotFound extends ExchangeError {}
 
 /**
- * Network Errors
+ * Errors related to network issues.
+ *
+ * @category Errors
  *
  * @link https://docs.ccxt.com/en/latest/manual.html?#networkerror
  */

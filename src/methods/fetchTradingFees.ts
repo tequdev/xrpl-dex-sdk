@@ -1,18 +1,19 @@
-import { SDKContext, FetchTradingFeesResponse, MarketSymbol } from '../models';
+import { FetchTradingFeesResponse, MarketSymbol } from '../models';
 import { validateMarketSymbol } from '../utils';
+import SDK from '../sdk';
 
 /**
- * Fetches information about the fees incurred while trading on any {@link Market}. Returns a
- * {@link FetchTradingFeesResponse}.
+ * Fetches information about the fees incurred while trading on any {@link models.Market}. Returns a
+ * {@link models.FetchTradingFeesResponse}.
  *
  * @category Methods
  *
  * @link https://docs.ccxt.com/en/latest/manual.html?#fees
  *
- * @returns A {@link FetchTradingFeesResponse} object
+ * @returns {@link models.FetchTradingFeesResponse}
  */
-async function fetchTradingFees(this: SDKContext): Promise<FetchTradingFeesResponse> {
-  const markets = await this.fetchMarkets();
+async function fetchTradingFees(sdk: SDK): Promise<FetchTradingFeesResponse> {
+  const markets = await sdk.fetchMarkets();
 
   if (!markets) return [];
 
@@ -20,7 +21,7 @@ async function fetchTradingFees(this: SDKContext): Promise<FetchTradingFeesRespo
 
   for (const symbol in markets) {
     validateMarketSymbol(symbol as MarketSymbol);
-    const tradingFee = await this.fetchTradingFee(symbol as MarketSymbol);
+    const tradingFee = await sdk.fetchTradingFee(symbol as MarketSymbol);
     if (tradingFee) tradingFees.push(tradingFee);
   }
 

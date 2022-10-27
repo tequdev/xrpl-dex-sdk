@@ -2,12 +2,12 @@ import _ from 'lodash';
 import { LedgerRequest, rippleTimeToUnixTime } from 'xrpl';
 import { Amount } from 'xrpl/dist/npm/models/common';
 import { DEFAULT_LIMIT, DEFAULT_SEARCH_LIMIT } from '../constants';
+import SDK from '../sdk';
 import {
   FetchTradesParams,
   FetchTradesResponse,
   MarketSymbol,
   UnixTimestamp,
-  SDKContext,
   Trade,
   ArgumentsRequired,
   AccountAddress,
@@ -16,21 +16,21 @@ import {
 import { getMarketSymbol, getOfferFromNode, getTradeFromData, validateMarketSymbol } from '../utils';
 
 /**
- * Fetch {@link Trades} for a given {@link MarketSymbol}. Returns a {@link FetchTradesResponse} with any
+ * Fetch {@link models.Trade}s for a given {@link models.MarketSymbol}. Returns a {@link models.FetchTradesResponse} with any
  * matching Trades.
  *
  * @category Methods
  *
  * @link https://docs.ccxt.com/en/latest/manual.html?#querying-multiple-orders-and-trades
  *
- * @param symbol - (Optional) {@link MarketSymbol} to filter Trades by
- * @param since - (Optional) Only return Trades since this date
+ * @param symbol - (Optional) {@link models.MarketSymbol} to filter Trades by
+ * @param since - (Optional) Only return Trades since sdk date
  * @param limit - (Optional) Total number of Trades to return (default is 20)
- * @param params - (Optional) A {@link FetchTradesParams} object
- * @returns A {@link FetchTradesResponse} object
+ * @param params - (Optional) A {@link models.FetchTradesParams} object
+ * @returns {@link models.FetchTradesResponse}
  */
 async function fetchTrades(
-  this: SDKContext,
+  sdk: SDK,
   symbol: MarketSymbol,
   since?: UnixTimestamp,
   limit: number = DEFAULT_LIMIT,
@@ -56,7 +56,7 @@ async function fetchTrades(
     if (previousLedgerHash) ledgerRequest.ledger_hash = previousLedgerHash;
     else ledgerRequest.ledger_index = 'validated';
 
-    const ledgerResponse = await this.client.request(ledgerRequest);
+    const ledgerResponse = await sdk.client.request(ledgerRequest);
 
     /** Filter by date if `since` is defined */
     if (since && rippleTimeToUnixTime(ledgerResponse.result.ledger.close_time) < since) {
@@ -89,7 +89,7 @@ async function fetchTrades(
         if (!offer) continue;
 
         const trade = await getTradeFromData.call(
-          this,
+          sdk,
           {
             date: ledgerResponse.result.ledger.close_time,
             Flags: offer.Flags as number,

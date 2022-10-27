@@ -5,4 +5,4 @@ import { Issuers } from '../xrpl';
  *
  * @category Responses
  */
-export type FetchIssuersResponse = Issuers | undefined;
+export interface FetchIssuersResponse extends Issuers {}

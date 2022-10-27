@@ -9,7 +9,10 @@ import { Readable } from 'stream';
 import { Amount } from 'xrpl/dist/npm/models/common';
 import BigNumber from 'bignumber.js';
 
-export type OrderStream = Readable;
+/**
+ * @category Streams
+ */
+ export type OrderStream = Readable;
 
 export type OrderId = `${AccountAddress}:${Sequence}`;
 
@@ -22,7 +25,7 @@ export type OrderTimeInForce = 'GTC' | 'IOC' | 'FOK' | 'PO';
 export type OrderSide = 'buy' | 'sell';
 
 /**
- * Order
+ * @category CCXT
  *
  * @link https://docs.ccxt.com/en/latest/manual.html?#order-structure
  */
@@ -51,8 +54,10 @@ export interface Order {
 }
 
 /**
- * Data used to assemble Order objects.
+ * @category CCXT
  */
+export type Orders = Order[];
+
 export interface OrderSourceData {
   date: XrplTimestamp;
   filled: BigNumber;

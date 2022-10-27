@@ -5,12 +5,15 @@
  */
 import { Readable } from 'stream';
 
+/**
+ * @category Streams
+ */
 export type ExchangeStatusStream = Readable;
 
 export type ExchangeStatusType = 'ok' | 'shutdown' | 'error' | 'maintenance';
 
 /**
- * ExchangeStatus
+ * @category CCXT
  *
  * @link https://docs.ccxt.com/en/latest/manual.html?#exchange-status-structure
  */

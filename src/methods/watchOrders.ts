@@ -3,16 +3,8 @@ import { Readable } from 'stream';
 import { OfferCreate, SubscribeRequest, TransactionStream } from 'xrpl';
 import { ResponseOnlyTxInfo } from 'xrpl/dist/npm/models/common';
 import { Offer } from 'xrpl/dist/npm/models/ledger';
-import {
-  MarketSymbol,
-  WatchOrdersParams,
-  SDKContext,
-  Node,
-  Order,
-  Trade,
-  OrderStatus,
-  WatchOrdersResponse,
-} from '../models';
+import { MarketSymbol, WatchOrdersParams, Node, Order, Trade, OrderStatus, WatchOrdersResponse } from '../models';
+import SDK from '../sdk';
 import {
   BN,
   getMarketSymbol,
@@ -23,17 +15,17 @@ import {
 } from '../utils';
 
 /**
- * Listens for new {@link Orders} for a single {@link Market} pair. Returns a Promise
- * resolving to a {@link WatchOrdersResponse}.
+ * Listens for new {@link models.Order}s for a single {@link models.Market} pair. Returns a Promise
+ * resolving to a {@link models.WatchOrdersResponse}.
  *
  * @category Methods
  *
- * @param symbol - (Optional) {@link MarketSymbol} to filter Orders by
- * @param params - (Optional) A {@link WatchOrdersParams} object
- * @returns A Promise resolving to a {@link WatchOrdersResponse} object
+ * @param symbol - (Optional) {@link models.MarketSymbol} to filter Orders by
+ * @param params - (Optional) A {@link models.WatchOrdersParams} object
+ * @returns {@link models.WatchOrdersResponse}
  */
 async function watchOrders(
-  this: SDKContext,
+  sdk: SDK,
   symbol?: MarketSymbol,
   params: WatchOrdersParams = {}
 ): Promise<WatchOrdersResponse> {
@@ -43,19 +35,19 @@ async function watchOrders(
   const showClosed = params.showClosed || true;
   const showCanceled = params.showCanceled || true;
 
-  const orderStream = new Readable({ read: () => this });
+  const orderStream = new Readable({ read: () => sdk });
 
-  await this.client.request({
+  await sdk.client.request({
     command: 'subscribe',
     streams: ['transactions'],
   } as SubscribeRequest);
 
-  this.client.on('error', async (error: unknown) => {
+  sdk.client.on('error', async (error: unknown) => {
     console.error(error as Error);
     throw error as Error;
   });
 
-  this.client.on('transaction', async (tx: TransactionStream) => {
+  sdk.client.on('transaction', async (tx: TransactionStream) => {
     if (!tx.validated || tx.transaction.TransactionType !== 'OfferCreate') return;
 
     const transaction = tx.transaction as OfferCreate & ResponseOnlyTxInfo;
@@ -86,7 +78,7 @@ async function watchOrders(
       if (!offer.Sequence) continue;
 
       const trade = await getTradeFromData.call(
-        this,
+        sdk,
         {
           date: transaction.date ?? 0,
           Flags: offer.Flags as number,
@@ -109,7 +101,7 @@ async function watchOrders(
     }
 
     order = await getOrderFromData.call(
-      this,
+      sdk,
       {
         status: orderStatus,
         date: transaction.date ?? 0,

@@ -1,5 +1,5 @@
 import { Balances } from '../ccxt';
-import { CurrencyCode } from '../common';
+import { CurrencyCode, ResponseInfo } from '../common';
 
 /**
  * Request parameters for a {@link SDK.fetchBalance} call.
@@ -16,4 +16,7 @@ export interface FetchBalanceParams {
  *
  * @category Responses
  */
-export type FetchBalanceResponse = { balances: Balances; info: Record<string, any> } | undefined;
+export interface FetchBalanceResponse {
+  balances: Balances;
+  info: ResponseInfo;
+}

@@ -2,12 +2,12 @@ import _ from 'lodash';
 import { rippleTimeToUnixTime } from 'xrpl';
 import { Amount } from 'xrpl/dist/npm/models/common';
 import { DEFAULT_LIMIT, DEFAULT_SEARCH_LIMIT } from '../constants';
+import SDK from '../sdk';
 import {
   FetchMyTradesParams,
   FetchMyTradesResponse,
   MarketSymbol,
   UnixTimestamp,
-  SDKContext,
   Trade,
   ArgumentsRequired,
   AccountAddress,
@@ -16,18 +16,18 @@ import {
 import { fetchAccountTxns, getMarketSymbol, getOfferFromNode, getTradeFromData, validateMarketSymbol } from '../utils';
 
 /**
- * Fetch the SDK user's {@link Trades} for a given market symbol. Returns a {@link FetchMyTradesResponse}.
+ * Fetch the SDK user's {@link models.Trade}s for a given market symbol. Returns a {@link models.FetchMyTradesResponse}.
  *
  * @category Methods
  *
- * @param symbol - {@link MarketSymbol} to filter Trades by
- * @param since - (Optional) Only return Trades since this date
+ * @param symbol - {@link models.MarketSymbol} to filter Trades by
+ * @param since - (Optional) Only return Trades since sdk date
  * @param limit - (Optional) Total number of Trades to return (default is 20)
- * @param params - (Optional) A {@link FetchMyTradesParams} object
- * @returns A {@link FetchMyTradesResponse} object
+ * @param params - (Optional) A {@link models.FetchMyTradesParams} object
+ * @returns {@link models.FetchMyTradesResponse}
  */
 async function fetchMyTrades(
-  this: SDKContext,
+  sdk: SDK,
   symbol: MarketSymbol,
   since?: UnixTimestamp,
   limit: number = DEFAULT_LIMIT,
@@ -46,7 +46,7 @@ async function fetchMyTrades(
   let hasNextPage = trades.length <= limit;
 
   while (hasNextPage) {
-    const accountTxResponse = await fetchAccountTxns(this.client, this.wallet.classicAddress, requestLimit, marker);
+    const accountTxResponse = await fetchAccountTxns(sdk.client, sdk.wallet.classicAddress, requestLimit, marker);
     if (!accountTxResponse) break;
 
     marker = accountTxResponse.result.marker;
@@ -80,7 +80,7 @@ async function fetchMyTrades(
         if (!offer) continue;
 
         const trade = await getTradeFromData.call(
-          this,
+          sdk,
           {
             date: transaction.tx.date,
             Flags: offer.Flags as number,

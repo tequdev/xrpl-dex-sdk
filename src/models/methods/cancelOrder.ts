@@ -1,8 +1,12 @@
 import { OrderId } from '../ccxt';
+import { ResponseInfo } from '../common';
 
 /**
  * Expected response from a {@link SDK.cancelOrder} call.
  *
  * @category Responses
  */
-export type CancelOrderResponse = { id: OrderId; info: Record<string, any> } | undefined;
+export interface CancelOrderResponse {
+  id: OrderId;
+  info: ResponseInfo;
+}

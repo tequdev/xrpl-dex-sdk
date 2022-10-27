@@ -21,4 +21,4 @@ export interface FetchL2OrderBookParams {
  *
  * @category Responses
  */
-export type FetchL2OrderBookResponse = OrderBook | undefined;
+export interface FetchL2OrderBookResponse extends OrderBook {}

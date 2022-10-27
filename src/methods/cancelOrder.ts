@@ -1,10 +1,11 @@
 import _ from 'lodash';
 import { OfferCancel } from 'xrpl';
-import { OrderId, CancelOrderResponse, SDKContext, ArgumentsRequired } from '../models';
+import { OrderId, CancelOrderResponse, ArgumentsRequired } from '../models';
+import SDK from '../sdk';
 import { parseOrderId, validateOrderId } from '../utils';
 
 /**
- * Cancels an {@link Order} on the Ripple dEX. Returns a Promise resolving to a {@link CancelOrderResponse}
+ * Cancels an {@link models.Order} on the Ripple dEX. Returns a Promise resolving to a {@link models.CancelOrderResponse}
  * with the ID of the canceled Order object.
  *
  * @link https://docs.ccxt.com/en/latest/manual.html?#canceling-orders
@@ -12,9 +13,9 @@ import { parseOrderId, validateOrderId } from '../utils';
  * @category Methods
  *
  * @param id - ID of the Order to cancel
- * @returns A {@link CancelOrderResponse} object
+ * @returns {@link models.CancelOrderResponse}
  */
-async function cancelOrder(this: SDKContext, id: OrderId): Promise<CancelOrderResponse> {
+async function cancelOrder(sdk: SDK, id: OrderId): Promise<CancelOrderResponse> {
   if (!id) throw new ArgumentsRequired('Missing required arguments for cancelOrder call');
 
   validateOrderId(id);
@@ -23,11 +24,11 @@ async function cancelOrder(this: SDKContext, id: OrderId): Promise<CancelOrderRe
 
   const offerCancel: OfferCancel = {
     TransactionType: 'OfferCancel',
-    Account: this.wallet.classicAddress,
+    Account: sdk.wallet.classicAddress,
     OfferSequence: sequence,
   };
 
-  const offerCancelResult = await this.client.submitAndWait(offerCancel, { autofill: true, wallet: this.wallet });
+  const offerCancelResult = await sdk.client.submitAndWait(offerCancel, { autofill: true, wallet: sdk.wallet });
 
   const response: CancelOrderResponse = {
     id,

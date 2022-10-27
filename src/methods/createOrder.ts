@@ -9,8 +9,8 @@ import {
   MarketSymbol,
   OrderSide,
   OrderType,
-  SDKContext,
 } from '../models';
+import SDK from '../sdk';
 import {
   BN,
   getAmount,
@@ -22,23 +22,23 @@ import {
 } from '../utils';
 
 /**
- * Places an {@link Order} on the Ripple dEX. Returns a {@link CreateOrderResponse} with the
+ * Places an {@link models.Order} on the Ripple dEX. Returns a {@link models.CreateOrderResponse} with the
  * newly created Order's ID.
  *
  * @category Methods
  *
  * @link https://docs.ccxt.com/en/latest/manual.html?#placing-orders
  *
- * @param symbol - {@link MarketSymbol} for new Order
+ * @param symbol - {@link models.MarketSymbol} for new Order
  * @param side - Order direction (buy or sell)
  * @param type - Order type (only limit is supported)
  * @param amount - How much currency you want to trade (in units of base currency)
  * @param price - Price at which the order is to be fullfilled (in units of quote currency)
- * @param params - (Optional) a {@link CreateOrderParams} object
- * @returns A {@link CreateOrderResponse} object
+ * @param params - (Optional) a {@link models.CreateOrderParams} object
+ * @returns {@link models.CreateOrderResponse}
  */
 async function createOrder(
-  this: SDKContext,
+  sdk: SDK,
   symbol: MarketSymbol,
   side: OrderSide,
   /* eslint-disable-next-line */
@@ -60,7 +60,7 @@ async function createOrder(
 
   const offerCreateRequest: OfferCreate = {
     TransactionType: 'OfferCreate',
-    Account: this.wallet.classicAddress,
+    Account: sdk.wallet.classicAddress,
     Flags: {
       ...params.flags,
       tfSell: side === 'sell',
@@ -74,9 +74,9 @@ async function createOrder(
 
   setTransactionFlagsToNumber(offerCreateRequest);
 
-  const offerCreateTxResponse = await this.client.submitAndWait(offerCreateRequest, {
+  const offerCreateTxResponse = await sdk.client.submitAndWait(offerCreateRequest, {
     autofill: true,
-    wallet: this.wallet,
+    wallet: sdk.wallet,
   });
 
   handleTxErrors(offerCreateTxResponse);

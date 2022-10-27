@@ -9,6 +9,8 @@ import { CurrencyCode, Drops, MarketSymbol, PercentDecimal } from '../common';
  * The `fee` property on Order objects.
  *
  * This is not related to the Fees endpoints.
+ * 
+ * @category CCXT
  *
  * @link https://docs.ccxt.com/en/latest/manual.html?#fee-structure
  */
@@ -25,6 +27,8 @@ export interface Fee {
 
 /**
  * This is returned by `fetchTransactionFee(s)`.
+ * 
+ * @category CCXT
  */
 export interface TransactionFee {
   /** The currency being transacted */
@@ -38,6 +42,8 @@ export interface TransactionFee {
 
 /**
  * This is returned by `fetchTradingFee(s)`.
+ * 
+ * @category CCXT
  */
 export interface TradingFee {
   /** Unified Market Symbol */
@@ -53,6 +59,8 @@ export interface TradingFee {
 
 /**
  * This is returned by `fetchFees`.
+ * 
+ * @category CCXT
  */
 export interface FeeSchedule {
   transactions: TransactionFee[];

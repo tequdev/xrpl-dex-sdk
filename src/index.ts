@@ -1,9 +1,29 @@
+import { Wallet } from 'xrpl';
 import SDK from './sdk';
 import * as constants from './constants';
 import * as models from './models';
-import * as methods from './methods';
-import * as utils from './utils';
+import {
+  getCurrencyCode,
+  getOrderId,
+  parseCurrencyCode,
+  parseMarketSymbol,
+  parseOrderId,
+  validateMarketSymbol,
+  validateOrderId,
+} from './utils';
 
-export { SDK, constants, models, methods, utils };
+export {
+  SDK,
+  constants,
+  models,
+  getCurrencyCode,
+  getOrderId,
+  parseCurrencyCode,
+  parseMarketSymbol,
+  parseOrderId,
+  validateMarketSymbol,
+  validateOrderId,
+  Wallet,
+};
 
 export default SDK;

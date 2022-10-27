@@ -6,7 +6,7 @@
 import { CurrencyCode, MarketSymbol, PercentDecimal } from '../common';
 
 /**
- * Market
+ * @category CCXT
  *
  * @link https://docs.ccxt.com/en/latest/manual.html?#market-structure
  */
@@ -27,4 +27,7 @@ export interface Market {
   percentage?: true;
 }
 
+/**
+ * @category CCXT
+ */
 export type Markets = Record<MarketSymbol, Market>;

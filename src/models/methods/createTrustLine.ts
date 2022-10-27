@@ -1,8 +1,12 @@
-import { CurrencyCode } from '../common';
+import { CurrencyCode, ResponseInfo } from '../common';
 
 /**
  * Expected response from a {@link SDK.createTrustLine} call.
  *
  * @category Responses
  */
-export type CreateTrustLineResponse = { code: CurrencyCode; amount: string; info: any } | undefined;
+export interface CreateTrustLineResponse {
+  code: CurrencyCode;
+  amount: string;
+  info: ResponseInfo;
+}

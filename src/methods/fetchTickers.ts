@@ -1,28 +1,22 @@
 import _ from 'lodash';
-import {
-  MarketSymbol,
-  FetchTickersParams,
-  Ticker,
-  FetchTickersResponse,
-  SDKContext,
-  ArgumentsRequired,
-} from '../models';
+import { MarketSymbol, FetchTickersParams, Ticker, FetchTickersResponse, ArgumentsRequired } from '../models';
 import { validateMarketSymbol } from '../utils';
+import SDK from '../sdk';
 
 /**
- * Retrieves price {@link Ticker} data for multiple {@link Market} pairs. Returns a
- * {@link FetchTickersResponse}.
+ * Retrieves price {@link models.Ticker} data for multiple {@link models.Market} pairs. Returns a
+ * {@link models.FetchTickersResponse}.
  *
  * @category Methods
  *
  * @link https://docs.ccxt.com/en/latest/manual.html?#multiple-tickers-for-all-or-many-symbols
  *
- * @param symbols - Array of {@link MarketSymbol}s to get price ticker data for
- * @param params - (Optional) A {@link FetchTickersParams} object
- * @returns A {@link FetchTickersResponse} object
+ * @param symbols - Array of {@link models.MarketSymbol}s to get price ticker data for
+ * @param params - (Optional) A {@link models.FetchTickersParams} object
+ * @returns {@link models.FetchTickersResponse}
  */
 async function fetchTickers(
-  this: SDKContext,
+  sdk: SDK,
   symbols: MarketSymbol[],
   params: FetchTickersParams = {}
 ): Promise<FetchTickersResponse> {
@@ -31,7 +25,7 @@ async function fetchTickers(
 
   for (const symbol of symbols) {
     validateMarketSymbol(symbol);
-    const ticker = await this.fetchTicker(symbol, params);
+    const ticker = await sdk.fetchTicker(symbol, params);
     if (ticker) tickers.push(ticker);
   }
 

@@ -2,39 +2,39 @@ import _ from 'lodash';
 import { Readable } from 'stream';
 import { OfferCreate, Payment, SubscribeRequest, TransactionStream } from 'xrpl';
 import { LedgerStreamResponse } from 'xrpl/dist/npm/models/methods/subscribe';
-import { WatchBalanceParams, SDKContext, ArgumentsRequired, WatchBalanceResponse } from '../models';
+import { WatchBalanceParams, WatchBalanceResponse } from '../models';
 import { getAmountCurrencyCode } from '../utils';
+import SDK from '../sdk';
 
 /**
- * Listens for new {@link OrderBook} data for a single {@link Market} pair. Returns a Promise
- * resolving to a {@link WatchBalanceResponse}.
+ * Listens for new {@link models.OrderBook} data for a single {@link models.Market} pair. Returns a Promise
+ * resolving to a {@link models.WatchBalanceResponse}.
  *
  * @category Methods
  *
- * @param params - (Optional) A {@link WatchBalanceParams} object
- * @returns A Promise resolving to a {@link WatchBalanceResponse} object
+ * @param params - (Optional) A {@link models.WatchBalanceParams} object
+ * @returns {@link models.WatchBalanceResponse}
  */
-async function watchBalance(this: SDKContext, params: WatchBalanceParams): Promise<WatchBalanceResponse> {
-  if (!params) throw new ArgumentsRequired('Missing required arguments for watchBalance call');
-  const account = this.wallet.classicAddress;
+async function watchBalance(sdk: SDK, params: WatchBalanceParams = {}): Promise<WatchBalanceResponse> {
+  const account = sdk.wallet.classicAddress;
 
-  const balanceStream = new Readable({ read: () => this });
+  const balanceStream = new Readable({ read: () => sdk });
 
-  let balance = await this.fetchBalance(params);
+  let balance = await sdk.fetchBalance(params);
 
-  await this.client.request({
+  await sdk.client.request({
     command: 'subscribe',
     streams: ['transactions', 'ledger'],
     accounts: [account],
   } as SubscribeRequest);
 
   const refreshBalance = async () => {
-    const newBalance = await this.fetchBalance(params);
+    const newBalance = await sdk.fetchBalance(params);
     if (newBalance) balanceStream.emit('update', newBalance);
     balance = newBalance;
   };
 
-  this.client.on('ledgerClosed', async (ledger: LedgerStreamResponse) => {
+  sdk.client.on('ledgerClosed', async (ledger: LedgerStreamResponse) => {
     if (
       ledger.reserve_base !== balance?.info.validatedLedger.reserve_base ||
       ledger.reserve_inc !== balance?.info.validatedLedger.reserve_inc
@@ -43,7 +43,7 @@ async function watchBalance(this: SDKContext, params: WatchBalanceParams): Promi
     }
   });
 
-  this.client.on('transaction', async (tx: TransactionStream) => {
+  sdk.client.on('transaction', async (tx: TransactionStream) => {
     if (tx.transaction.TransactionType === 'Payment') {
       const transaction = tx.transaction as Payment;
       if (transaction.Account === account || transaction.Destination === account) {
@@ -59,10 +59,10 @@ async function watchBalance(this: SDKContext, params: WatchBalanceParams): Promi
       ) {
         return;
       } else if (transaction.Account === account) {
-        // Did we send this txn?
+        // Did we send sdk txn?
         shouldRefresh = true;
       } else if (tx.meta?.AffectedNodes) {
-        // Were we affected by this txn?
+        // Were we affected by sdk txn?
         for (const node of tx.meta.AffectedNodes) {
           const { LedgerEntryType, FinalFields, NewFields } = Object.values(node)[0];
 

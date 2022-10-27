@@ -1,33 +1,26 @@
 import _ from 'lodash';
 import { LedgerRequest, rippleTimeToUnixTime } from 'xrpl';
 import { DEFAULT_LIMIT, DEFAULT_SEARCH_LIMIT } from '../constants';
-import {
-  FetchOrdersParams,
-  FetchOrdersResponse,
-  MarketSymbol,
-  UnixTimestamp,
-  SDKContext,
-  Order,
-  DeletedNode,
-} from '../models';
+import { FetchOrdersParams, FetchOrdersResponse, MarketSymbol, UnixTimestamp, Order, DeletedNode } from '../models';
+import SDK from '../sdk';
 import { getMarketSymbol, getOrderId, validateMarketSymbol } from '../utils';
 
 /**
- * Retrieves {@link OrderBook} data for multiple {@link Market} pairs. Returns a
- * {@link FetchOrdersResponse} with a list of any matching Orders.
+ * Retrieves {@link models.OrderBook} data for multiple {@link models.Market} pairs. Returns a
+ * {@link models.FetchOrdersResponse} with a list of any matching Orders.
  *
  * @category Methods
  *
  * @link https://docs.ccxt.com/en/latest/manual.html?#querying-multiple-orders-and-trades
  *
- * @param symbol - (Optional) {@link MarketSymbol} to filter {@link Order}s by
- * @param since - (Optional) Only return Orders since this date
+ * @param symbol - (Optional) {@link models.MarketSymbol} to filter {@link models.Order}s by
+ * @param since - (Optional) Only return Orders since sdk date
  * @param limit - (Optional) Total number of entries to return (default is 20)
- * @param params - (Optional) A {@link FetchOrdersParams} object
- * @returns A {@link FetchOrdersResponse} object
+ * @param params - (Optional) A {@link models.FetchOrdersParams} object
+ * @returns {@link models.FetchOrdersResponse}
  */
 async function fetchOrders(
-  this: SDKContext,
+  sdk: SDK,
   symbol?: MarketSymbol,
   since?: UnixTimestamp,
   limit: number = DEFAULT_LIMIT,
@@ -54,7 +47,7 @@ async function fetchOrders(
     if (previousLedgerHash) ledgerRequest.ledger_hash = previousLedgerHash;
     else ledgerRequest.ledger_index = 'validated';
 
-    const ledgerResponse = await this.client.request(ledgerRequest);
+    const ledgerResponse = await sdk.client.request(ledgerRequest);
 
     const ledger = ledgerResponse.result.ledger;
 
@@ -106,7 +99,7 @@ async function fetchOrders(
 
       const orderId = getOrderId(transaction.Account, transaction.Sequence);
 
-      const order = await this.fetchOrder(orderId, undefined, { searchLimit });
+      const order = await sdk.fetchOrder(orderId, undefined, { searchLimit });
 
       if (!order) continue;
 

@@ -21,4 +21,4 @@ export interface CreateLimitBuyOrderParams {
  *
  * @category Responses
  */
-export type CreateLimitBuyOrderResponse = CreateOrderResponse;
+export interface CreateLimitBuyOrderResponse extends CreateOrderResponse {}

@@ -1,19 +1,20 @@
-import { FetchFeesResponse, SDKContext } from '../models';
+import { FetchFeesResponse } from '../models';
+import SDK from '../sdk';
 
 /**
- * Fetches information about currency-related {@link Fees} incurred for performing transactions.
- * Returns a {@link FetchFeesResponse}.
+ * Fetches information about currency-related {@link models.Fee}s incurred for performing transactions.
+ * Returns a {@link models.FetchFeesResponse}.
  *
  * @category Methods
  *
  * @link https://docs.ccxt.com/en/latest/manual.html?#fees
  *
- * @returns A {@link FetchFeesResponse} object
+ * @returns {@link models.FetchFeesResponse}
  */
-async function fetchFees(this: SDKContext): Promise<FetchFeesResponse> {
-  const currencies = await this.fetchCurrencies();
-  const transactions = currencies ? (await this.fetchTransactionFees(Object.keys(currencies))) || [] : [];
-  const trading = (await this.fetchTradingFees()) || [];
+async function fetchFees(sdk: SDK): Promise<FetchFeesResponse> {
+  const currencies = await sdk.fetchCurrencies();
+  const transactions = currencies ? (await sdk.fetchTransactionFees(Object.keys(currencies))) || [] : [];
+  const trading = (await sdk.fetchTradingFees()) || [];
 
   const response: FetchFeesResponse = {
     transactions,

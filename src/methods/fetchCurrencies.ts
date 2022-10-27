@@ -1,24 +1,25 @@
 import _ from 'lodash';
 import { transferRateToDecimal } from 'xrpl';
 import { currencies } from '../data';
-import { FetchCurrenciesResponse, SDKContext, XrplNetwork } from '../models';
+import { FetchCurrenciesResponse, XrplNetwork } from '../models';
 import { parseCurrencyCode } from '../utils';
+import SDK from '../sdk';
 
 /**
- * Retrieves a list of {@link Currencies} being traded on the dEX. Returns a {@link FetchCurrenciesResponse}.
+ * Retrieves a list of {@link models.Currencies} being traded on the dEX. Returns a {@link models.FetchCurrenciesResponse}.
  *
  * @category Methods
  *
- * @returns A {@link FetchCurrenciesResponse} object
+ * @returns {@link models.FetchCurrenciesResponse}
  */
-async function fetchCurrencies(this: SDKContext): Promise<FetchCurrenciesResponse> {
-  const response = currencies[this.params.network || XrplNetwork.Mainnet];
+async function fetchCurrencies(sdk: SDK): Promise<FetchCurrenciesResponse> {
+  const response = currencies[sdk.params.network || XrplNetwork.Mainnet];
 
   for (const currencyCode in response) {
     const { issuer } = parseCurrencyCode(currencyCode);
 
     if (issuer) {
-      const { result: accountInfoResult } = await this.client.request({
+      const { result: accountInfoResult } = await sdk.client.request({
         command: 'account_info',
         account: issuer,
       });

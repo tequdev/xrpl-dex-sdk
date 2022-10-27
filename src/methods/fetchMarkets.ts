@@ -1,19 +1,20 @@
 import _ from 'lodash';
 import { markets } from '../data';
-import { FetchMarketsResponse, SDKContext, XrplNetwork } from '../models';
+import { FetchMarketsResponse, XrplNetwork } from '../models';
+import SDK from '../sdk';
 
 /**
- * Retrieves info for all {@link Markets} being traded on the dEX. Returns a {@link FetchMarketsResponse}.
+ * Retrieves info for all {@link models.Markets} being traded on the dEX. Returns a {@link models.FetchMarketsResponse}.
  *
  * @category Methods
  *
- * @returns A {@link FetchMarketsResponse} object
+ * @returns {@link models.FetchMarketsResponse}
  */
-async function fetchMarkets(this: SDKContext): Promise<FetchMarketsResponse> {
-  const response = markets[this.params.network || XrplNetwork.Mainnet];
+async function fetchMarkets(sdk: SDK): Promise<FetchMarketsResponse> {
+  const response = markets[sdk.params.network || XrplNetwork.Mainnet];
 
   for (const market of Object.values(response)) {
-    const marketData = await this.fetchMarket(market.symbol);
+    const marketData = await sdk.fetchMarket(market.symbol);
     if (marketData) response[market.symbol] = marketData;
   }
 

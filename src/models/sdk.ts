@@ -54,8 +54,11 @@ import {
   WatchOrderBookResponse,
   WatchOrdersParams,
   WatchOrdersResponse,
+  WatchStatusResponse,
   WatchTickerParams,
+  WatchTickerResponse,
   WatchTickersParams,
+  WatchTickersResponse,
   WatchTradesResponse,
 } from './methods';
 import { Issuers, TransferRates } from './xrpl';
@@ -86,10 +89,6 @@ export interface SDKContext {
   currencies?: Currencies;
   issuers?: Issuers;
   transferRates?: TransferRates;
-  connect(): Promise<void>;
-  disconnect(): Promise<void>;
-  removeListener(eventName: string, listener: any): void;
-  removeAllListeners(): void;
   cancelOrder(id: OrderId): Promise<CancelOrderResponse>;
   createLimitBuyOrder(
     symbol: MarketSymbol,
@@ -149,16 +148,7 @@ export interface SDKContext {
     symbol: MarketSymbol,
     limit?: number,
     params?: FetchL2OrderBookParams
-  ): Promise<FetchL2OrderBookResponse>;
-  /**
-   * Retrieves info about a single {@link Market} being traded on the dEX. Returns a {@link FetchMarketResponse}.
-   *
-   * @category Methods
-   *
-   * @param symbol - {@link MarketSymbol} to get information for
-   * @returns A Promise resolving to a {@link FetchMarketResponse} object
-   */
-
+  ): Promise<FetchL2OrderBookResponse | undefined>;
   fetchMarket(symbol: MarketSymbol): Promise<FetchMarketResponse>;
   fetchMarkets(): Promise<FetchMarketsResponse>;
   fetchMyTrades(
@@ -188,8 +178,8 @@ export interface SDKContext {
   watchBalance(params: WatchBalanceParams): Promise<Readable>;
   watchOrderBook(symbol: MarketSymbol, limit?: number): Promise<WatchOrderBookResponse>;
   watchOrders(symbol?: MarketSymbol, params?: WatchOrdersParams): Promise<WatchOrdersResponse>;
-  watchStatus(): Promise<Readable>;
-  watchTicker(symbol: MarketSymbol, params: WatchTickerParams): Promise<Readable>;
-  watchTickers(symbols: MarketSymbol[], params: WatchTickersParams): Promise<Readable>;
+  watchStatus(): Promise<WatchStatusResponse>;
+  watchTicker(symbol: MarketSymbol, params: WatchTickerParams): Promise<WatchTickerResponse>;
+  watchTickers(symbols: MarketSymbol[], params: WatchTickersParams): Promise<WatchTickersResponse>;
   watchTrades(symbol: MarketSymbol): Promise<WatchTradesResponse>;
 }

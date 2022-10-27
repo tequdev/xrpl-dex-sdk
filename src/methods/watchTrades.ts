@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { Readable } from 'stream';
 import { OfferCreateFlags, SubscribeRequest, TransactionStream } from 'xrpl';
 import { Offer } from 'xrpl/dist/npm/models/ledger';
-import { MarketSymbol, SDKContext, Trade, AffectedNode, WatchTradesResponse, ArgumentsRequired } from '../models';
+import { MarketSymbol, Trade, AffectedNode, WatchTradesResponse, ArgumentsRequired } from '../models';
 import {
   getBaseAmountKey,
   getMarketSymbolFromAmount,
@@ -10,28 +10,29 @@ import {
   getTradeFromData,
   validateMarketSymbol,
 } from '../utils';
+import SDK from '../sdk';
 
 /**
- * Listens for new {@link Trades} for a given {@link Market}. Returns a Promise resolving to a
- * {@link WatchTradesResponse}.
+ * Listens for new {@link models.Trade}s for a given {@link models.Market}. Returns a Promise resolving to a
+ * {@link models.WatchTradesResponse}.
  *
  * @category Methods
  *
- * @param symbol - (Optional) {@link MarketSymbol} to filter Trades by
- * @returns A Promise resolving to a {@link WatchTradesResponse} object
+ * @param symbol - {@link models.MarketSymbol} to filter Trades by
+ * @returns {@link models.WatchTradesResponse}
  */
-async function watchTrades(this: SDKContext, symbol: MarketSymbol): Promise<WatchTradesResponse> {
+async function watchTrades(sdk: SDK, symbol: MarketSymbol): Promise<WatchTradesResponse> {
   if (!symbol) throw new ArgumentsRequired('Missing required arguments for watchTrades call');
   validateMarketSymbol(symbol);
 
-  const tradeStream = new Readable({ read: () => this });
+  const tradeStream = new Readable({ read: () => sdk });
 
-  await this.client.request({
+  await sdk.client.request({
     command: 'subscribe',
     streams: ['transactions'],
   } as SubscribeRequest);
 
-  this.client.on('transaction', async (tx: TransactionStream) => {
+  sdk.client.on('transaction', async (tx: TransactionStream) => {
     const transaction = tx.transaction;
     if (
       typeof transaction !== 'object' ||
@@ -63,7 +64,7 @@ async function watchTrades(this: SDKContext, symbol: MarketSymbol): Promise<Watc
       const offer = FinalFields as unknown as Offer;
 
       const trade = await getTradeFromData.call(
-        this,
+        sdk,
         {
           date: transaction.date ?? 0,
           Flags: offer.Flags as number,

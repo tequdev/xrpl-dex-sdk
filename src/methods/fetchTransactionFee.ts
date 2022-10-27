@@ -1,23 +1,24 @@
 import { FeeRequest } from 'xrpl';
-import { SDKContext, CurrencyCode, FetchTransactionFeeResponse, ArgumentsRequired } from '../models';
+import { CurrencyCode, FetchTransactionFeeResponse, ArgumentsRequired } from '../models';
+import SDK from '../sdk';
 
 /**
- * Fetches information about fees incurred for performing transactions with a given {@link Currency}.
- * Returns a {@link FetchTransactionFeesResponse}.
+ * Fetches information about fees incurred for performing transactions with a given {@link models.Currency}.
+ * Returns a {@link models.FetchTransactionFeesResponse}.
  *
  * @category Methods
  *
  * @link https://docs.ccxt.com/en/latest/manual.html?#fees
  *
- * @param code - {@link CurrencyCode} to get fees for
- * @returns A {@link FetchTransactionsFeeResponse} object
+ * @param code - {@link models.CurrencyCode} to get fees for
+ * @returns {@link models.FetchTransactionFeeResponse}
  */
-async function fetchTransactionFee(this: SDKContext, code: CurrencyCode): Promise<FetchTransactionFeeResponse> {
+async function fetchTransactionFee(sdk: SDK, code: CurrencyCode): Promise<FetchTransactionFeeResponse> {
   if (!code) throw new ArgumentsRequired('Missing required arguments for fetchTransactionFee call');
 
-  const { result: feesResult } = await this.client.request({ command: 'fee' } as FeeRequest);
+  const { result: feesResult } = await sdk.client.request({ command: 'fee' } as FeeRequest);
 
-  const currencies = await this.fetchCurrencies();
+  const currencies = await sdk.fetchCurrencies();
 
   const currency = currencies[code];
 

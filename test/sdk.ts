@@ -10,7 +10,7 @@ async function sdkTest() {
     ...sdkParams,
     walletSecret: addresses.AKT_SELLER_SECRET,
   });
-  await seller.connect();
+  await seller.client.connect();
   await seller.loadMarkets();
   await seller.loadCurrencies();
   await seller.loadIssuers();
@@ -18,7 +18,7 @@ async function sdkTest() {
     ...sdkParams,
     walletSecret: addresses.AKT_BUYER_SECRET,
   });
-  await buyer.connect();
+  await buyer.client.connect();
   await buyer.loadMarkets();
   await buyer.loadCurrencies();
   await buyer.loadIssuers();

@@ -6,6 +6,9 @@
 import { Readable } from 'stream';
 import { BigNumberish, MarketSymbol } from '../common';
 
+/**
+ * @category Streams
+ */
 export type OrderBookStream = Readable;
 
 export type PriceAmountTuple = [price: BigNumberish, amount: BigNumberish];
@@ -16,7 +19,7 @@ export type OrderBookAsk = PriceAmountTuple;
 export type OrderBookLevel = 'L1' | 'L2' | 'L3';
 
 /**
- * OrderBook
+ * @category CCXT
  *
  * @link https://docs.ccxt.com/en/latest/manual.html?#order-book-structure
  */
@@ -28,3 +31,8 @@ export interface OrderBook {
   bids: OrderBookBid[];
   asks: OrderBookAsk[];
 }
+
+/**
+ * @category CCXT
+ */
+export type OrderBooks = OrderBook[];

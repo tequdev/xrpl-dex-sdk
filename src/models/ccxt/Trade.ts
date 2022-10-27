@@ -10,10 +10,13 @@ import { Amount } from 'xrpl/dist/npm/models/common';
 import { AccountAddress, MarketSymbol, XrplTimestamp } from '../common';
 import { Fee } from './Fees';
 
+/**
+ * @category Streams
+ */
 export type TradeStream = Readable;
 
 /**
- * Trade
+ * @category CCXT
  *
  * @link https://docs.ccxt.com/en/latest/manual.html?#trade-structure
  */
@@ -46,8 +49,10 @@ export interface Trade {
 }
 
 /**
- * Data used to assemble Trade objects.
+ * @category CCXT
  */
+export type Trades = Trade[];
+
 export interface TradeSourceData {
   date: XrplTimestamp;
   Flags: number;

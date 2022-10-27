@@ -2,34 +2,35 @@ import { randomUUID } from 'crypto';
 import _ from 'lodash';
 import { AccountInfoRequest, AccountLinesRequest, dropsToXrp } from 'xrpl';
 import { DEFAULT_LIMIT } from '../constants';
-import { Balances, FetchBalanceParams, FetchBalanceResponse, SDKContext } from '../models';
+import { Balances, FetchBalanceParams, FetchBalanceResponse } from '../models';
+import SDK from '../sdk';
 import { BN, getCurrencyCode } from '../utils';
 
 /**
  * Fetches information about an account's balances, sorted by currency and funds availability.
- * Returns a {@link FetchBalanceResponse}.
+ * Returns a {@link models.FetchBalanceResponse}.
  *
  * @category Methods
  *
  * @link https://docs.ccxt.com/en/latest/manual.html?#account-balance
  *
- * @param params - (Optional) A {@link FetchBalanceParams} object
- * @returns A {@link FetchBalanceResponse} object
+ * @param params - (Optional) A {@link models.FetchBalanceParams} object
+ * @returns {@link models.FetchBalanceResponse}
  */
 async function fetchBalance(
-  this: SDKContext,
+  sdk: SDK,
   /* Request parameters */
   params: FetchBalanceParams = {}
 ): Promise<FetchBalanceResponse> {
   const { code } = params;
-  const account = this.wallet.classicAddress;
+  const account = sdk.wallet.classicAddress;
 
   const balances: Balances = {};
   const info: any = {};
 
   // Get XRP balances
   if (!code || (code && code === 'XRP')) {
-    const accountInfoResponse = await this.client.request({
+    const accountInfoResponse = await sdk.client.request({
       id: randomUUID(),
       command: 'account_info',
       account,
@@ -40,7 +41,7 @@ async function fetchBalance(
     const accountInfo = accountInfoResponse.result.account_data;
     const accountObjectCount = accountInfo.OwnerCount;
 
-    const serverState = await this.fetchStatus();
+    const serverState = await sdk.fetchStatus();
     const { reserve_base, reserve_inc } = serverState?.info.serverState.validated_ledger;
 
     info.validatedLedger = serverState?.info.serverState.validated_ledger;
@@ -68,7 +69,7 @@ async function fetchBalance(
     let hasNextPage = true;
 
     while (hasNextPage) {
-      const accountTrustLinesResponse = await this.client.request({
+      const accountTrustLinesResponse = await sdk.client.request({
         id: randomUUID(),
         command: 'account_lines',
         account,
@@ -82,7 +83,7 @@ async function fetchBalance(
       for (const { account, balance, currency } of trustLines) {
         const currencyCode = getCurrencyCode(currency, account);
 
-        if (code && code !== currencyCode) return;
+        if (code && code !== currencyCode) continue;
 
         const usedBalance = BN(0);
         const freeBalance = BN(balance).minus(usedBalance);

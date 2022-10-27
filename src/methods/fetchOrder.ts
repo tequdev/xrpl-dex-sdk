@@ -9,11 +9,11 @@ import {
   TransactionData,
   Order,
   Trade,
-  SDKContext,
   ArgumentsRequired,
   OrderNotFound,
   UnixTimestamp,
 } from '../models';
+import SDK from '../sdk';
 import {
   BN,
   fetchTxn,
@@ -27,19 +27,19 @@ import {
 } from '../utils';
 
 /**
- * Fetches an {@link Order} from the dEX. Returns a {@link FetchOrderResponse} with the matching Order.
+ * Fetches an {@link models.Order} from the dEX. Returns a {@link models.FetchOrderResponse} with the matching Order.
  *
  * @category Methods
  *
  * @link https://docs.ccxt.com/en/latest/manual.html?#querying-orders
  *
- * @param id - {@link OrderId} of the Order to fetch
- * @param symbol - (Optional) The {@link MarketSymbol} of the Order to fetch
- * @param params - (Optional) A {@link FetchOrderParams} object
- * @returns A {@link FetchOrderResponse} object
+ * @param id - {@link models.OrderId} of the Order to fetch
+ * @param symbol - (Optional) The {@link models.MarketSymbol} of the Order to fetch
+ * @param params - (Optional) A {@link models.FetchOrderParams} object
+ * @returns {@link models.FetchOrderResponse}
  */
 async function fetchOrder(
-  this: SDKContext,
+  sdk: SDK,
   id: OrderId,
   /* eslint-disable-next-line */
   symbol?: MarketSymbol,
@@ -58,7 +58,7 @@ async function fetchOrder(
     const { account, sequence } = parseOrderId(id);
     const transactions: TransactionData<OfferCreate>[] = [];
 
-    const previousTxn = await getMostRecentTx(this.client, id, params.searchLimit);
+    const previousTxn = await getMostRecentTx(sdk.client, id, params.searchLimit);
 
     if (!previousTxn) throw new OrderNotFound(`Couldn't find data for Order ID: "${id}"`);
 
@@ -69,10 +69,10 @@ async function fetchOrder(
     if (previousTxnData) transactions.push(previousTxnData);
 
     /**
-     * Build a Transaction history for this Order
+     * Build a Transaction history for sdk Order
      */
     while (previousTxnId) {
-      const previousTxnResponse = await fetchTxn(this.client, previousTxnId);
+      const previousTxnResponse = await fetchTxn(sdk.client, previousTxnId);
 
       if (previousTxnResponse) {
         previousTxnData = parseTransaction(id, previousTxnResponse);
@@ -83,8 +83,8 @@ async function fetchOrder(
       }
     }
 
-    // if (!transactions.length) throw new OrderNotFound(`Couldn't find data for OrderId ${id}`);
-    if (!transactions.length) return;
+    if (!transactions.length) throw new OrderNotFound(`Couldn't find data for OrderId ${id}`);
+    // if (!transactions.length) return;
 
     /**
      * Parse the Transaction history for Trade and Order objects
@@ -106,7 +106,7 @@ async function fetchOrder(
         if (!offer.Sequence) continue;
 
         const trade = await getTradeFromData.call(
-          this,
+          sdk,
           {
             date,
             Flags: offer.Flags as number,
@@ -130,10 +130,10 @@ async function fetchOrder(
       }
 
       if (transaction.Account === account && transaction.Sequence === sequence) {
-        if (!transaction.Sequence) return;
+        if (!transactions.length) throw new OrderNotFound(`Couldn't find data for OrderId ${id}`);
 
         order = await getOrderFromData.call(
-          this,
+          sdk,
           {
             status: orderStatus,
             date,
@@ -153,7 +153,8 @@ async function fetchOrder(
       }
     }
 
-    return order;
+    if (order) return order;
+    else throw new OrderNotFound(`Couldn't find data for OrderId ${id}`);
   } catch (err) {
     console.error(err);
     throw err;

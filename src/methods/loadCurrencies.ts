@@ -1,21 +1,22 @@
 import _ from 'lodash';
-import { LoadCurrenciesResponse, SDKContext } from '../models';
+import { LoadCurrenciesResponse } from '../models';
+import SDK from '../sdk';
 
 /**
- * Retrieves and caches a list of {@link Currencies} being traded on the dEX. Returns a Promise
- * resolving to a {@link LoadCurrenciesResponse}.
+ * Retrieves and caches a list of {@link models.Currencies} being traded on the dEX. Returns a Promise
+ * resolving to a {@link models.LoadCurrenciesResponse}.
  *
  * @category Methods
  *
  * @param reload - (Optional) Whether to refresh the cache
- * @returns A Promise resolving to a {@link LoadCurrenciesResponse} object
+ * @returns {@link models.LoadCurrenciesResponse}
  */
-async function loadCurrencies(this: SDKContext, reload = false): Promise<LoadCurrenciesResponse> {
-  if (!this.currencies || reload) {
-    const currencies = await this.fetchCurrencies();
-    this.currencies = currencies;
+async function loadCurrencies(sdk: SDK, reload = false): Promise<LoadCurrenciesResponse> {
+  if (!sdk.currencies || reload) {
+    const currencies = await sdk.fetchCurrencies();
+    sdk.currencies = currencies;
   }
-  return this.currencies;
+  return sdk.currencies;
 }
 
 export default loadCurrencies;

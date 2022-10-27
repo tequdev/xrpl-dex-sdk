@@ -6,7 +6,7 @@
 import { CurrencyCode, PercentDecimal } from '../common';
 
 /**
- * Currency
+ * @category CCXT
  *
  * @link https://docs.ccxt.com/en/latest/manual.html?#currency-structure
  */
@@ -19,4 +19,7 @@ export interface Currency {
   precision?: number;
 }
 
+/**
+ * @category CCXT
+ */
 export type Currencies = Record<CurrencyCode, Currency>;

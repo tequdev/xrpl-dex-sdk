@@ -18,4 +18,4 @@ export interface FetchOrderParams {
  *
  * @category Responses
  */
-export type FetchOrderResponse = Order | undefined;
+export interface FetchOrderResponse extends Order {}

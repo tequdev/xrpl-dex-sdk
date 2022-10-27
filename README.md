@@ -2,7 +2,7 @@
 
 This TypeScript SDK provides a [CCXT-compatible API](https://docs.ccxt.com/en/latest/manual.html?#unified-api) for interacting with the [XRPL decentralized exchange](https://xrpl.org/decentralized-exchange.html).
 
-A Python version of this SDK is available [here]().
+A Python version of this SDK is available [here](https://github.com/AktaryTech/xrpl-dex-sdk-python).
 
 ## Getting Started
 
@@ -13,7 +13,7 @@ Make sure you have the following installed on your system:
 - NodeJS v16 (lts/gallium)
 - Yarn
 
-We recommend using [`nvm`]() to manage your NodeJS installations. If `nvm` is installed, type `nvm use` in the SDK's root folder to automatically switch to the proper Node version.
+We recommend using [`nvm`](https://github.com/nvm-sh/nvm) to manage your NodeJS installations. If `nvm` is installed, type `nvm use` in the SDK's root folder to automatically switch to the proper Node version.
 
 ### Installation
 

@@ -1,21 +1,22 @@
 import _ from 'lodash';
-import { LoadIssuersResponse, SDKContext } from '../models';
+import { LoadIssuersResponse } from '../models';
+import SDK from '../sdk';
 
 /**
- * Retrieves and caches a list of {@link Issuers} whose {@link Currencies} are being traded on the dEX.
- * Returns a Promise resolving to a {@link LoadIssuersResponse}.
+ * Retrieves and caches a list of {@link models.Issuer}s whose {@link models.Currency | Currencies} are being traded on the dEX.
+ * Returns a Promise resolving to a {@link models.LoadIssuersResponse}.
  *
  * @category Methods
  *
  * @param reload - (Optional) Whether to refresh the cache
- * @returns A Promise resolving to a {@link LoadIssuersResponse} object
+ * @returns {@link models.LoadIssuersResponse}
  */
-async function loadIssuers(this: SDKContext, reload = false): Promise<LoadIssuersResponse> {
-  if (!this.issuers || reload) {
-    const issuers = await this.fetchIssuers();
-    this.issuers = issuers;
+async function loadIssuers(sdk: SDK, reload = false): Promise<LoadIssuersResponse> {
+  if (!sdk.issuers || reload) {
+    const issuers = await sdk.fetchIssuers();
+    sdk.issuers = issuers;
   }
-  return this.issuers;
+  return sdk.issuers;
 }
 
 export default loadIssuers;

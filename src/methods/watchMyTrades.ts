@@ -2,38 +2,39 @@ import _ from 'lodash';
 import { Readable } from 'stream';
 import { SubscribeRequest, TransactionStream } from 'xrpl';
 import { Offer } from 'xrpl/dist/npm/models/ledger';
-import { MarketSymbol, SDKContext, AffectedNode, ArgumentsRequired, WatchMyTradesResponse } from '../models';
+import { MarketSymbol, AffectedNode, ArgumentsRequired, WatchMyTradesResponse } from '../models';
 import { getMarketSymbol, getTradeFromData, validateMarketSymbol } from '../utils';
+import SDK from '../sdk';
 
 /**
- * Listens for new {@link Trades} from the SDK user for a given {@link Market} pair. Returns a Promise
- * resolving to a {@link WatchMyTradesResponse}.
+ * Listens for new {@link models.Trade}s from the SDK user for a given {@link models.Market} pair. Returns a Promise
+ * resolving to a {@link models.WatchMyTradesResponse}.
  *
  * @category Methods
  *
- * @param symbol - {@link MarketSymbol} to watch
- * @returns A Promise resolving to a {@link WatchMyTradesResponse} object
+ * @param symbol - {@link models.MarketSymbol} to watch
+ * @returns {@link models.WatchMyTradesResponse}
  */
-async function watchMyTrades(this: SDKContext, symbol: MarketSymbol): Promise<WatchMyTradesResponse> {
+async function watchMyTrades(sdk: SDK, symbol: MarketSymbol): Promise<WatchMyTradesResponse> {
   if (!symbol) throw new ArgumentsRequired('Missing required arguments for watchMyTrades call');
   validateMarketSymbol(symbol);
 
-  const tradeStream = new Readable({ read: () => this });
+  const tradeStream = new Readable({ read: () => sdk });
 
-  await this.client.request({
+  await sdk.client.request({
     command: 'subscribe',
     streams: ['transactions'],
-    accounts: [this.wallet.classicAddress],
+    accounts: [sdk.wallet.classicAddress],
   } as SubscribeRequest);
 
-  this.client.on('transaction', async (tx: TransactionStream) => {
+  sdk.client.on('transaction', async (tx: TransactionStream) => {
     const transaction = tx.transaction;
     if (
       typeof transaction !== 'object' ||
       transaction.TransactionType !== 'OfferCreate' ||
       typeof tx.meta !== 'object' ||
       !transaction.Sequence ||
-      transaction.Account !== this.wallet.classicAddress
+      transaction.Account !== sdk.wallet.classicAddress
     )
       return;
 
@@ -47,7 +48,7 @@ async function watchMyTrades(this: SDKContext, symbol: MarketSymbol): Promise<Wa
       const offer = FinalFields as unknown as Offer;
 
       const trade = await getTradeFromData.call(
-        this,
+        sdk,
         {
           date: transaction.date || 0,
           Flags: transaction.Flags as number,

@@ -7,27 +7,27 @@ import {
   MarketSymbol,
   FetchOrderBookParams,
   FetchOrderBookResponse,
-  SDKContext,
   OrderBookBid,
   OrderBook,
   ArgumentsRequired,
 } from '../models';
+import SDK from '../sdk';
 import { getSharedOrderData, getTakerAmount, parseMarketSymbol, validateMarketSymbol } from '../utils';
 
 /**
- * Retrieves order book data for a single {@link Market} pair. Returns a {@link FetchOrderBookResponse}.
+ * Retrieves order book data for a single {@link models.Market} pair. Returns a {@link models.FetchOrderBookResponse}.
  *
  * @category Methods
  *
  * @link https://docs.ccxt.com/en/latest/manual.html?#order-book
  *
- * @param symbol - {@link MarketSymbol} to get order book for
+ * @param symbol - {@link models.MarketSymbol} to get order book for
  * @param limit - (Optional) Total number of entries to return (default is 20)
- * @param params - (Optional) A {@link FetchOrderBookParams} object
- * @returns A {@link FetchOrderBookResponse} object
+ * @param params - (Optional) A {@link models.FetchOrderBookParams} object
+ * @returns {@link models.FetchOrderBookResponse}
  */
 async function fetchOrderBook(
-  this: SDKContext,
+  sdk: SDK,
   symbol: MarketSymbol,
   limit: number = DEFAULT_LIMIT,
   params: FetchOrderBookParams = {
@@ -56,14 +56,14 @@ async function fetchOrderBook(
   if (params.ledgerHash) orderBookRequest.ledger_hash = params.ledgerHash;
   if (params.ledgerIndex) orderBookRequest.ledger_index = params.ledgerIndex;
 
-  const orderBookResponse = await this.client.request(orderBookRequest);
+  const orderBookResponse = await sdk.client.request(orderBookRequest);
   const offers = orderBookResponse.result.offers;
 
   const bids: OrderBookBid[] = [];
   const asks: OrderBookAsk[] = [];
 
   for (const offer of offers) {
-    const sharedData = await getSharedOrderData.call(this, offer);
+    const sharedData = await getSharedOrderData.call(sdk, offer);
 
     if (!sharedData) continue;
 

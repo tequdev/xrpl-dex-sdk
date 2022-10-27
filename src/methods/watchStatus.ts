@@ -1,28 +1,28 @@
 import _ from 'lodash';
 import { Readable } from 'stream';
 import { LedgerStream, SubscribeRequest } from 'xrpl';
-import { SDKContext } from '../models';
+import SDK from '../sdk';
 import { WatchStatusResponse } from '../models';
 
 /**
- * Streams information regarding {@link ExchangeStatus} from either the info hardcoded in
+ * Streams information regarding {@link models.ExchangeStatus} from either the info hardcoded in
  * the exchange instance or the API, if available. Returns a Promise resolving to a
- * {@link WatchStatusResponse}.
+ * {@link models.WatchStatusResponse}.
  *
  * @category Methods
  *
- * @returns A Promise resolving to a {@link WatchStatusResponse} object
+ * @returns {@link models.WatchStatusResponse}
  */
-async function watchStatus(this: SDKContext): Promise<WatchStatusResponse> {
-  const statusStream = new Readable({ read: () => this });
+async function watchStatus(sdk: SDK): Promise<WatchStatusResponse> {
+  const statusStream = new Readable({ read: () => sdk });
 
-  await this.client.request({
+  await sdk.client.request({
     command: 'subscribe',
     streams: ['ledger'],
   } as SubscribeRequest);
 
-  this.client.on('ledgerClosed', async (ledger: LedgerStream) => {
-    const newStatus = await this.fetchStatus();
+  sdk.client.on('ledgerClosed', async (ledger: LedgerStream) => {
+    const newStatus = await sdk.fetchStatus();
     if (newStatus) statusStream.emit('update', newStatus);
   });
 

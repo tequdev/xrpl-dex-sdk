@@ -1,21 +1,22 @@
 import _ from 'lodash';
-import { LoadMarketsResponse, SDKContext } from '../models';
+import { LoadMarketsResponse } from '../models';
+import SDK from '../sdk';
 
 /**
- * Retrieves and caches a list of {@link Markets} being traded on the dEX. Returns a Promise
- * resolving to a {@link LoadMarketsResponse}.
+ * Retrieves and caches a list of {@link models.Market}s being traded on the dEX. Returns a Promise
+ * resolving to a {@link models.LoadMarketsResponse}.
  *
  * @category Methods
  *
  * @param reload - (Optional) Whether to refresh the cache
- * @returns A Promise resolving to a {@link LoadMarketsResponse} object
+ * @returns {@link models.LoadMarketsResponse}
  */
-async function loadMarkets(this: SDKContext, reload = false): Promise<LoadMarketsResponse> {
-  if (!this.markets || reload) {
-    const markets = await this.fetchMarkets();
-    this.markets = markets;
+async function loadMarkets(sdk: SDK, reload = false): Promise<LoadMarketsResponse> {
+  if (!sdk.markets || reload) {
+    const markets = await sdk.fetchMarkets();
+    sdk.markets = markets;
   }
-  return this.markets;
+  return sdk.markets;
 }
 
 export default loadMarkets;

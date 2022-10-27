@@ -6,10 +6,13 @@
 import { Readable } from 'stream';
 import { MarketSymbol, PercentDecimal, UnixTimestamp } from '../common';
 
+/**
+ * @category Streams
+ */
 export type TickerStream = Readable;
 
 /**
- * Ticker
+ * @category CCXT
  *
  * @link https://docs.ccxt.com/en/latest/manual.html?#ticker-structure
  */

@@ -3,22 +3,23 @@ import _ from 'lodash';
 import { BookOffer, BookOffersRequest } from 'xrpl';
 import { parseAmountValue } from 'xrpl/dist/npm/models/transactions/common';
 import { DEFAULT_TICKER_SEARCH_LIMIT } from '../constants';
-import { MarketSymbol, FetchTickerParams, Ticker, FetchTickerResponse, SDKContext, ArgumentsRequired } from '../models';
+import { MarketSymbol, FetchTickerParams, Ticker, FetchTickerResponse, ArgumentsRequired } from '../models';
 import { BN, getTakerAmount, parseMarketSymbol, validateMarketSymbol } from '../utils';
+import SDK from '../sdk';
 
 /**
- * Retrieves {@link Ticker} data for a single {@link Market} pair. Returns a {@link FetchTickerResponse}.
+ * Retrieves {@link models.Ticker} data for a single {@link models.Market} pair. Returns a {@link models.FetchTickerResponse}.
  *
  * @category Methods
  *
  * @link https://docs.ccxt.com/en/latest/manual.html?#a-single-ticker-for-one-symbol
  *
- * @param symbol - {@link MarketSymbol} to get price ticker data for
- * @param params - (Optional) A {@link FetchTickerParams} object
- * @returns A {@link FetchTickerResponse} object
+ * @param symbol - {@link models.MarketSymbol} to get price ticker data for
+ * @param params - (Optional) A {@link models.FetchTickerParams} object
+ * @returns {@link models.FetchTickerResponse}
  */
 async function fetchTicker(
-  this: SDKContext,
+  sdk: SDK,
   symbol: MarketSymbol,
   params: FetchTickerParams = {}
 ): Promise<FetchTickerResponse> {
@@ -51,13 +52,13 @@ async function fetchTicker(
 
   const bookOffersBaseRequest = { command: 'book_offers', limit: limit + 1 };
 
-  const bidsResponse = await this.client.request({
+  const bidsResponse = await sdk.client.request({
     ...bookOffersBaseRequest,
     taker_gets: quoteAmount,
     taker_pays: baseAmount,
   } as BookOffersRequest);
 
-  const asksResponse = await this.client.request({
+  const asksResponse = await sdk.client.request({
     ...bookOffersBaseRequest,
     taker_gets: baseAmount,
     taker_pays: quoteAmount,
