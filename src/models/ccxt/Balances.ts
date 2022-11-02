@@ -1,7 +1,7 @@
 /**
  * CCXT Balances
  *
- * @link https://docs.ccxt.com/en/latest/manual.html?#account-balance
+ * @see {@link https://docs.ccxt.com/en/latest/manual.html?#account-balance | CCXT Balances} for more information.
  */
 import { Readable } from 'stream';
 import { CurrencyCode } from '../common';
@@ -9,12 +9,14 @@ import { CurrencyCode } from '../common';
 /**
  * @category Streams
  */
- export type BalanceStream = Readable;
+export type BalanceStream = Readable;
 
 /**
  * @category CCXT
  *
- * @link https://docs.ccxt.com/en/latest/manual.html?#balance-structure
+ * @see {@link https://docs.ccxt.com/en/latest/manual.html?#balance-structure | Balance} for more information.
+ *
+ * @attribute
  */
 export interface Balance {
   // Money, available for trading, by currency (as float string)

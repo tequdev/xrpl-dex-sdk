@@ -4,29 +4,31 @@ This TypeScript SDK provides a [CCXT-compatible API](https://docs.ccxt.com/en/la
 
 A Python version of this SDK is available [here](https://github.com/AktaryTech/xrpl-dex-sdk-python).
 
-## Getting Started
+## Installation
 
-### Prerequisites
+This package requires [NodeJS v16](https://nodejs.org/en/blog/release/v16.16.0/) or later.
+
+> NOTE: We recommend using [nvm](https://github.com/nvm-sh/nvm) to manage your NodeJS installations. If `nvm` is installed, type `nvm use` in the SDK's root folder to automatically switch to the proper Node version.
+
+### From NPM
+
+Add the SDK package to your project:
+
+```
+$ npm install -S xrpl-dex-sdk
+```
+
+### From Source
 
 Make sure you have the following installed on your system:
 
 - NodeJS v16 (lts/gallium)
 - Yarn
 
-We recommend using [`nvm`](https://github.com/nvm-sh/nvm) to manage your NodeJS installations. If `nvm` is installed, type `nvm use` in the SDK's root folder to automatically switch to the proper Node version.
-
-### Installation
-
-Add the SDK as a dependency in your app:
+Clone the repo, install dependencies, and build the SDK:
 
 ```
-$ yarn add xrpl-dex-sdk
-```
-
-#### From Source
-
-```
-$ git clone https://github.com/[ORG_LINK_HERE]/xrpl-dex-sdk.git
+$ git clone https://github.com/AktaryTech/xrpl-dex-sdk.git
 $ cd xrpl-dex-sdk
 $ yarn
 $ yarn build
@@ -36,7 +38,7 @@ The compiled SDK will be in the `/dist` folder.
 
 ## Usage
 
-To use the SDK, import it into your script and initialize it:
+To use the SDK, import it into your script and create a new SDK instance:
 
 ```typescript
 import { SDK, OrderSide, OrderType, Wallet } from 'xrpl-dex-sdk';
@@ -64,7 +66,7 @@ Currency codes, market symbols, and Order/Trade IDs are strings that follow the 
 
 #### Placing an Order
 
-The following example places an Order to buy 20 TST tokens, issued by the wallet at `rP9jPyP5kyvFRb6ZiRghAGw5u8SGAmU4bd`, at a price of 1.5 XRP each:
+The following example places an Order to buy 20 TST tokens, issued by the account at `rP9jPyP5kyvFRb6ZiRghAGw5u8SGAmU4bd`, at a price of 1.5 XRP each:
 
 ```typescript
 import { SDK, OrderSide, OrderType, Wallet } from 'xrpl-dex-sdk';
@@ -98,7 +100,7 @@ example();
 
 It produces the following output:
 
-```json
+```
 {
   ...,
   "status": "open",
@@ -121,7 +123,7 @@ It produces the following output:
 
 ## Methods
 
-See the full SDK documentation [here](https://github.com/AktaryTech/xrpl-dex-sdk/tree/main/docs), or run `yarn docs` to generate the documentation locally.
+For full SDK documentation, load [`docs/index.html`](docs/index.html) in your browser. Run `yarn docs:build` to re-generate documentation.
 
 ## Further Reading
 
@@ -130,8 +132,36 @@ See the full SDK documentation [here](https://github.com/AktaryTech/xrpl-dex-sdk
 - [General Documentation](https://docs.ccxt.com/en/latest/index.html)
 - [Unified API](https://docs.ccxt.com/en/latest/manual.html#unified-api)
 
-### XRPL Ledger
+### XRP Ledger
 
 - [General Documentation](https://xrpl.org/concepts.html)
 - [Decentralized Exchange](https://xrpl.org/decentralized-exchange.html)
 - [dEX Tutorial](https://xrpl.org/trade-in-the-decentralized-exchange.html)
+
+## Contributing
+
+Pull requests, issues and comments are welcome! Make sure to add tests for new features and bug fixes.
+
+## Contact
+
+For questions, suggestions, etc, you can reach the maintainer at [info@aktarytech.com](mailto:info@aktarytech.com).
+
+## License
+
+The software is distributed under the MIT license. See [LICENSE](https://github.com/AktaryTech/xrpl-dex-sdk/blob/main/LICENSE) for details.
+
+Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in this library by you, as defined in the MIT license, shall be licensed as above, without any additional terms or conditions.
+
+## Disclaimer
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+## Copyright
+
+Copyright © 2022 Ripple Labs, Inc.

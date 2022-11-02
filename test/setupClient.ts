@@ -36,28 +36,24 @@ async function setupMockRippledConnectionForBroadcast(
 ): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
     try {
-      // const servers = ports.map((port) => `ws://localhost:${port}`);
       // eslint-disable-next-line max-len -- Too many rules to disable
       // eslint-disable-next-line @typescript-eslint/promise-function-async, @typescript-eslint/no-unsafe-return -- Typing is too complicated, not an async function
-      // testcase.mocks = ports.map((port) => createMockRippled(port));
       testcase.mockRippled = createMockRippled(ports[0]);
-      // testcase.client = new BroadcastClient(servers);
-      // testcase.client.connect().then(resolve).catch(reject);
-      testcase.sellerSdk = new SDK({
-        walletSecret: addresses.AKT_SELLER_SECRET,
-        websocketsUrl: `ws://localhost:${ports[0]}`,
-      });
-      await testcase.sellerSdk.connect();
-      testcase.buyerSdk = new SDK({
-        walletSecret: addresses.AKT_BUYER_SECRET,
-        websocketsUrl: `ws://localhost:${ports[0]}`,
-      });
-      await testcase.buyerSdk.connect();
-      testcase.buyerSdk = new SDK({
-        walletSecret: addresses.TST_BUYER_SECRET,
-        websocketsUrl: `ws://localhost:${ports[0]}`,
-      });
-      await testcase.buyerSdk.connect();
+      // testcase.sellerSdk = new SDK({
+      //   walletSecret: addresses.AKT_SELLER_SECRET,
+      //   websocketsUrl: `ws://localhost:${ports[0]}`,
+      // });
+      // await testcase.sellerSdk.connect();
+      // testcase.buyerSdk = new SDK({
+      //   walletSecret: addresses.AKT_BUYER_SECRET,
+      //   websocketsUrl: `ws://localhost:${ports[0]}`,
+      // });
+      // await testcase.buyerSdk.connect();
+      // testcase.buyerSdk = new SDK({
+      //   walletSecret: addresses.TST_BUYER_SECRET,
+      //   websocketsUrl: `ws://localhost:${ports[0]}`,
+      // });
+      // await testcase.buyerSdk.connect();
       resolve();
     } catch (err: unknown) {
       reject(err);
@@ -65,37 +61,13 @@ async function setupMockRippledConnectionForBroadcast(
   });
 }
 
-async function setupClient(this: unknown): Promise<void> {
-  return getFreePort().then(async (port) => {
-    return setupMockRippledConnection(this, port);
-  });
-}
-
-async function setupBroadcast(this: unknown): Promise<void> {
+export async function setupBroadcast(this: unknown): Promise<void> {
   return Promise.all([getFreePort()]).then(async (ports) => {
     return setupMockRippledConnectionForBroadcast(this, ports);
   });
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Typing is too complicated
-async function teardownClient(this: any, done: () => void): Promise<void> {
-  await this.sellerSdk.disconnect();
-  await this.buyerSdk.disconnect();
-  this.client
-    .disconnect()
-    .then(() => {
-      // eslint-disable-next-line no-negated-condition -- Easier to read with negation
-      if (this.mockRippled != null) {
-        this.mockRippled.close();
-      } else {
-        this.mocks.forEach((mock: { close: () => void }) => mock.close());
-      }
-      setImmediate(done);
-    })
-    .catch(done);
-}
-
-export { setupClient, teardownClient, setupBroadcast, createMockRippled };
+export { createMockRippled };
 
 /**
  * Remote Client

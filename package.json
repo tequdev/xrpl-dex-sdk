@@ -2,14 +2,18 @@
   "name": "xrpl-dex-sdk",
   "version": "1.0.0",
   "description": "TypeScript SDK for interacting with the XRPL decentralized exchange",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "repository": "https://github.com/AktaryTech/xrpl-dex-sdk.git",
+  "author": "AktaryTech <info@aktarytech.com>",
+  "maintainers": [
+    "AktaryTech <info@aktarytech.com>"
+  ],
   "main": "src/index.ts",
   "scripts": {
     "build": "tsc",
     "watch": "yarn build --watch",
     "clean": "rm -rf dist",
-    "test": "DEBUG=xrpl-dex-sdk nyc mocha --config=test/.mocharc.json --exit",
+    "test": "nyc mocha --config=test/.mocharc.json --exit",
     "test:watch": "TS_NODE_PROJECT=./tsconfig.json mocha --config=test/.mocharc.json --watch --reporter dot",
     "format": "prettier --write '{src,test}/**/*.ts",
     "lint": "eslint . --ext .ts --max-warnings 0",
