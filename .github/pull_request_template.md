@@ -1,7 +1,3 @@
-## Notes
-
-Jira: [_ticketNumber_]
-
 ### Summary
 
 _Summarize the changes, the thinking behind the changes, etc_

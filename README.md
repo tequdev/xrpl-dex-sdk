@@ -2,7 +2,7 @@
 
 This TypeScript SDK provides a [CCXT-compatible API](https://docs.ccxt.com/en/latest/manual.html?#unified-api) for interacting with the [XRPL decentralized exchange](https://xrpl.org/decentralized-exchange.html).
 
-A Python version of this SDK is available [here](https://github.com/AktaryTech/xrpl-dex-sdk-python).
+A Python version of this SDK is available [here](https://pypi.org/project/xrpl-dex-sdk/).
 
 ## Installation
 
@@ -14,8 +14,16 @@ This package requires [NodeJS v16](https://nodejs.org/en/blog/release/v16.16.0/)
 
 Add the SDK package to your project:
 
+#### Using NPM
+
 ```
 $ npm install -S xrpl-dex-sdk
+```
+
+#### Using Yarn
+
+```
+$ yarn add xrpl-dex-sdk
 ```
 
 ### From Source
@@ -123,7 +131,7 @@ It produces the following output:
 
 ## Methods
 
-For full SDK documentation, load [`docs/index.html`](docs/index.html) in your browser. Run `yarn docs:build` to re-generate documentation.
+For full SDK documentation, see the `docs` folder. To re-generate documentation, run `yarn docs:build`.
 
 ## Further Reading
 

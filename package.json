@@ -1,6 +1,6 @@
 {
   "name": "xrpl-dex-sdk",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "TypeScript SDK for interacting with the XRPL decentralized exchange",
   "license": "MIT",
   "repository": "https://github.com/AktaryTech/xrpl-dex-sdk.git",
