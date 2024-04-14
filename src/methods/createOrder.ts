@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import { OfferCreate, setTransactionFlagsToNumber } from 'xrpl';
 import { CURRENCY_PRECISION } from '../constants';
 import {
@@ -63,7 +62,6 @@ async function createOrder(
     Account: sdk.wallet.classicAddress,
     Flags: {
       ...params.flags,
-      tfSell: side === 'sell',
     },
     TakerGets: baseAmountKey === 'TakerGets' ? baseAmount : quoteAmount,
     TakerPays: baseAmountKey === 'TakerPays' ? baseAmount : quoteAmount,

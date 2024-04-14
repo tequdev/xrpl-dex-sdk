@@ -1,12 +1,11 @@
-import _ from 'lodash';
 import { assert } from 'chai';
 import 'mocha';
 
+import { xrpToDrops } from 'xrpl';
 import { MarketSymbol, XrplNetwork } from '../../src/models';
-import { setupRemoteSDK, teardownRemoteSDK } from '../setupClient';
-import { OfferCreateFlags, xrpToDrops } from 'xrpl';
-import { requests } from '../fixtures';
 import { BN, parseCurrencyCode, parseMarketSymbol } from '../../src/utils';
+import { requests } from '../fixtures';
+import { setupRemoteSDK, teardownRemoteSDK } from '../setupClient';
 
 const TIMEOUT = 25000;
 const NETWORK = XrplNetwork.Testnet;
@@ -32,7 +31,6 @@ describe('createOrder', function () {
 
     const tx = newOrder.info.OfferCreate.result;
     assert(tx.Account === this.sdk.wallet.classicAddress, 'Account does not match');
-    assert((tx.Flags & OfferCreateFlags.tfSell) === 0, 'Flags do not match');
     // Base
     assert(tx.TakerPays.currency === base.currency, 'TakerPays currency does not match');
     assert(tx.TakerPays.issuer === base.issuer, 'TakerPays issuer does not match');
@@ -53,7 +51,6 @@ describe('createOrder', function () {
 
     const tx = newOrder.info.OfferCreate.result;
     assert(tx.Account === this.sdk.wallet.classicAddress, 'Account does not match');
-    assert((tx.Flags & OfferCreateFlags.tfSell) === OfferCreateFlags.tfSell, 'Flags do not match');
     // Base
     assert(tx.TakerGets === xrpToDrops(baseValue), 'TakerGets currency does not match');
     // Quote

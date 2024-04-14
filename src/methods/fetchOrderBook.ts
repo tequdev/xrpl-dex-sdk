@@ -1,15 +1,14 @@
 import { randomUUID } from 'crypto';
-import _ from 'lodash';
 import { BookOffersRequest } from 'xrpl';
 import { CURRENCY_PRECISION, DEFAULT_LIMIT, DEFAULT_SEARCH_LIMIT } from '../constants';
 import {
-  OrderBookAsk,
-  MarketSymbol,
+  ArgumentsRequired,
   FetchOrderBookParams,
   FetchOrderBookResponse,
-  OrderBookBid,
+  MarketSymbol,
   OrderBook,
-  ArgumentsRequired,
+  OrderBookAsk,
+  OrderBookBid,
 } from '../models';
 import SDK from '../sdk';
 import { getSharedOrderData, getTakerAmount, parseMarketSymbol, validateMarketSymbol } from '../utils';
@@ -63,7 +62,7 @@ async function fetchOrderBook(
   const asks: OrderBookAsk[] = [];
 
   for (const offer of offers) {
-    const sharedData = await getSharedOrderData.call(sdk, offer);
+    const sharedData = await getSharedOrderData.call(sdk, offer, symbol);
 
     if (!sharedData) continue;
 

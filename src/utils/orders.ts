@@ -5,6 +5,7 @@ import {
   AccountTxRequest,
   AccountTxResponse,
   Client,
+  decodeAccountID,
   dropsToXrp,
   ErrorResponse,
   LedgerEntryRequest,
@@ -18,32 +19,33 @@ import {
   TxResponse,
 } from 'xrpl';
 import { Amount, LedgerIndex } from 'xrpl/dist/npm/models/common';
-import { Offer, OfferFlags } from 'xrpl/dist/npm/models/ledger';
+import { Offer } from 'xrpl/dist/npm/models/ledger';
 import { hashOfferId } from 'xrpl/dist/npm/utils/hashes';
 import { CURRENCY_PRECISION, DEFAULT_LIMIT, DEFAULT_SEARCH_LIMIT } from '../constants';
 import {
   AccountAddress,
-  OrderId,
   AccountTransaction,
+  AffectedNode,
+  BadOrderId,
+  DeletedNode,
+  LedgerEntryType,
   LedgerTransaction,
+  MarketSymbol,
   Node,
+  Order,
+  OrderId,
+  OrderNotFound,
   OrderSide,
+  OrderSourceData,
+  OrderStatus,
+  OrderTimeInForce,
+  SDKContext,
+  Sequence,
+  Trade,
+  TradeSourceData,
   TransactionData,
   TxResult,
   XrplErrorTypes,
-  Sequence,
-  OrderStatus,
-  Trade,
-  TradeSourceData,
-  SDKContext,
-  OrderSourceData,
-  OrderTimeInForce,
-  LedgerEntryType,
-  Order,
-  BadOrderId,
-  OrderNotFound,
-  DeletedNode,
-  AffectedNode,
 } from '../models';
 import { getAmountCurrencyCode, getAmountIssuer, getMarketSymbol, getMarketSymbolFromAmount } from './conversions';
 import { BN, parseAmountValue, subtractAmounts } from './numbers';
@@ -129,17 +131,29 @@ export const validateOrderId = (orderId: OrderId) => {
 export const getOrderId = (account: AccountAddress, sequence: Sequence): OrderId => `${account}:${sequence}`;
 
 /**
- * Parses an Offer's flags and returns its side (buy or sell).
+ * Returns offer side (buy or sell).
  *
- * @param flags XRPL flags to evaluate
+ * @param source Offer or Transaction data to parse
  * @returns OrderSide
  */
-export const getOrderSideFromFlags = (flags: number): OrderSide =>
-  (flags & OfferFlags.lsfSell) === OfferFlags.lsfSell
-    ? 'sell'
-    : (flags & OfferCreateFlags.tfSell) === OfferCreateFlags.tfSell
-    ? 'sell'
-    : 'buy';
+export const getOrderSideFromSource = (source: Record<string, any>): OrderSide => {
+  const buyAmount = source[getBaseAmountKey('buy')];
+  const sellAmount = source[getBaseAmountKey('sell')];
+  if (typeof buyAmount === 'string') return 'buy';
+  else if (typeof sellAmount === 'string') return 'sell';
+
+  const buyAmountIssuerId = decodeAccountID(buyAmount.issuer);
+  const sellAmountIssuerId = decodeAccountID(sellAmount.issuer);
+  const comparedIssuer = buyAmountIssuerId.compare(sellAmountIssuerId);
+  if (comparedIssuer === 1) return 'buy';
+  else if (comparedIssuer === -1) return 'sell';
+
+  const buyCurrency = getAmountCurrencyCode(buyAmount);
+  const sellCurrency = getAmountCurrencyCode(sellAmount);
+
+  if (buyCurrency.localeCompare(sellCurrency)) return 'buy';
+  else return 'sell';
+};
 
 /**
  * Parses an Order and returns its Time In Force.
@@ -260,13 +274,16 @@ export const getOfferFromTransaction = (
 /**
  * Get Base and Quote Currency data.
  *
+ * @param market symbol
  * @param source Offer or Transaction data to parse
  * @returns Data object with Base/Quote information
  */
-export const getBaseAndQuoteData = (source: Record<string, any>) => {
+export const getBaseAndQuoteData = (symbol: MarketSymbol, source: Record<string, any>) => {
   const data: Record<string, any> = {};
 
-  data.side = (source.Flags & OfferFlags.lsfSell) === OfferFlags.lsfSell ? 'sell' : 'buy';
+  const symbolFromSource = getMarketSymbolFromAmount(source[getBaseAmountKey('buy')], source[getBaseAmountKey('sell')]);
+
+  data.side = symbolFromSource === symbol ? 'buy' : 'sell';
 
   data.baseAmount = source[getBaseAmountKey(data.side)];
   data.baseValue = BN(
@@ -294,8 +311,9 @@ export const getBaseAndQuoteData = (source: Record<string, any>) => {
  *
  * @param source Order data object to parse
  */
-export async function getSharedOrderData(this: SDKContext, source: Record<string, any>) {
-  const data = getBaseAndQuoteData(source);
+export async function getSharedOrderData(this: SDKContext, source: Record<string, any>, symbol?: MarketSymbol) {
+  if (!symbol) symbol = getMarketSymbol(source);
+  const data = getBaseAndQuoteData(symbol, source);
 
   if (!data) return;
 
