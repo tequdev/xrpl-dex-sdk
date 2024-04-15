@@ -1,18 +1,17 @@
-import _ from 'lodash';
 import { rippleTimeToUnixTime } from 'xrpl';
 import { Amount } from 'xrpl/dist/npm/models/common';
 import { DEFAULT_LIMIT, DEFAULT_SEARCH_LIMIT } from '../constants';
-import SDK from '../sdk';
 import {
+  AccountAddress,
+  ArgumentsRequired,
   FetchMyTradesParams,
   FetchMyTradesResponse,
   MarketSymbol,
-  UnixTimestamp,
-  Trade,
-  ArgumentsRequired,
-  AccountAddress,
   Sequence,
+  Trade,
+  UnixTimestamp,
 } from '../models';
+import SDK from '../sdk';
 import { fetchAccountTxns, getMarketSymbol, getOfferFromNode, getTradeFromData, validateMarketSymbol } from '../utils';
 
 /**

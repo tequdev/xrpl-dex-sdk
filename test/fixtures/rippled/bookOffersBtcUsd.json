@@ -3,15 +3,16 @@
   "status": "success",
   "type": "response",
   "result": {
-    "ledger_current_index": 10714274,
+    "ledger_hash": "BEC66B0057B89B5661A1841E4FC512BB6CD0378F519D6FC7477F70EA577B8D92",
+    "ledger_index": 10714274,
     "offers": [
       {
         "Account": "rwBYyfufTzk77zUSKEu4MvixfarC35av1J",
         "BookDirectory": "6EAB7C172DEFA430DBFAD120FDC373B5F5AF8B191649EC98570B9980E49C7DE8",
-        "BookNode": "0000000000000000",
+        "BookNode": "0",
         "Flags": 0,
         "LedgerEntryType": "Offer",
-        "OwnerNode": "0000000000000008",
+        "OwnerNode": "8",
         "PreviousTxnID": "92DBA0BE18B331AC61FB277211477A255D3B5EA9C5FE689171DE689FB45FE18A",
         "PreviousTxnLgrSeq": 10714030,
         "Sequence": 386940,
@@ -32,10 +33,10 @@
       {
         "Account": "rwjsRktX1eguUr1pHTffyHnC4uyrvX58V1",
         "BookDirectory": "6EAB7C172DEFA430DBFAD120FDC373B5F5AF8B191649EC98570BBF1EEFA2FB0A",
-        "BookNode": "0000000000000000",
+        "BookNode": "0",
         "Flags": 0,
         "LedgerEntryType": "Offer",
-        "OwnerNode": "0000000000000000",
+        "OwnerNode": "0",
         "PreviousTxnID": "C6BDA152363E3CFE18688A6830B49F3DB2B05976110B5908EA4EB66D93DEEB1F",
         "PreviousTxnLgrSeq": 10714031,
         "Sequence": 207855,
@@ -56,11 +57,11 @@
       {
         "Account": "raudnGKfTK23YKfnS7ixejHrqGERTYNFXk",
         "BookDirectory": "6EAB7C172DEFA430DBFAD120FDC373B5F5AF8B191649EC98570BC3A506FC016F",
-        "BookNode": "0000000000000000",
+        "BookNode": "0",
         "Expiration": 472785283,
         "Flags": 131072,
         "LedgerEntryType": "Offer",
-        "OwnerNode": "00000000000008F0",
+        "OwnerNode": "8f0",
         "PreviousTxnID": "77E763F1D02F58965CD1AD94F557B37A582FAC7760B71F391B856959836C2F7B",
         "PreviousTxnLgrSeq": 10713576,
         "Sequence": 110103,
@@ -78,6 +79,7 @@
         "owner_funds": "4.021116654525635",
         "quality": "331.1338298016111"
       }
-    ]
+    ],
+    "validated": true
   }
 }

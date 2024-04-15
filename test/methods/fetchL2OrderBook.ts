@@ -11,7 +11,8 @@ describe('fetchL2OrderBook', function () {
 
   it('should return an L2 OrderBook object', async function () {
     this.mockRippled.addResponse('account_info', fetchL2OrderBook.mocks.account_info);
-    this.mockRippled.addResponse('book_offers', fetchL2OrderBook.mocks.book_offers);
+    this.mockRippled.addResponseOnce('book_offers', fetchL2OrderBook.mocks.book_offers1);
+    this.mockRippled.addResponseOnce('book_offers', fetchL2OrderBook.mocks.book_offers2);
 
     const { symbol, limit, params } = fetchL2OrderBook.request;
     const l2OrderBook = await this.sdk.fetchL2OrderBook(symbol, limit, params);
