@@ -1,5 +1,4 @@
 import { EventEmitter2 } from 'eventemitter2';
-import _ from 'lodash';
 import { Server as WebSocketServer } from 'ws';
 
 import { Request, XrplError } from 'xrpl';
@@ -46,6 +45,7 @@ export default function createMockRippled(port: number): MockedWebSocketServer {
   Object.assign(mock, EventEmitter2.prototype);
 
   mock.responses = {};
+  mock.responsesOnce = {};
   mock.suppressOutput = false;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Typing is too complicated otherwise
@@ -65,7 +65,7 @@ export default function createMockRippled(port: number): MockedWebSocketServer {
           ping(conn, request);
         } else if (request.command === 'test_command') {
           mock.testCommand(conn, request);
-        } else if (request.command in mock.responses) {
+        } else if (request.command in mock.responses || request.command in mock.responsesOnce) {
           conn.send(createResponse(request, mock.getResponse(request)));
         } else {
           throw new XrplError(
@@ -113,9 +113,31 @@ export default function createMockRippled(port: number): MockedWebSocketServer {
     mock.responses[command] = response;
   };
 
+  mock.addResponseOnce = function (
+    command: string,
+    response: Response | ErrorResponse | ((r: Request) => Response | ErrorResponse)
+  ): void {
+    if (typeof command !== 'string') {
+      throw new XrplError('command is not a string');
+    }
+    if (typeof response === 'object' && !('type' in response) && !('error' in response)) {
+      throw new XrplError(`Bad response format. Must contain \`type\` or \`error\`. ${JSON.stringify(response)}`);
+    }
+    if (mock.responsesOnce[command]) mock.responsesOnce[command].push(response);
+    else mock.responsesOnce[command] = [response];
+  };
+
   mock.getResponse = (request: Request): Record<string, unknown> => {
-    if (!(request.command in mock.responses)) {
+    if (!(request.command in mock.responses || request.command in mock.responsesOnce)) {
       throw new XrplError(`No handler for ${request.command}`);
+    }
+    let onceFunctionOrObjectArray = mock.responsesOnce[request.command];
+    if (Array.isArray(onceFunctionOrObjectArray) && onceFunctionOrObjectArray.length > 0) {
+      const obj = onceFunctionOrObjectArray.shift();
+      mock.responsesOnce[request.command] =
+        onceFunctionOrObjectArray.length === 0 ? undefined : onceFunctionOrObjectArray;
+      if (typeof obj === 'function') return obj(request) as Record<string, unknown>;
+      return obj as Record<string, unknown>;
     }
     const functionOrObject = mock.responses[request.command];
     if (typeof functionOrObject === 'function') {

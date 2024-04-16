@@ -1,9 +1,8 @@
-import _ from 'lodash';
 import { Readable } from 'stream';
 import { OfferCreate, SubscribeRequest, TransactionStream } from 'xrpl';
 import { ResponseOnlyTxInfo } from 'xrpl/dist/npm/models/common';
 import { Offer } from 'xrpl/dist/npm/models/ledger';
-import { MarketSymbol, WatchOrdersParams, Node, Order, Trade, OrderStatus, WatchOrdersResponse } from '../models';
+import { MarketSymbol, Node, Order, OrderStatus, Trade, WatchOrdersParams, WatchOrdersResponse } from '../models';
 import SDK from '../sdk';
 import {
   BN,
@@ -11,6 +10,7 @@ import {
   getOfferFromNode,
   getOrderFromData,
   getTradeFromData,
+  reverseSymbol,
   validateMarketSymbol,
 } from '../utils';
 
@@ -54,7 +54,7 @@ async function watchOrders(
     if (!transaction.Sequence) return;
 
     /** Filter by symbol (if applicable) */
-    if (symbol && getMarketSymbol(transaction) !== symbol) return;
+    if (symbol && ![symbol, reverseSymbol(symbol)].includes(getMarketSymbol(transaction))) return;
 
     const tradeOffers: Offer[] = [];
     const parsedNodes: Node[] = [];

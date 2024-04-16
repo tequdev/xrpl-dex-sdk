@@ -1,12 +1,11 @@
-import _ from 'lodash';
 import { assert } from 'chai';
 import 'mocha';
 
-import { requests } from '../fixtures';
+import { xrpToDrops } from 'xrpl';
 import { MarketSymbol, XrplNetwork } from '../../src/models';
-import { setupRemoteSDK, teardownRemoteSDK } from '../setupClient';
 import { BN, parseCurrencyCode, parseMarketSymbol } from '../../src/utils';
-import { OfferCreateFlags, xrpToDrops } from 'xrpl';
+import { requests } from '../fixtures';
+import { setupRemoteSDK, teardownRemoteSDK } from '../setupClient';
 
 const TIMEOUT = 20000;
 const NETWORK = XrplNetwork.Testnet;
@@ -32,7 +31,6 @@ describe('createLimitBuyOrder', function () {
 
     const tx = newOrder.info.OfferCreate.result;
     assert(tx.Account === this.sdk.wallet.classicAddress, 'Account does not match');
-    assert((tx.Flags & OfferCreateFlags.tfSell) === 0, 'Flags do not match');
     // Base
     assert(tx.TakerPays.currency === base.currency, 'TakerPays currency does not match');
     assert(tx.TakerPays.issuer === base.issuer, 'TakerPays issuer does not match');

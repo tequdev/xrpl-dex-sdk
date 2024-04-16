@@ -1,8 +1,19 @@
 import { xrpToDrops } from 'xrpl';
 import { Amount } from 'xrpl/dist/npm/models/common';
 import { TakerAmount } from 'xrpl/dist/npm/models/methods/bookOffers';
-import { AccountAddress, BigNumberish, CurrencyCode, IssuerAddress, MarketSymbol, BadSymbol } from '../models';
-import { getBaseAmountKey, getOrderSideFromFlags, getQuoteAmountKey } from './orders';
+import { AccountAddress, BadSymbol, BigNumberish, CurrencyCode, IssuerAddress, MarketSymbol } from '../models';
+import { getBaseAmountKey, getOrderSideFromSource, getQuoteAmountKey } from './orders';
+
+/**
+ * Given a MarketSymbol string (base/quote), returns its reversed symbol(quote/base).
+ *
+ * @param symbol - Given market symbol
+ * @returns MarketSymbol
+ */
+export const reverseSymbol = (symbol: MarketSymbol): MarketSymbol => {
+  const [base, quote] = symbol.split('/');
+  return getMarketSymbolFromAmount(quote, base);
+};
 
 /**
  * Given a MarketSymbol string, returns its Base and Quote currencies.
@@ -22,7 +33,7 @@ export const parseMarketSymbol = (symbol: MarketSymbol): [base: CurrencyCode, qu
  * @returns
  */
 export const getMarketSymbol = (source: Record<string, any>) => {
-  const side = getOrderSideFromFlags(source.Flags);
+  const side = getOrderSideFromSource(source);
   return getMarketSymbolFromAmount(source[getBaseAmountKey(side)], source[getQuoteAmountKey(side)]);
 };
 

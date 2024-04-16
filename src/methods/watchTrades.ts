@@ -1,16 +1,16 @@
-import _ from 'lodash';
 import { Readable } from 'stream';
-import { OfferCreateFlags, SubscribeRequest, TransactionStream } from 'xrpl';
+import { SubscribeRequest, TransactionStream } from 'xrpl';
 import { Offer } from 'xrpl/dist/npm/models/ledger';
-import { MarketSymbol, Trade, AffectedNode, WatchTradesResponse, ArgumentsRequired } from '../models';
+import { AffectedNode, ArgumentsRequired, MarketSymbol, Trade, WatchTradesResponse } from '../models';
+import SDK from '../sdk';
 import {
   getBaseAmountKey,
   getMarketSymbolFromAmount,
+  getOrderSideFromSource,
   getQuoteAmountKey,
   getTradeFromData,
   validateMarketSymbol,
 } from '../utils';
-import SDK from '../sdk';
 
 /**
  * Listens for new {@link models.Trade}s for a given {@link models.Market}. Returns a Promise resolving to a
@@ -42,8 +42,7 @@ async function watchTrades(sdk: SDK, symbol: MarketSymbol): Promise<WatchTradesR
     )
       return;
 
-    const side =
-      typeof transaction.Flags === 'number' && !(transaction.Flags & OfferCreateFlags.tfSell) ? 'buy' : 'sell';
+    const side = getOrderSideFromSource(transaction);
 
     const marketSymbol = getMarketSymbolFromAmount(
       transaction[getBaseAmountKey(side)],

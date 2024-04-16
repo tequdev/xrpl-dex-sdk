@@ -16,7 +16,8 @@ describe('fetchOrderBook', function () {
   it('should return an OrderBook object', async function () {
     this.mockRippled.addResponse('account_info', rippled.account_info.issuer);
     this.mockRippled.addResponse('account_info', rippled.account_info.issuer);
-    this.mockRippled.addResponse('book_offers', rippled.book_offers.usdBtc);
+    this.mockRippled.addResponseOnce('book_offers', rippled.book_offers.usdBtc);
+    this.mockRippled.addResponseOnce('book_offers', rippled.book_offers.btcUsd);
 
     const { symbol, limit, params } = requests.fetchOrderBook;
     const orderBook = await this.sdk.fetchOrderBook(symbol, limit, params);

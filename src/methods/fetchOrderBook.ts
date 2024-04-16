@@ -1,15 +1,14 @@
 import { randomUUID } from 'crypto';
-import _ from 'lodash';
-import { BookOffersRequest } from 'xrpl';
+import { BookOffer, BookOffersRequest } from 'xrpl';
 import { CURRENCY_PRECISION, DEFAULT_LIMIT, DEFAULT_SEARCH_LIMIT } from '../constants';
 import {
-  OrderBookAsk,
-  MarketSymbol,
+  ArgumentsRequired,
   FetchOrderBookParams,
   FetchOrderBookResponse,
-  OrderBookBid,
+  MarketSymbol,
   OrderBook,
-  ArgumentsRequired,
+  OrderBookAsk,
+  OrderBookBid,
 } from '../models';
 import SDK from '../sdk';
 import { getSharedOrderData, getTakerAmount, parseMarketSymbol, validateMarketSymbol } from '../utils';
@@ -44,43 +43,57 @@ async function fetchOrderBook(
   const baseAmount = getTakerAmount(baseCurrency);
   const quoteAmount = getTakerAmount(quoteCurrency);
 
-  const orderBookRequest: BookOffersRequest = {
-    id: randomUUID(),
+  let offers: BookOffer[] = [];
+  let ledger_index: number | undefined;
+
+  let orderBookRequestBase: any = {
     command: 'book_offers',
-    taker_pays: baseAmount,
-    taker_gets: quoteAmount,
     limit: searchLimit,
-    both: true,
   };
 
-  if (params.ledgerHash) orderBookRequest.ledger_hash = params.ledgerHash;
-  if (params.ledgerIndex) orderBookRequest.ledger_index = params.ledgerIndex;
+  if (params.ledgerHash) orderBookRequestBase.ledger_hash = params.ledgerHash;
+  if (params.ledgerIndex) orderBookRequestBase.ledger_index = params.ledgerIndex;
 
-  const orderBookResponse = await sdk.client.request(orderBookRequest);
-  const offers = orderBookResponse.result.offers;
+  for (let i = 0; i < 2; i++) {
+    const orderBookRequest: BookOffersRequest = {
+      ...orderBookRequestBase,
+      id: randomUUID(),
+      taker_pays: i === 0 ? baseAmount : quoteAmount,
+      taker_gets: i === 0 ? quoteAmount : baseAmount,
+    };
+    const orderBookResponse = await sdk.client.request(orderBookRequest);
+    offers = [...offers, ...orderBookResponse.result.offers];
+    ledger_index = orderBookResponse.result.ledger_index;
+  }
 
   const bids: OrderBookBid[] = [];
   const asks: OrderBookAsk[] = [];
 
   for (const offer of offers) {
-    const sharedData = await getSharedOrderData.call(sdk, offer);
+    const sharedData = await getSharedOrderData.call(sdk, offer, symbol);
 
     if (!sharedData) continue;
 
     const { side, price, amount } = sharedData;
 
-    const orderBookEntry = [
-      (+price.toPrecision(CURRENCY_PRECISION)).toString(),
-      (+amount.toPrecision(CURRENCY_PRECISION)).toString(),
-    ];
-
-    if (side === 'sell') asks.push(orderBookEntry as OrderBookAsk);
-    else bids.push(orderBookEntry as OrderBookBid);
-
-    if (bids.length + asks.length > limit) break;
+    if (side === 'sell') {
+      if (asks.length > limit) break;
+      const orderBookEntry = [
+        (+price.toPrecision(CURRENCY_PRECISION)).toString(),
+        (+amount.toPrecision(CURRENCY_PRECISION)).toString(),
+      ];
+      asks.push(orderBookEntry as OrderBookAsk);
+    } else {
+      if (bids.length > limit) break;
+      const orderBookEntry = [
+        (+price.toPrecision(CURRENCY_PRECISION)).toString(),
+        (+amount.toPrecision(CURRENCY_PRECISION)).toString(),
+      ];
+      bids.push(orderBookEntry as OrderBookBid);
+    }
   }
 
-  const nonce = orderBookResponse.result.ledger_index ?? Date.now();
+  const nonce = ledger_index ?? Date.now();
 
   const response: OrderBook = {
     symbol,

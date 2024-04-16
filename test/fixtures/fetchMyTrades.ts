@@ -1,4 +1,4 @@
-const request = 'USD+rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq/XRP';
+const request = 'XRP/USD+rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq';
 
 const mocks = {
   account_info: {
