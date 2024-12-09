@@ -343,7 +343,7 @@ export async function getSharedOrderData(this: SDKContext, source: Record<string
 export const getOrderFeeFromData = (feeCost: BigNumber, source: Record<string, any>) => {
   if (feeCost.isGreaterThan(0)) {
     return {
-      currency: source.quoteCurrency,
+      currency: source.feeCurrency,
       cost: (+feeCost.toPrecision(CURRENCY_PRECISION)).toString(),
       rate: (+source.feeRate.toPrecision(CURRENCY_PRECISION)).toString(),
       percentage: true,
