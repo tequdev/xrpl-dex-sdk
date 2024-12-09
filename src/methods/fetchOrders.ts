@@ -1,7 +1,6 @@
-import _ from 'lodash';
 import { LedgerRequest, rippleTimeToUnixTime } from 'xrpl';
 import { DEFAULT_LIMIT, DEFAULT_SEARCH_LIMIT } from '../constants';
-import { FetchOrdersParams, FetchOrdersResponse, MarketSymbol, UnixTimestamp, Order, DeletedNode } from '../models';
+import { DeletedNode, FetchOrdersParams, FetchOrdersResponse, MarketSymbol, Order, UnixTimestamp } from '../models';
 import SDK from '../sdk';
 import { getMarketSymbol, getOrderId, validateMarketSymbol } from '../utils';
 
@@ -80,7 +79,7 @@ async function fetchOrders(
       /** Filter by market symbol if `symbol` is defined */
 
       if (symbol) {
-        let txSymbol;
+        let txSymbol: `${string}/${string}` | undefined;
         if (transaction.TransactionType === 'OfferCancel') {
           for (const node of transaction.metaData.AffectedNodes) {
             if (node.hasOwnProperty('DeletedNode')) {

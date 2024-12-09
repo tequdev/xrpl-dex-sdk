@@ -24,7 +24,6 @@ describe('fetchOpenOrders', function () {
       undefined,
       2
     );
-
     assert(orders.length === 2);
     assert(JSON.stringify(orders) === JSON.stringify(fetchOrders.expectedResponse));
   });

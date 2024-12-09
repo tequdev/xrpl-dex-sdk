@@ -5,7 +5,6 @@ import {
   AccountTxRequest,
   AccountTxResponse,
   Client,
-  decodeAccountID,
   dropsToXrp,
   ErrorResponse,
   LedgerEntryRequest,
@@ -139,20 +138,22 @@ export const getOrderId = (account: AccountAddress, sequence: Sequence): OrderId
 export const getOrderSideFromSource = (source: Record<string, any>): OrderSide => {
   const buyAmount = source[getBaseAmountKey('buy')];
   const sellAmount = source[getBaseAmountKey('sell')];
-  if (typeof buyAmount === 'string') return 'buy';
-  else if (typeof sellAmount === 'string') return 'sell';
+  if (typeof buyAmount === 'string') return 'sell'; // sell IOU for XRP
+  else if (typeof sellAmount === 'string') return 'buy'; // buy IOU for XRP
 
-  const buyAmountIssuerId = decodeAccountID(buyAmount.issuer);
-  const sellAmountIssuerId = decodeAccountID(sellAmount.issuer);
-  const comparedIssuer = buyAmountIssuerId.compare(sellAmountIssuerId);
-  if (comparedIssuer === 1) return 'buy';
-  else if (comparedIssuer === -1) return 'sell';
+  throw new Error('Not yet implemented for IOU-IOU');
 
-  const buyCurrency = getAmountCurrencyCode(buyAmount);
-  const sellCurrency = getAmountCurrencyCode(sellAmount);
+  // const buyAmountIssuerId = decodeAccountID(buyAmount.issuer);
+  // const sellAmountIssuerId = decodeAccountID(sellAmount.issuer);
+  // const comparedIssuer = buyAmountIssuerId.compare(sellAmountIssuerId);
+  // if (comparedIssuer === 1) return 'buy';
+  // else if (comparedIssuer === -1) return 'sell';
 
-  if (buyCurrency.localeCompare(sellCurrency)) return 'buy';
-  else return 'sell';
+  // const buyCurrency = getAmountCurrencyCode(buyAmount);
+  // const sellCurrency = getAmountCurrencyCode(sellAmount);
+
+  // if (buyCurrency.localeCompare(sellCurrency)) return 'buy';
+  // else return 'sell';
 };
 
 /**
@@ -313,6 +314,7 @@ export const getBaseAndQuoteData = (symbol: MarketSymbol, source: Record<string,
  */
 export async function getSharedOrderData(this: SDKContext, source: Record<string, any>, symbol?: MarketSymbol) {
   if (!symbol) symbol = getMarketSymbol(source);
+  if (!symbol) return;
   const data = getBaseAndQuoteData(symbol, source);
 
   if (!data) return;
