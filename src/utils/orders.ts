@@ -282,9 +282,7 @@ export const getOfferFromTransaction = (
 export const getBaseAndQuoteData = (symbol: MarketSymbol, source: Record<string, any>) => {
   const data: Record<string, any> = {};
 
-  const symbolFromSource = getMarketSymbolFromAmount(source[getBaseAmountKey('buy')], source[getBaseAmountKey('sell')]);
-
-  data.side = symbolFromSource === symbol ? 'buy' : 'sell';
+  data.side = getOrderSideFromSource(source);
 
   data.baseAmount = source[getBaseAmountKey(data.side)];
   data.baseValue = BN(

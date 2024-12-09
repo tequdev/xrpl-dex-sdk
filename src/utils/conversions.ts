@@ -12,7 +12,14 @@ import { getBaseAmountKey, getOrderSideFromSource, getQuoteAmountKey } from './o
  */
 export const reverseSymbol = (symbol: MarketSymbol): MarketSymbol => {
   const [base, quote] = symbol.split('/');
-  return getMarketSymbolFromAmount(quote, base);
+  return `${quote}/${base}` as MarketSymbol;
+};
+
+export const normalizeSymbol = (symbol: MarketSymbol): MarketSymbol => {
+  const [base, quote] = symbol.split('/');
+  if (base === 'XRP') return reverseSymbol(symbol);
+  if (quote === 'XRP') return symbol;
+  return symbol;
 };
 
 /**
