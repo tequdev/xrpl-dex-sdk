@@ -1,10 +1,8 @@
-import _ from 'lodash';
 import { assert } from 'chai';
 import 'mocha';
 
+import { FetchOrderResponse, XrplNetwork } from '../../src/models';
 import { requests } from '../fixtures';
-import { FetchOrderResponse } from '../../src/models';
-import { XrplNetwork } from '../../src/models';
 import { setupRemoteSDK, teardownRemoteSDK } from '../setupClient';
 
 const TIMEOUT = 25000;

@@ -12,7 +12,14 @@ import {
   UnixTimestamp,
 } from '../models';
 import SDK from '../sdk';
-import { fetchAccountTxns, getMarketSymbol, getOfferFromNode, getTradeFromData, validateMarketSymbol } from '../utils';
+import {
+  fetchAccountTxns,
+  getMarketSymbol,
+  getOfferFromNode,
+  getTradeFromData,
+  normalizeSymbol,
+  validateMarketSymbol,
+} from '../utils';
 
 /**
  * Fetch the SDK user's {@link models.Trade}s for a given market symbol. Returns a {@link models.FetchMyTradesResponse}.
@@ -63,7 +70,7 @@ async function fetchMyTrades(
         typeof transaction.meta !== 'object' ||
         transaction.tx.TransactionType !== 'OfferCreate' ||
         !transaction.tx.date ||
-        getMarketSymbol(transaction.tx) !== symbol
+        getMarketSymbol(transaction.tx) !== normalizeSymbol(symbol)
       )
         continue;
 

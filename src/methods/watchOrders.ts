@@ -54,7 +54,9 @@ async function watchOrders(
     if (!transaction.Sequence) return;
 
     /** Filter by symbol (if applicable) */
-    if (symbol && ![symbol, reverseSymbol(symbol)].includes(getMarketSymbol(transaction))) return;
+    let txSymbol = getMarketSymbol(transaction);
+    if (!txSymbol) return;
+    if (symbol && ![symbol, reverseSymbol(symbol)].includes(txSymbol)) return;
 
     const tradeOffers: Offer[] = [];
     const parsedNodes: Node[] = [];

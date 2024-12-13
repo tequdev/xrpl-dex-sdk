@@ -103,6 +103,8 @@ export async function setupRemoteSDK(
     sdkParams.walletPrivateKey = walletPrivateKey;
     sdkParams.walletPublicKey = walletPublicKey;
   } else {
+    // r9euB9DopZQsMYDHK9VLRbSsh7nsgQexrh
+    // sdkParams.walletSecret = 'sEd7v7TfHUtvKz5EkiDE9wEBHHLyCSs';
     newWallet = Wallet.generate();
     sdkParams.walletPrivateKey = newWallet.privateKey;
     sdkParams.walletPublicKey = newWallet.publicKey;

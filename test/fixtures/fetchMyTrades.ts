@@ -6766,13 +6766,13 @@ const expectedResponse = [
     order: 'rpXhhWmCvDwkzNtRbm7mmD1vZqdfatQNEe:59349452',
     datetime: '2022-10-21T02:19:30.000Z',
     timestamp: 1666318770000,
-    symbol: 'XRP/USD+rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq',
+    symbol: 'USD+rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq/XRP',
     type: 'limit',
-    side: 'sell',
-    amount: '5254.779017',
-    price: '0.446230679963582',
-    takerOrMaker: 'maker',
-    cost: '2344.84361381427',
+    side: 'buy',
+    amount: '2344.84361381427',
+    price: '2.24099338055737',
+    takerOrMaker: 'taker',
+    cost: '5254.779017',
     info: {
       transaction: {
         meta: {
@@ -6859,7 +6859,9 @@ const expectedResponse = [
                 },
                 LedgerEntryType: 'AccountRoot',
                 LedgerIndex: '73F7B01109BB599FEDF75529CD8A6521890745E813DD45EC36A73828EDDD56BF',
-                PreviousFields: { Balance: '106694473102' },
+                PreviousFields: {
+                  Balance: '106694473102',
+                },
                 PreviousTxnID: '634E09AE83E884DC123F5A3816834227CFF76EAAE51BFDCDC74BEFA5FAB7AEC7',
                 PreviousTxnLgrSeq: 75200809,
               },

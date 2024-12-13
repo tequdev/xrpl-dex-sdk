@@ -5,7 +5,6 @@ import {
   AccountTxRequest,
   AccountTxResponse,
   Client,
-  decodeAccountID,
   dropsToXrp,
   ErrorResponse,
   LedgerEntryRequest,
@@ -139,20 +138,22 @@ export const getOrderId = (account: AccountAddress, sequence: Sequence): OrderId
 export const getOrderSideFromSource = (source: Record<string, any>): OrderSide => {
   const buyAmount = source[getBaseAmountKey('buy')];
   const sellAmount = source[getBaseAmountKey('sell')];
-  if (typeof buyAmount === 'string') return 'buy';
-  else if (typeof sellAmount === 'string') return 'sell';
+  if (typeof buyAmount === 'string') return 'sell'; // sell IOU for XRP
+  else if (typeof sellAmount === 'string') return 'buy'; // buy IOU for XRP
 
-  const buyAmountIssuerId = decodeAccountID(buyAmount.issuer);
-  const sellAmountIssuerId = decodeAccountID(sellAmount.issuer);
-  const comparedIssuer = buyAmountIssuerId.compare(sellAmountIssuerId);
-  if (comparedIssuer === 1) return 'buy';
-  else if (comparedIssuer === -1) return 'sell';
+  throw new Error('Not yet implemented for IOU-IOU');
 
-  const buyCurrency = getAmountCurrencyCode(buyAmount);
-  const sellCurrency = getAmountCurrencyCode(sellAmount);
+  // const buyAmountIssuerId = decodeAccountID(buyAmount.issuer);
+  // const sellAmountIssuerId = decodeAccountID(sellAmount.issuer);
+  // const comparedIssuer = buyAmountIssuerId.compare(sellAmountIssuerId);
+  // if (comparedIssuer === 1) return 'buy';
+  // else if (comparedIssuer === -1) return 'sell';
 
-  if (buyCurrency.localeCompare(sellCurrency)) return 'buy';
-  else return 'sell';
+  // const buyCurrency = getAmountCurrencyCode(buyAmount);
+  // const sellCurrency = getAmountCurrencyCode(sellAmount);
+
+  // if (buyCurrency.localeCompare(sellCurrency)) return 'buy';
+  // else return 'sell';
 };
 
 /**
@@ -281,9 +282,7 @@ export const getOfferFromTransaction = (
 export const getBaseAndQuoteData = (symbol: MarketSymbol, source: Record<string, any>) => {
   const data: Record<string, any> = {};
 
-  const symbolFromSource = getMarketSymbolFromAmount(source[getBaseAmountKey('buy')], source[getBaseAmountKey('sell')]);
-
-  data.side = symbolFromSource === symbol ? 'buy' : 'sell';
+  data.side = getOrderSideFromSource(source);
 
   data.baseAmount = source[getBaseAmountKey(data.side)];
   data.baseValue = BN(
@@ -313,6 +312,7 @@ export const getBaseAndQuoteData = (symbol: MarketSymbol, source: Record<string,
  */
 export async function getSharedOrderData(this: SDKContext, source: Record<string, any>, symbol?: MarketSymbol) {
   if (!symbol) symbol = getMarketSymbol(source);
+  if (!symbol) return;
   const data = getBaseAndQuoteData(symbol, source);
 
   if (!data) return;
@@ -343,7 +343,7 @@ export async function getSharedOrderData(this: SDKContext, source: Record<string
 export const getOrderFeeFromData = (feeCost: BigNumber, source: Record<string, any>) => {
   if (feeCost.isGreaterThan(0)) {
     return {
-      currency: source.quoteCurrency,
+      currency: source.feeCurrency,
       cost: (+feeCost.toPrecision(CURRENCY_PRECISION)).toString(),
       rate: (+source.feeRate.toPrecision(CURRENCY_PRECISION)).toString(),
       percentage: true,

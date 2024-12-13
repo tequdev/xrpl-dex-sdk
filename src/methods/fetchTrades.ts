@@ -1,19 +1,18 @@
-import _ from 'lodash';
 import { LedgerRequest, rippleTimeToUnixTime } from 'xrpl';
 import { Amount } from 'xrpl/dist/npm/models/common';
 import { DEFAULT_LIMIT, DEFAULT_SEARCH_LIMIT } from '../constants';
-import SDK from '../sdk';
 import {
+  AccountAddress,
+  ArgumentsRequired,
   FetchTradesParams,
   FetchTradesResponse,
   MarketSymbol,
-  UnixTimestamp,
-  Trade,
-  ArgumentsRequired,
-  AccountAddress,
   Sequence,
+  Trade,
+  UnixTimestamp,
 } from '../models';
-import { getMarketSymbol, getOfferFromNode, getTradeFromData, validateMarketSymbol } from '../utils';
+import SDK from '../sdk';
+import { getMarketSymbol, getOfferFromNode, getTradeFromData, normalizeSymbol, validateMarketSymbol } from '../utils';
 
 /**
  * Fetch {@link models.Trade}s for a given {@link models.MarketSymbol}. Returns a {@link models.FetchTradesResponse} with any
@@ -79,7 +78,7 @@ async function fetchTrades(
         !transaction.Sequence ||
         !transaction.metaData ||
         transaction.TransactionType !== 'OfferCreate' ||
-        getMarketSymbol(transaction) !== symbol
+        getMarketSymbol(transaction) !== normalizeSymbol(symbol)
       )
         continue;
 

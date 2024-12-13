@@ -1,9 +1,9 @@
 import _ from 'lodash';
 import 'mocha';
 
-import { setupLocalSDK, teardownLocalSDK } from '../setupClient';
-import { addresses, fetchOrder } from '../fixtures';
 import { assert } from 'chai';
+import { addresses, fetchOrder } from '../fixtures';
+import { setupLocalSDK, teardownLocalSDK } from '../setupClient';
 
 const TIMEOUT = 20000;
 

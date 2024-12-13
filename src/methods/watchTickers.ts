@@ -1,8 +1,8 @@
 import _ from 'lodash';
 import { Readable } from 'stream';
 import { SubscribeRequest, TransactionStream } from 'xrpl';
+import { ArgumentsRequired, MarketSymbol, Ticker, WatchTickersParams, WatchTickersResponse } from '../models';
 import SDK from '../sdk';
-import { MarketSymbol, WatchTickersParams, WatchTickersResponse, Ticker, ArgumentsRequired } from '../models';
 import { getMarketSymbol, validateMarketSymbol } from '../utils';
 
 /**
@@ -35,6 +35,7 @@ async function watchTickers(
     if (!tx.validated || tx.transaction.TransactionType !== 'OfferCreate') return;
 
     const symbol = getMarketSymbol(tx.transaction);
+    if (!symbol) return;
     validateMarketSymbol(symbol);
 
     if (!symbols.includes(symbol)) return;
