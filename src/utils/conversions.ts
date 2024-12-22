@@ -39,9 +39,9 @@ export const parseMarketSymbol = (symbol: MarketSymbol): [base: CurrencyCode, qu
  * @param source The Offer or Transaction object to parse
  * @returns
  */
-export const getMarketSymbol = (source: Record<string, any>): MarketSymbol | undefined => {
+export const getMarketSymbol = (source: Record<string, any>, symbol?: MarketSymbol): MarketSymbol | undefined => {
   try {
-    const side = getOrderSideFromSource(source);
+    const side = getOrderSideFromSource(source, symbol);
     return getMarketSymbolFromAmount(source[getBaseAmountKey(side)], source[getQuoteAmountKey(side)]);
   } catch (error) {
     return undefined;

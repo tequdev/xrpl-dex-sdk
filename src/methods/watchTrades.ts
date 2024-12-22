@@ -42,7 +42,7 @@ async function watchTrades(sdk: SDK, symbol: MarketSymbol): Promise<WatchTradesR
     )
       return;
 
-    const side = getOrderSideFromSource(transaction);
+    const side = getOrderSideFromSource(transaction, symbol);
 
     const marketSymbol = getMarketSymbolFromAmount(
       transaction[getBaseAmountKey(side)],

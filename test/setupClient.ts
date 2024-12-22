@@ -117,13 +117,13 @@ export async function setupRemoteSDK(
       this.sdk.client
         .fundWallet(this.sdk.wallet)
         .then(({ balance }: { balance: number }) => {
-          console.log(
-            'Generated wallet:\n  Address: %s\n  Public key: %s\n  Private key: %s\n  Balance: %s XRP',
-            this.sdk.wallet.classicAddress,
-            this.sdk.wallet.publicKey,
-            this.sdk.wallet.privateKey,
-            balance
-          );
+          // console.log(
+          //   'Generated wallet:\n  Address: %s\n  Public key: %s\n  Private key: %s\n  Balance: %s XRP',
+          //   this.sdk.wallet.classicAddress,
+          //   this.sdk.wallet.publicKey,
+          //   this.sdk.wallet.privateKey,
+          //   balance
+          // );
           if (done) done();
         })
         .catch((error: Error) => {

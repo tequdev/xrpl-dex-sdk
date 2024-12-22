@@ -135,11 +135,25 @@ export const getOrderId = (account: AccountAddress, sequence: Sequence): OrderId
  * @param source Offer or Transaction data to parse
  * @returns OrderSide
  */
-export const getOrderSideFromSource = (source: Record<string, any>): OrderSide => {
-  const buyAmount = source[getBaseAmountKey('buy')];
-  const sellAmount = source[getBaseAmountKey('sell')];
-  if (typeof buyAmount === 'string') return 'sell'; // sell IOU for XRP
-  else if (typeof sellAmount === 'string') return 'buy'; // buy IOU for XRP
+export const getOrderSideFromSource = (source: Record<string, any>, symbol?: MarketSymbol): OrderSide => {
+  const takerPaysAmount = source[getBaseAmountKey('buy')];
+  const takerGetsAmount = source[getBaseAmountKey('sell')];
+
+  if (symbol) {
+    const symbolFromAmount = getMarketSymbolFromAmount(takerGetsAmount, takerPaysAmount);
+    if (symbolFromAmount === symbol) return 'sell';
+    else return 'buy';
+  }
+
+  if (typeof takerPaysAmount === 'string') return 'sell'; // sell IOU for XRP
+  else if (typeof takerGetsAmount === 'string') return 'buy'; // buy IOU for XRP
+
+  if (symbol) {
+    const buyCurrency = getAmountCurrencyCode(takerPaysAmount);
+    const sellCurrency = getAmountCurrencyCode(takerGetsAmount);
+    if (buyCurrency.localeCompare(sellCurrency)) return 'buy';
+    else return 'sell';
+  }
 
   throw new Error('Not yet implemented for IOU-IOU');
 
@@ -282,7 +296,7 @@ export const getOfferFromTransaction = (
 export const getBaseAndQuoteData = (symbol: MarketSymbol, source: Record<string, any>) => {
   const data: Record<string, any> = {};
 
-  data.side = getOrderSideFromSource(source);
+  data.side = getOrderSideFromSource(source, symbol);
 
   data.baseAmount = source[getBaseAmountKey(data.side)];
   data.baseValue = BN(

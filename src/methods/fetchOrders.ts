@@ -79,7 +79,7 @@ async function fetchOrders(
       /** Filter by market symbol if `symbol` is defined */
 
       if (symbol) {
-        let txSymbol: `${string}/${string}` | undefined;
+        let txSymbol: MarketSymbol | undefined;
         if (transaction.TransactionType === 'OfferCancel') {
           for (const node of transaction.metaData.AffectedNodes) {
             if (node.hasOwnProperty('DeletedNode')) {
